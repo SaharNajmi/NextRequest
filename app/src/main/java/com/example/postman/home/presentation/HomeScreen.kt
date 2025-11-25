@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -25,9 +26,13 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -38,14 +43,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,6 +80,7 @@ import com.example.postman.home.presentation.components.RemovableTagList
 import com.example.postman.home.presentation.components.SearchFromContentText
 import com.example.postman.home.presentation.components.TextVisibilityTextField
 import com.example.postman.home.presentation.util.getHeaderValue
+import kotlinx.coroutines.launch
 
 
 @Composable()
@@ -92,6 +101,10 @@ fun HomeScreen(
             }
         }
     }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val clipboard = LocalClipboardManager.current
+
     val callbacks = HomeCallbacks(
         onSendRequestClick = { homeViewModel.sendRequest(collectionId) },
         onBodyChanged = { homeViewModel.updateBody(it) },
@@ -103,40 +116,63 @@ fun HomeScreen(
         onRequestUrlChanged = { homeViewModel.updateRequestUrl(it) },
         onClearDataClick = { homeViewModel.clearData() },
         onNavigateToHistory = onNavigateToHistory,
-        onNavigateToCollection = onNavigateToCollection
+        onNavigateToCollection = onNavigateToCollection,
+        onCopyClick = {
+            val textToCopy =
+                (uiState.response as? Loadable.Success)?.data?.response
+                    ?: (uiState.response as? Loadable.Error)?.message
+            textToCopy?.let {
+                clipboard.setText(AnnotatedString(it))
+                scope.launch {
+                    snackbarHostState.showSnackbar("Copied to clipboard")
+                }
+            }
+        }
     )
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 8.dp)
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.BottomCenter
     ) {
-        Row(
+        SnackbarHost(hostState = snackbarHostState, snackbar = { data ->
+            Snackbar(
+                containerColor = LightGreen,
+                contentColor = Color.Black,
+                snackbarData = data
+            )
+        })
+        Column(
             modifier = Modifier
-                .padding(top = 24.dp)
+                .fillMaxSize()
+                .padding(horizontal = 8.dp)
         ) {
-            BaseTextIconButton(
-                onClick = { callbacks.onNavigateToHistory() },
-                icon = History,
-                label = "History",
-            )
+            Row(
+                modifier = Modifier
+                    .padding(top = 24.dp)
+            ) {
+                BaseTextIconButton(
+                    onClick = { callbacks.onNavigateToHistory() },
+                    icon = History,
+                    label = "History",
+                )
 
-            Spacer(modifier = Modifier.width(4.dp))
-            BaseTextIconButton(
-                onClick = { callbacks.onNavigateToCollection() },
-                icon = Collections_bookmark,
-                label = "Collection"
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            BaseTextIconButton(
-                onClick = { callbacks.onClearDataClick() },
-                icon = Add,
-                label = "Create new request"
+                Spacer(modifier = Modifier.width(4.dp))
+                BaseTextIconButton(
+                    onClick = { callbacks.onNavigateToCollection() },
+                    icon = Collections_bookmark,
+                    label = "Collection"
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                BaseTextIconButton(
+                    onClick = { callbacks.onClearDataClick() },
+                    icon = Add,
+                    label = "Create new request"
+                )
+            }
+            RequestBuilder(
+                uiState,
+                callbacks = callbacks
             )
         }
-        RequestBuilder(
-            uiState,
-            callbacks = callbacks
-        )
     }
 }
 
@@ -216,9 +252,13 @@ fun RequestBuilder(
 
     Spacer(modifier = Modifier.height(8.dp))
 
-    ResponseBodyTopBar(statusCode, isSearchVisible, onSearchClick = {
-        isSearchVisible = it
-    })
+    ResponseBodyTopBar(
+        statusCode, isSearchVisible,
+        onSearchClick = {
+            isSearchVisible = it
+        },
+        callbacks = callbacks
+    )
 
     HorizontalDivider(
         thickness = 0.5.dp,
@@ -509,6 +549,7 @@ private fun ResponseBodyTopBar(
     statusCode: Int?,
     searchVisible: Boolean,
     onSearchClick: (Boolean) -> Unit,
+    callbacks: HomeCallbacks,
 ) {
     Row(
         modifier = Modifier
@@ -528,19 +569,28 @@ private fun ResponseBodyTopBar(
         StatusCode(statusCode)
 
         Spacer(Modifier.weight(1f))
-        Icon(
-            imageVector = Search,
-            contentDescription = "search",
+        IconButton(
+            onClick = { onSearchClick(!searchVisible) },
             modifier = Modifier
-                .padding(end = 4.dp)
-                .clickable {
-                    onSearchClick(!searchVisible)
-                }
-        )
-        Icon(
-            Content_copy,
-            contentDescription = "copy all"
-        )
+                .padding(end = 8.dp)
+                .size(24.dp)
+        ) {
+            Icon(
+                imageVector = Search,
+                contentDescription = "search"
+            )
+        }
+        IconButton(
+            onClick = {
+                callbacks.onCopyClick()
+            },
+            modifier = Modifier.size(24.dp)
+        ) {
+            Icon(
+                imageVector = Content_copy,
+                contentDescription = "copy response"
+            )
+        }
     }
 }
 

@@ -14,4 +14,5 @@ data class HomeCallbacks(
     val onClearDataClick: () -> Unit,
     val onNavigateToHistory: () -> Unit,
     val onNavigateToCollection: () -> Unit,
+    val onCopyClick: () -> Unit,
 )
