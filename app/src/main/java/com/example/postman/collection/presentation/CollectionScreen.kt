@@ -4,10 +4,13 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -51,23 +54,22 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.postman.core.extensions.parseHttpMethodFromString
-import com.example.postman.collection.domain.model.Collection
 import com.example.postman.collection.domain.model.Request
 import com.example.postman.collection.presentation.model.CollectionUiState
+import com.example.postman.core.extensions.parseHttpMethodFromString
 import com.example.postman.core.presentation.component.CustomSearchBar
 import com.example.postman.core.presentation.component.CustomToolbar
 import com.example.postman.core.presentation.component.NotFoundMessage
-import com.example.postman.history.domain.searchCollections
-import com.example.postman.core.presentation.theme.Blue
-import com.example.postman.core.presentation.theme.LightGreen
-import com.example.postman.core.presentation.theme.Silver
 import com.example.postman.core.presentation.icons.Add
 import com.example.postman.core.presentation.icons.Delete
 import com.example.postman.core.presentation.icons.Delete_sweep
 import com.example.postman.core.presentation.icons.Edit
 import com.example.postman.core.presentation.icons.Keyboard_arrow_down
 import com.example.postman.core.presentation.icons.Keyboard_arrow_right
+import com.example.postman.core.presentation.theme.Blue
+import com.example.postman.core.presentation.theme.LightGreen
+import com.example.postman.core.presentation.theme.Silver
+import com.example.postman.history.domain.searchCollections
 
 @Composable
 fun CollectionScreen(
@@ -361,6 +363,11 @@ private fun CollectionItem(
     val focusManager = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
     var isEditable by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val httpMethod = request.requestName.parseHttpMethodFromString()
+    if (interactionSource.collectIsPressedAsState().value) {
+        callbacks.onCollectionItemClick(request.id, collectionId)
+    }
 
     Row(
         modifier = modifier
@@ -369,7 +376,6 @@ private fun CollectionItem(
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val httpMethod = request.requestName.parseHttpMethodFromString()
         Text(
             text = httpMethod.name,
             color = httpMethod.color,
@@ -382,12 +388,16 @@ private fun CollectionItem(
             onValueChange = { text = it },
             readOnly = !isEditable,
             maxLines = 1,
+            interactionSource = interactionSource,
             modifier = Modifier
                 .padding(start = 4.dp)
                 .weight(1f)
                 .height(48.dp)
                 .focusable(isEditable)
                 .focusRequester(focusRequester)
+                .combinedClickable(onClick = {
+                    callbacks.onCollectionItemClick(request.id, collectionId)
+                })
                 .onFocusChanged { focusState ->
                     if (!focusState.isFocused && isEditable) {
                         isEditable = false
@@ -428,7 +438,6 @@ private fun CollectionItem(
                         focusRequester.requestFocus()
                     }
                 },
-            // tint = Blue
         )
 
         Icon(
