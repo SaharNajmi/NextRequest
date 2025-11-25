@@ -50,15 +50,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.postman.R
-import com.example.postman.core.models.HttpMethod
 import com.example.postman.core.KeyValueList
 import com.example.postman.core.domain.model.ApiResponse
-import com.example.postman.home.presentation.util.getHeaderValue
-import com.example.postman.home.presentation.components.KeyValueInput
-import com.example.postman.home.domain.RadioHttpParameterOptions
-import com.example.postman.home.presentation.components.RemovableTagList
-import com.example.postman.home.presentation.components.SearchFromContentText
-import com.example.postman.home.presentation.components.TextVisibilityTextField
+import com.example.postman.core.models.HttpMethod
+import com.example.postman.core.presentation.icons.Add
+import com.example.postman.core.presentation.icons.Arrow_drop_down
+import com.example.postman.core.presentation.icons.Collections_bookmark
+import com.example.postman.core.presentation.icons.Content_copy
+import com.example.postman.core.presentation.icons.History
+import com.example.postman.core.presentation.icons.Search
 import com.example.postman.core.presentation.navigation.Screens
 import com.example.postman.core.presentation.theme.DarkGreen
 import com.example.postman.core.presentation.theme.Gray
@@ -66,12 +66,12 @@ import com.example.postman.core.presentation.theme.LightGray
 import com.example.postman.core.presentation.theme.LightGreen
 import com.example.postman.core.presentation.theme.Silver
 import com.example.postman.core.presentation.theme.TextPrimary
-import com.example.postman.core.presentation.icons.Add
-import com.example.postman.core.presentation.icons.Arrow_drop_down
-import com.example.postman.core.presentation.icons.Collections_bookmark
-import com.example.postman.core.presentation.icons.Content_copy
-import com.example.postman.core.presentation.icons.History
-import com.example.postman.core.presentation.icons.Search
+import com.example.postman.home.domain.RadioHttpParameterOptions
+import com.example.postman.home.presentation.components.KeyValueInput
+import com.example.postman.home.presentation.components.RemovableTagList
+import com.example.postman.home.presentation.components.SearchFromContentText
+import com.example.postman.home.presentation.components.TextVisibilityTextField
+import com.example.postman.home.presentation.util.getHeaderValue
 
 
 @Composable()
@@ -425,16 +425,16 @@ fun ParamsSection(
     callbacks: HomeCallbacks,
 ) {
     Column {
+        KeyValueInput { key, value ->
+            callbacks.onAddParameter(key, value)
+        }
+        Spacer(modifier = Modifier.height(4.dp))
         RemovableTagList(
             items = params,
             onRemoveItem = { key, value ->
                 callbacks.onRemoveParameter(key, value)
             }
         )
-        Spacer(modifier = Modifier.height(4.dp))
-        KeyValueInput { key, value ->
-            callbacks.onAddParameter(key, value)
-        }
     }
 }
 
@@ -467,16 +467,16 @@ fun HeaderSection(
     callbacks: HomeCallbacks,
 ) {
     Column {
+        KeyValueInput { key, value ->
+            callbacks.onAddHeader(key, value)
+        }
+        Spacer(modifier = Modifier.height(4.dp))
         RemovableTagList(
             items = headers,
             onRemoveItem = { key, value ->
                 callbacks.onRemoveHeader(key, value)
             }
         )
-        Spacer(modifier = Modifier.height(4.dp))
-        KeyValueInput { key, value ->
-            callbacks.onAddHeader(key, value)
-        }
     }
 }
 

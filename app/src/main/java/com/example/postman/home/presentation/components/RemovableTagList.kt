@@ -28,8 +28,6 @@ fun RemovableTagList(items: KeyValueList?, onRemoveItem: (String, String) -> Uni
             .height(48.dp)
             .fillMaxWidth()
             .clip(RoundedCornerShape(4.dp))
-            .background(MaterialTheme.colorScheme.secondaryContainer)
-//            .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f))
             .horizontalScroll(scrollState),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -41,7 +39,7 @@ fun RemovableTagList(items: KeyValueList?, onRemoveItem: (String, String) -> Uni
                         onRemoveItem(key, value)
                     }
                     .padding(horizontal = 8.dp)
-                    .background(LightGreen, shape = MaterialTheme.shapes.small)
+                    .background(MaterialTheme.colorScheme.secondaryContainer, shape = MaterialTheme.shapes.small)
                     .padding(horizontal = 4.dp),
             )
         }

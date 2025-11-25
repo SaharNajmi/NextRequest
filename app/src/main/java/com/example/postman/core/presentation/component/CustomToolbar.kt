@@ -1,10 +1,10 @@
 package com.example.postman.core.presentation.component
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,19 +18,20 @@ import com.example.postman.core.presentation.icons.Arrow_back_ios
 
 @Composable
 fun CustomToolbar(title: String, navController: NavController) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            imageVector = Arrow_back_ios,
-            contentDescription = "backToHome",
-            modifier = Modifier
-                .padding(start = 4.dp)
-                .clickable(onClick = {
-                    navController.popBackStack()
-                }),
-        )
+    Box(Modifier.fillMaxWidth()) {
+        IconButton(onClick = {
+            navController.popBackStack()
+        }) {
+            Icon(
+                imageVector = Arrow_back_ios,
+                contentDescription = "backToHome",
+                modifier = Modifier
+                    .padding(start = 4.dp),
+            )
+        }
         Text(
             text = title,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.align(Alignment.Center),
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Medium

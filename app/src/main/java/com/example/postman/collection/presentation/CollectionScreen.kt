@@ -22,6 +22,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -235,10 +236,6 @@ fun CollectionHeader(
         mutableStateOf(TextFieldValue(header, TextRange(header.length)))
     }
 
-    LaunchedEffect(header) {
-        text = TextFieldValue(header, TextRange(header.length))
-    }
-
     var isEditable by remember { mutableStateOf(false) }
     val icon =
         if (isExpanded) Keyboard_arrow_down else Keyboard_arrow_right
@@ -282,7 +279,7 @@ fun CollectionHeader(
             textStyle = TextStyle(),
             shape = RoundedCornerShape(8.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = if (isEditable) Blue else Color.Transparent,
+                focusedBorderColor = if (isEditable) MaterialTheme.colorScheme.primary else Color.Transparent,
                 unfocusedBorderColor = Color.Transparent,
             ),
             keyboardOptions = KeyboardOptions.Default.copy(
@@ -355,10 +352,10 @@ private fun CollectionItem(
     callbacks: CollectionCallbacks,
 ) {
     val requestName = request.requestName.substringAfter(" ")
+    val displayText = if (requestName.length > 35) requestName.take(35) + "..." else requestName
 
     var text by remember {
-        val displayText = if (requestName.length > 35) requestName.take(35) + "..." else requestName
-        mutableStateOf(TextFieldValue(displayText))
+        mutableStateOf(TextFieldValue(displayText, TextRange(displayText.length)))
     }
 
     val focusManager = LocalFocusManager.current
@@ -386,6 +383,7 @@ private fun CollectionItem(
             readOnly = !isEditable,
             maxLines = 1,
             modifier = Modifier
+                .padding(start = 4.dp)
                 .weight(1f)
                 .height(48.dp)
                 .focusable(isEditable)
@@ -402,7 +400,7 @@ private fun CollectionItem(
             textStyle = TextStyle(),
             shape = RoundedCornerShape(8.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = if (isEditable) Blue else Color.Transparent,
+                focusedBorderColor = if (isEditable) MaterialTheme.colorScheme.primary else Color.Transparent,
                 unfocusedBorderColor = Color.Transparent,
             ),
             keyboardOptions = KeyboardOptions.Default.copy(
