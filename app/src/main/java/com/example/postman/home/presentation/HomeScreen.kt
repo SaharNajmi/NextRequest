@@ -301,7 +301,6 @@ private fun RequestLine(
         Icon(
             imageVector = Arrow_drop_down,
             modifier = Modifier
-                .padding(end = 8.dp)
                 .clickable { isHttpMethodExpanded = true },
             contentDescription = "drop down icon"
         )
@@ -326,7 +325,7 @@ private fun RequestLine(
                 onRequestUrlChanged(it)
             },
             maxLines = 3,
-            modifier = Modifier.padding(0.dp),
+            placeholder = { Text("Enter URL", color = Silver) },
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
