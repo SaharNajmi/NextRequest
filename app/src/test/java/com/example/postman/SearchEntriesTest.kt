@@ -1,11 +1,12 @@
 package com.example.postman
 
 import com.example.postman.collection.domain.model.Collection
-import com.example.postman.history.domain.model.History
-import com.example.postman.history.presentation.model.HistoryEntry
 import com.example.postman.collection.domain.model.Request
+import com.example.postman.collection.presentation.model.CollectionUiState
+import com.example.postman.history.domain.model.History
 import com.example.postman.history.domain.searchCollections
 import com.example.postman.history.domain.searchHistories
+import com.example.postman.history.presentation.model.HistoryEntry
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import org.junit.Test
@@ -71,22 +72,26 @@ class SearchEntriesTest {
 
     @Test
     fun `searchCollections returns all collections when query is empty`() {
-        val c1 = Collection(
-            collectionName = "admin",
-            requests = listOf(
-                Request(requestName = "create admin"),
-                Request(requestName = "update admin")
+        val c1 = CollectionUiState(
+            Collection(
+                collectionName = "admin",
+                requests = listOf(
+                    Request(requestName = "create admin"),
+                    Request(requestName = "update admin")
+                )
             )
         )
-        val c2 = Collection(
-            collectionName = "auth",
-            requests = listOf(
-                Request(requestName = "login"),
-                Request(requestName = "register"),
-                Request(requestName = "logout")
+        val c2 = CollectionUiState(
+            Collection(
+                collectionName = "auth",
+                requests = listOf(
+                    Request(requestName = "login"),
+                    Request(requestName = "register"),
+                    Request(requestName = "logout")
+                )
             )
         )
-        val collections = listOf<Collection>(c1, c2)
+        val collections = listOf<CollectionUiState>(c1, c2)
         val actual1 = searchCollections(collections, "")
         actual1 shouldBe collections
         val actual2 = searchCollections(collections, "  ")
@@ -95,61 +100,78 @@ class SearchEntriesTest {
 
     @Test
     fun `searchCollections returns matching collections by request name or collection name`() {
-        val c1 = Collection(
-            collectionName = "admin",
-            requests = listOf(
-                Request(requestName = "create admin"),
-                Request(requestName = "update admin")
+        val c1 = CollectionUiState(
+            Collection(
+                collectionName = "admin",
+                requests = listOf(
+                    Request(requestName = "create admin"),
+                    Request(requestName = "update admin")
+                )
             )
         )
-        val c2 = Collection(
-            collectionName = "auth",
-            requests = listOf(
-                Request(requestName = "login"),
-                Request(requestName = "register"),
-                Request(requestName = "logout")
+        val c2 = CollectionUiState(
+            Collection(
+                collectionName = "auth",
+                requests = listOf(
+                    Request(requestName = "login"),
+                    Request(requestName = "register"),
+                    Request(requestName = "logout")
+                )
             )
         )
-        val c3 = Collection(
-            collectionName = "user",
-            requests = listOf(
-                Request(requestName = "get user profile"),
-                Request(requestName = "update user profile")
+        val c3 = CollectionUiState(
+            Collection(
+                collectionName = "user",
+                requests = listOf(
+                    Request(requestName = "get user profile"),
+                    Request(requestName = "update user profile")
+                )
             )
         )
-        val c4 = Collection(
-            collectionName = "product",
-            requests = listOf(
-                Request(requestName = "create order"),
-                Request(requestName = "update  order"),
-                Request(requestName = "list user orders")
+        val c4 = CollectionUiState(
+            Collection(
+                collectionName = "product",
+                requests = listOf(
+                    Request(requestName = "create order"),
+                    Request(requestName = "update  order"),
+                    Request(requestName = "list user orders")
+                )
             )
         )
-        val collections = listOf<Collection>(c1, c2, c3, c4)
+        val collections = listOf<CollectionUiState>(c1, c2, c3, c4)
         val actual1 = searchCollections(collections, "user")
         val expected1 =
-            listOf(c3, c4.copy(requests = listOf(Request(requestName = "list user orders"))))
+            listOf(
+                c3,
+                c4.copy(
+                    collection = c4.collection.copy(
+                        requests = listOf(Request(requestName = "list user orders"))
+                    )
+                )
+            )
         actual1 shouldBe expected1
-
         val actual2 = searchCollections(collections, "admin")
         val expected2 = listOf(c1)
         actual2 shouldBe expected2
 
         val actual3 = searchCollections(collections, "login")
-        val expected3 = listOf(c2.copy(requests = listOf(Request(requestName = "login"))))
+        val expected3 =
+            listOf(CollectionUiState(c2.collection.copy(requests = listOf(Request(requestName = "login")))))
         actual3 shouldBe expected3
     }
 
     @Test
     fun `searchCollections performs case-insensitive matching`() {
-        val c1 = Collection(
-            collectionName = "user",
-            requests = listOf(
-                Request(requestName = "get user profile"),
-                Request(requestName = "update user profile")
+        val c1 = CollectionUiState(
+            Collection(
+                collectionName = "user",
+                requests = listOf(
+                    Request(requestName = "get user profile"),
+                    Request(requestName = "update user profile")
+                )
             )
         )
-        val collections = listOf<Collection>(c1, Collection())
+        val collections = listOf<CollectionUiState>(c1, CollectionUiState(Collection()))
 
         val actual1 = searchCollections(collections, "UseR")
         val expected1 = listOf(c1)
