@@ -7,14 +7,14 @@ plugins {
 }
 
 android {
-    namespace = "com.example.postman"
+    namespace = "com.sahar.nextrequest"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.postman"
+        applicationId = "com.sahar.nextrequest"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
+        versionCode = 3
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

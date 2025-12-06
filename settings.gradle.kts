@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Postman"
+rootProject.name = "NextRequest"
 include(":app")
