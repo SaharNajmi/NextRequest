@@ -24,7 +24,7 @@ import com.example.nextrequest.core.presentation.icons.Add
 
 @Composable
 fun KeyValueInput(
-    item: (String, String) -> Unit
+    item: (String, String) -> Unit,
 ) {
     var key by remember { mutableStateOf("") }
     var value by remember { mutableStateOf("") }
@@ -44,13 +44,11 @@ fun KeyValueInput(
                 unfocusedContainerColor = Color.Transparent,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
-                //cursorColor = Color.Black,
-                focusedLabelColor = Color.Black,
             ),
             onValueChange = {
                 key = it
             },
-            label = { Text("Key") }
+            label = { Text("Key", color = MaterialTheme.colorScheme.onBackground) }
         )
         Spacer(modifier = Modifier.width(4.dp))
         TextField(
@@ -68,13 +66,11 @@ fun KeyValueInput(
                 unfocusedContainerColor = Color.Transparent,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
-                //cursorColor = Color.Black,
-                focusedLabelColor = Color.Black,
             ),
             onValueChange = {
                 value = it
             },
-            label = { Text("Value") }
+            label = { Text("Value", color = MaterialTheme.colorScheme.onBackground) }
         )
         Spacer(modifier = Modifier.width(4.dp))
         Icon(

@@ -29,8 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.nextrequest.collection.presentation.model.CollectionEntry
-import com.example.nextrequest.core.presentation.theme.LightGray
-import com.example.nextrequest.core.presentation.theme.LightGreen
 
 @Composable
 fun SaveToCollectionDialog(
@@ -50,12 +48,7 @@ fun SaveToCollectionDialog(
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-                Row(
-                    modifier = Modifier
-                        .background(LightGray)
-                        .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {}
+
                 LazyColumn(
                     modifier = Modifier
                         .heightIn(max = 300.dp)
@@ -64,7 +57,7 @@ fun SaveToCollectionDialog(
 
                     items(items.toList()) { entry ->
                         val backgroundColor: Color =
-                            if (selectedItem?.id == entry.id) LightGreen
+                            if (selectedItem?.id == entry.id) MaterialTheme.colorScheme.secondaryContainer
                             else Color.Transparent
                         Row(
                             modifier = Modifier

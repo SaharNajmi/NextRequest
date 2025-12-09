@@ -57,6 +57,7 @@ import androidx.navigation.NavController
 import com.example.nextrequest.collection.domain.model.Request
 import com.example.nextrequest.collection.presentation.model.CollectionUiState
 import com.example.nextrequest.core.extensions.parseHttpMethodFromString
+import com.example.nextrequest.core.presentation.color
 import com.example.nextrequest.core.presentation.component.CustomSearchBar
 import com.example.nextrequest.core.presentation.component.CustomToolbar
 import com.example.nextrequest.core.presentation.component.NotFoundMessage
@@ -66,8 +67,6 @@ import com.example.nextrequest.core.presentation.icons.Delete_sweep
 import com.example.nextrequest.core.presentation.icons.Edit
 import com.example.nextrequest.core.presentation.icons.Keyboard_arrow_down
 import com.example.nextrequest.core.presentation.icons.Keyboard_arrow_right
-import com.example.nextrequest.core.presentation.theme.Blue
-import com.example.nextrequest.core.presentation.theme.LightGreen
 import com.example.nextrequest.core.presentation.theme.Silver
 import com.example.nextrequest.history.domain.searchCollections
 
@@ -245,7 +244,7 @@ fun CollectionHeader(
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(4.dp))
-            .background(if (isExpanded) LightGreen else Color.Transparent),
+            .background(if (isExpanded) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(onClick = { callbacks.onHeaderClick(collection.collection.collectionId) }) {
@@ -302,7 +301,7 @@ fun CollectionHeader(
                 .clickable {
                     callbacks.onCreateEmptyRequestClick(collection.collection.collectionId)
                 },
-            tint = Blue
+            tint = MaterialTheme.colorScheme.tertiary
         )
 
         Icon(
@@ -319,7 +318,7 @@ fun CollectionHeader(
                         focusRequester.requestFocus()
                     }
                 },
-            tint = Blue
+            tint = MaterialTheme.colorScheme.tertiary
         )
 
         Icon(
@@ -329,7 +328,7 @@ fun CollectionHeader(
                 .clickable {
                     callbacks.onDeleteCollectionClick(collection.collection.collectionId)
                 },
-            tint = Blue
+            tint = MaterialTheme.colorScheme.tertiary
         )
     }
 }

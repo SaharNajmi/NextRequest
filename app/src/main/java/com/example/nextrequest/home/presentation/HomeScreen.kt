@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -57,10 +59,10 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sahar.nextrequest.R
 import com.example.nextrequest.core.KeyValueList
 import com.example.nextrequest.core.domain.model.ApiResponse
 import com.example.nextrequest.core.models.HttpMethod
+import com.example.nextrequest.core.presentation.color
 import com.example.nextrequest.core.presentation.icons.Add
 import com.example.nextrequest.core.presentation.icons.Arrow_drop_down
 import com.example.nextrequest.core.presentation.icons.Collections_bookmark
@@ -68,18 +70,15 @@ import com.example.nextrequest.core.presentation.icons.Content_copy
 import com.example.nextrequest.core.presentation.icons.History
 import com.example.nextrequest.core.presentation.icons.Search
 import com.example.nextrequest.core.presentation.navigation.Screens
-import com.example.nextrequest.core.presentation.theme.DarkGreen
 import com.example.nextrequest.core.presentation.theme.Gray
-import com.example.nextrequest.core.presentation.theme.LightGray
-import com.example.nextrequest.core.presentation.theme.LightGreen
 import com.example.nextrequest.core.presentation.theme.Silver
-import com.example.nextrequest.core.presentation.theme.TextPrimary
 import com.example.nextrequest.home.domain.RadioHttpParameterOptions
 import com.example.nextrequest.home.presentation.components.KeyValueInput
 import com.example.nextrequest.home.presentation.components.RemovableTagList
 import com.example.nextrequest.home.presentation.components.SearchFromContentText
 import com.example.nextrequest.home.presentation.components.TextVisibilityTextField
 import com.example.nextrequest.home.presentation.util.getHeaderValue
+import com.sahar.nextrequest.R
 import kotlinx.coroutines.launch
 
 
@@ -135,7 +134,7 @@ fun HomeScreen(
     ) {
         SnackbarHost(hostState = snackbarHostState, snackbar = { data ->
             Snackbar(
-                containerColor = LightGreen,
+                containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = Color.Black,
                 snackbarData = data
             )
@@ -181,7 +180,7 @@ fun BaseTextIconButton(
     onClick: () -> Unit,
     icon: ImageVector,
     label: String,
-    tint: Color = TextPrimary,
+    tint: Color = if(isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary ,
 ) {
     TextButton(
         onClick = onClick,
@@ -237,7 +236,7 @@ fun RequestBuilder(
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(4.dp))
-            .background(LightGreen)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
             .padding(8.dp)
     ) {
         RequestParametersSection(
@@ -307,7 +306,22 @@ private fun RequestLine(
 
         DropdownMenu(
             expanded = isHttpMethodExpanded,
-            onDismissRequest = { isHttpMethodExpanded = false }
+            onDismissRequest = { isHttpMethodExpanded = false },
+            modifier = Modifier
+                .shadow(
+                    elevation = 12.dp,
+                    shape = RoundedCornerShape(8.dp),
+                    clip = false
+                )
+                .border(
+                    width = 2.dp,
+                    color = MaterialTheme.colorScheme.outline,
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .background(
+                    color = MaterialTheme.colorScheme.background,
+                    shape = RoundedCornerShape(8.dp)
+                )
         ) {
             httpMethods.forEach { option ->
                 DropdownMenuItem(
@@ -436,9 +450,10 @@ private fun HttpParameterBody(
 @Composable
 private fun StatusCode(statusCode: Int?) {
     if (statusCode == null) return
-    val textColor = if (statusCode in 200..208) DarkGreen else MaterialTheme.colorScheme.error
+    val textColor =
+        if (statusCode in 200..208) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.error
     val backgroundColor =
-        if (statusCode in 200..208) LightGreen else MaterialTheme.colorScheme.errorContainer
+        if (statusCode in 200..208) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.errorContainer
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
@@ -487,8 +502,8 @@ fun AuthSection(
         Text(
             text = "Bearer Token", modifier = Modifier
                 .clip(RoundedCornerShape(4.dp))
-                .background(MaterialTheme.colorScheme.secondaryContainer)
-                .padding(4.dp)
+                .background(MaterialTheme.colorScheme.primaryContainer)
+                .padding(4.dp), color = Color.Black
         )
         Spacer(Modifier.height(8.dp))
         TextVisibilityTextField(
@@ -561,7 +576,7 @@ private fun ResponseBodyTopBar(
             text = "{ } JSON",
             fontSize = 14.sp,
             modifier = Modifier
-                .background(LightGray, shape = RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.onPrimary, shape = RoundedCornerShape(8.dp))
                 .padding(6.dp, 2.dp)
         )
 

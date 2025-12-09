@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,21 +35,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.nextrequest.collection.presentation.model.CollectionEntry
-import com.example.nextrequest.history.presentation.model.ExpandableHistoryItem
-import com.example.nextrequest.history.domain.model.History
-import com.example.nextrequest.history.presentation.model.HistoryEntry
+import com.example.nextrequest.core.presentation.color
 import com.example.nextrequest.core.presentation.component.CustomSearchBar
 import com.example.nextrequest.core.presentation.component.CustomToolbar
 import com.example.nextrequest.core.presentation.component.NotFoundMessage
-import com.example.nextrequest.history.presentation.component.SaveToCollectionDialog
-import com.example.nextrequest.history.domain.searchHistories
-import com.example.nextrequest.core.presentation.theme.Blue
-import com.example.nextrequest.core.presentation.theme.LightGreen
 import com.example.nextrequest.core.presentation.icons.Add
 import com.example.nextrequest.core.presentation.icons.Delete
 import com.example.nextrequest.core.presentation.icons.Delete_sweep
 import com.example.nextrequest.core.presentation.icons.Keyboard_arrow_down
 import com.example.nextrequest.core.presentation.icons.Keyboard_arrow_right
+import com.example.nextrequest.history.domain.model.History
+import com.example.nextrequest.history.domain.searchHistories
+import com.example.nextrequest.history.presentation.component.SaveToCollectionDialog
+import com.example.nextrequest.history.presentation.model.ExpandableHistoryItem
+import com.example.nextrequest.history.presentation.model.HistoryEntry
 
 @Composable
 fun HistoryScreen(
@@ -174,7 +174,7 @@ fun HistoryHeader(
         modifier = modifier
             .clip(RoundedCornerShape(4.dp))
             .clickable { callbacks.onHeaderClick(header) }
-            .background(if (isExpanded) LightGreen else Color.Transparent)
+            .background(if (isExpanded) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically) {
 
@@ -194,7 +194,7 @@ fun HistoryHeader(
                 .size(20.dp)
                 .clickable {
                     showDropdown = true
-                }, tint = Blue
+                }, tint = MaterialTheme.colorScheme.tertiary
         )
         Icon(
             Delete_sweep, contentDescription = "delete list by date",
@@ -203,7 +203,7 @@ fun HistoryHeader(
                 .clickable {
                     callbacks.onDeleteHistoriesClick(histories.map { it.id })
                 },
-            tint = Blue
+            tint = MaterialTheme.colorScheme.tertiary
         )
         if (showDropdown) {
             SaveToCollectionDialog(

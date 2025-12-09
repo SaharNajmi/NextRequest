@@ -1,6 +1,5 @@
 package com.example.nextrequest.home.presentation.components
 
-import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -12,6 +11,7 @@ import androidx.compose.foundation.text.BasicSecureTextField
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.TextObfuscationMode
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.sahar.nextrequest.R
@@ -33,7 +34,6 @@ fun TextVisibilityTextField(value: String, onTextChange: (String) -> Unit) {
     LaunchedEffect(state) {
         snapshotFlow { state.text }
             .collect {
-                Log.e("DDD", it.toString())
                 onTextChange(it.toString())
             }
     }
@@ -48,7 +48,9 @@ fun TextVisibilityTextField(value: String, onTextChange: (String) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(6.dp))
-            .padding(6.dp),
+            .padding(vertical = 6.dp, horizontal = 8.dp),
+        textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onBackground),
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         decorator = { innerTextField ->
             Row(
                 modifier = Modifier.fillMaxWidth(),

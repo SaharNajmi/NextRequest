@@ -2,6 +2,7 @@ package com.example.nextrequest.home.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,18 +30,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.nextrequest.core.extensions.formatJson
-import com.example.nextrequest.home.domain.HighlightedTextLine
-import com.example.nextrequest.home.domain.buildHighlightedTextLines
-import com.example.nextrequest.core.presentation.theme.LightGray
-import com.example.nextrequest.core.presentation.theme.LightGreen
-import com.example.nextrequest.core.presentation.theme.Silver
 import com.example.nextrequest.core.presentation.icons.Arrow_downward_alt
 import com.example.nextrequest.core.presentation.icons.Arrow_upward_alt
 import com.example.nextrequest.core.presentation.icons.ChromeClose
 import com.example.nextrequest.core.presentation.icons.Search
+import com.example.nextrequest.core.presentation.theme.Silver
+import com.example.nextrequest.home.domain.HighlightedTextLine
+import com.example.nextrequest.home.domain.buildHighlightedTextLines
 
 @Composable
 fun SearchFromContentText(
@@ -122,7 +123,7 @@ fun SearchBar(
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(4.dp))
-                .background(LightGray)
+                .background(if(isSystemInDarkTheme()) Color.Transparent else MaterialTheme.colorScheme.onPrimary)
                 .padding(6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -184,13 +185,26 @@ fun HighlightedTextList(
 ) {
     LazyColumn(state = listState) {
         itemsIndexed(lines) { index, item ->
+
+            val cleanAnnotatedString = buildAnnotatedString {
+                append(item.annotatedString.text)
+                item.annotatedString.spanStyles.forEach { span ->
+                    addStyle(
+                        style = SpanStyle(
+                            background =  MaterialTheme.colorScheme.primaryContainer
+                        ),
+                        start = span.start,
+                        end = span.end
+                    )
+                }
+            }
+
             Text(
-                text = item.annotatedString,
+                text = cleanAnnotatedString,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
-                    .background(if (index == foundIndex) LightGreen else Color.Transparent)
+                    .background(if (index == foundIndex)  MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f) else Color.Transparent)
+                    .padding(4.dp)
             )
         }
-    }
-}
+    }}
