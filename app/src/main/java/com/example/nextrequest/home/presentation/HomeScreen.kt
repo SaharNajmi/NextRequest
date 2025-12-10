@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -72,9 +71,7 @@ import com.example.nextrequest.core.presentation.icons.Search
 import com.example.nextrequest.core.presentation.navigation.Screens
 import com.example.nextrequest.core.presentation.theme.Silver
 import com.example.nextrequest.core.presentation.theme.iconOnBackground
-import com.example.nextrequest.core.presentation.theme.iconTint
 import com.example.nextrequest.core.presentation.theme.textMuted
-import com.example.nextrequest.core.presentation.theme.unfocusedBorderColor
 import com.example.nextrequest.home.domain.RadioHttpParameterOptions
 import com.example.nextrequest.home.presentation.components.KeyValueInput
 import com.example.nextrequest.home.presentation.components.RemovableTagList
@@ -145,25 +142,19 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = 8.dp, vertical = 24.dp)
         ) {
-            Row(
-                modifier = Modifier
-                    .padding(top = 24.dp)
-            ) {
+            Row {
                 BaseTextIconButton(
                     onClick = { callbacks.onNavigateToHistory() },
                     icon = History,
                     label = "History",
                 )
-
-                Spacer(modifier = Modifier.width(4.dp))
                 BaseTextIconButton(
                     onClick = { callbacks.onNavigateToCollection() },
                     icon = Collections_bookmark,
                     label = "Collection"
                 )
-                Spacer(modifier = Modifier.width(4.dp))
                 BaseTextIconButton(
                     onClick = { callbacks.onClearDataClick() },
                     icon = Add,
@@ -194,7 +185,6 @@ fun BaseTextIconButton(
                 contentDescription = label,
                 tint = tint
             )
-            Spacer(Modifier.width(4.dp))
             Text(label, color = tint)
         }
     }
