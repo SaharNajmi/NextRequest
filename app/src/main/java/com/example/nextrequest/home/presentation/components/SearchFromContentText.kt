@@ -40,6 +40,8 @@ import com.example.nextrequest.core.presentation.icons.Arrow_upward_alt
 import com.example.nextrequest.core.presentation.icons.ChromeClose
 import com.example.nextrequest.core.presentation.icons.Search
 import com.example.nextrequest.core.presentation.theme.Silver
+import com.example.nextrequest.core.presentation.theme.focusedBorderColor
+import com.example.nextrequest.core.presentation.theme.unfocusedBorderColor
 import com.example.nextrequest.home.domain.HighlightedTextLine
 import com.example.nextrequest.home.domain.buildHighlightedTextLines
 
@@ -144,9 +146,9 @@ fun SearchBar(
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedContainerColor = MaterialTheme.colorScheme.background,
                     focusedContainerColor = MaterialTheme.colorScheme.background,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                    unfocusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                ),
+                    focusedBorderColor = MaterialTheme.colorScheme.focusedBorderColor,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.unfocusedBorderColor,
+                )
             )
 
             Spacer(modifier = Modifier.width(8.dp))
@@ -191,7 +193,7 @@ fun HighlightedTextList(
                 item.annotatedString.spanStyles.forEach { span ->
                     addStyle(
                         style = SpanStyle(
-                            background =  MaterialTheme.colorScheme.primaryContainer
+                            background = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
                         ),
                         start = span.start,
                         end = span.end
@@ -203,7 +205,7 @@ fun HighlightedTextList(
                 text = cleanAnnotatedString,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(if (index == foundIndex)  MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f) else Color.Transparent)
+                    .background(if (index == foundIndex)  MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent)
                     .padding(4.dp)
             )
         }

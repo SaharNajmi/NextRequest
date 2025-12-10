@@ -68,6 +68,8 @@ import com.example.nextrequest.core.presentation.icons.Edit
 import com.example.nextrequest.core.presentation.icons.Keyboard_arrow_down
 import com.example.nextrequest.core.presentation.icons.Keyboard_arrow_right
 import com.example.nextrequest.core.presentation.theme.Silver
+import com.example.nextrequest.core.presentation.theme.focusedBorderColor
+import com.example.nextrequest.core.presentation.theme.iconTint
 import com.example.nextrequest.history.domain.searchCollections
 
 @Composable
@@ -142,7 +144,6 @@ private fun CreateNewCollection(callbacks: CollectionCallbacks) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(modifier = Modifier.height(24.dp))
-
         Text(
             text = "Create a collection for your requests",
             fontSize = 16.sp,
@@ -160,7 +161,7 @@ private fun CreateNewCollection(callbacks: CollectionCallbacks) {
             onClick = { callbacks.onCreateNewCollectionClick() }) {
             Text(
                 "Create Collection",
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Normal,
                 fontSize = 12.sp
             )
@@ -280,7 +281,7 @@ fun CollectionHeader(
             textStyle = TextStyle(),
             shape = RoundedCornerShape(8.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = if (isEditable) MaterialTheme.colorScheme.primary else Color.Transparent,
+                focusedBorderColor = if (isEditable) MaterialTheme.colorScheme.focusedBorderColor else Color.Transparent,
                 unfocusedBorderColor = Color.Transparent,
             ),
             keyboardOptions = KeyboardOptions.Default.copy(
@@ -301,7 +302,7 @@ fun CollectionHeader(
                 .clickable {
                     callbacks.onCreateEmptyRequestClick(collection.collection.collectionId)
                 },
-            tint = MaterialTheme.colorScheme.tertiary
+            tint = MaterialTheme.colorScheme.iconTint
         )
 
         Icon(
@@ -318,7 +319,7 @@ fun CollectionHeader(
                         focusRequester.requestFocus()
                     }
                 },
-            tint = MaterialTheme.colorScheme.tertiary
+            tint = MaterialTheme.colorScheme.iconTint
         )
 
         Icon(
@@ -328,7 +329,7 @@ fun CollectionHeader(
                 .clickable {
                     callbacks.onDeleteCollectionClick(collection.collection.collectionId)
                 },
-            tint = MaterialTheme.colorScheme.tertiary
+            tint = MaterialTheme.colorScheme.iconTint
         )
     }
 }
@@ -409,7 +410,7 @@ private fun CollectionItem(
             textStyle = TextStyle(),
             shape = RoundedCornerShape(8.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = if (isEditable) MaterialTheme.colorScheme.primary else Color.Transparent,
+                focusedBorderColor = if (isEditable) MaterialTheme.colorScheme.focusedBorderColor else Color.Transparent,
                 unfocusedBorderColor = Color.Transparent,
             ),
             keyboardOptions = KeyboardOptions.Default.copy(

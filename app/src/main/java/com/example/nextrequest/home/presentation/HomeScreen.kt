@@ -70,8 +70,11 @@ import com.example.nextrequest.core.presentation.icons.Content_copy
 import com.example.nextrequest.core.presentation.icons.History
 import com.example.nextrequest.core.presentation.icons.Search
 import com.example.nextrequest.core.presentation.navigation.Screens
-import com.example.nextrequest.core.presentation.theme.Gray
 import com.example.nextrequest.core.presentation.theme.Silver
+import com.example.nextrequest.core.presentation.theme.iconOnBackground
+import com.example.nextrequest.core.presentation.theme.iconTint
+import com.example.nextrequest.core.presentation.theme.textMuted
+import com.example.nextrequest.core.presentation.theme.unfocusedBorderColor
 import com.example.nextrequest.home.domain.RadioHttpParameterOptions
 import com.example.nextrequest.home.presentation.components.KeyValueInput
 import com.example.nextrequest.home.presentation.components.RemovableTagList
@@ -180,7 +183,7 @@ fun BaseTextIconButton(
     onClick: () -> Unit,
     icon: ImageVector,
     label: String,
-    tint: Color = if(isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary ,
+    tint: Color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
 ) {
     TextButton(
         onClick = onClick,
@@ -236,7 +239,7 @@ fun RequestBuilder(
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(4.dp))
-            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .background(if (isSystemInDarkTheme()) Color.Transparent else MaterialTheme.colorScheme.secondaryContainer)
             .padding(8.dp)
     ) {
         RequestParametersSection(
@@ -383,8 +386,7 @@ private fun HttpParameterSelection(
     FlowRow(
         modifier = Modifier
             .fillMaxWidth()
-            .selectableGroup()
-            .padding(horizontal = 12.dp),
+            .selectableGroup(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         radioHttpParameterOptions.forEach { option ->
@@ -429,7 +431,7 @@ private fun HttpParameterBody(
     ) {
         when (selectedOption) {
             RadioHttpParameterOptions.Auth -> AuthSection(
-                Modifier.padding(12.dp), headers, callbacks
+                Modifier.padding(start = 12.dp, end = 12.dp, top = 6.dp), headers, callbacks
             )
 
             RadioHttpParameterOptions.Params -> ParamsSection(
@@ -457,8 +459,11 @@ private fun StatusCode(statusCode: Int?) {
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = "Status ", modifier = Modifier
-                .padding(start = 24.dp), color = Gray, fontSize = 12.sp
+            text = "Status ",
+            modifier = Modifier
+                .padding(start = 24.dp),
+            color = MaterialTheme.colorScheme.textMuted,
+            fontSize = 12.sp
         )
         Text(
             modifier = Modifier
@@ -503,7 +508,7 @@ fun AuthSection(
             text = "Bearer Token", modifier = Modifier
                 .clip(RoundedCornerShape(4.dp))
                 .background(MaterialTheme.colorScheme.primaryContainer)
-                .padding(4.dp), color = Color.Black
+                .padding(4.dp), color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(Modifier.height(8.dp))
         TextVisibilityTextField(
@@ -651,12 +656,12 @@ fun ResponseBody(
                 Icon(
                     painter = painterResource(R.drawable.action_block),
                     contentDescription = "no responses yet",
-                    tint = Silver
+                    tint = MaterialTheme.colorScheme.iconOnBackground
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Enter the URL and click send to get a response",
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.textMuted,
                     fontSize = 14.sp
                 )
             }

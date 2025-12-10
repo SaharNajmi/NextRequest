@@ -4,6 +4,8 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -42,8 +44,11 @@ import com.example.nextrequest.core.presentation.component.NotFoundMessage
 import com.example.nextrequest.core.presentation.icons.Add
 import com.example.nextrequest.core.presentation.icons.Delete
 import com.example.nextrequest.core.presentation.icons.Delete_sweep
+import com.example.nextrequest.core.presentation.icons.Hourglass_empty
 import com.example.nextrequest.core.presentation.icons.Keyboard_arrow_down
 import com.example.nextrequest.core.presentation.icons.Keyboard_arrow_right
+import com.example.nextrequest.core.presentation.theme.iconTint
+import com.example.nextrequest.core.presentation.theme.textMuted
 import com.example.nextrequest.history.domain.model.History
 import com.example.nextrequest.history.domain.searchHistories
 import com.example.nextrequest.history.presentation.component.SaveToCollectionDialog
@@ -103,7 +108,26 @@ fun HistoryScreen(
         CustomToolbar("History", navController)
         Spacer(Modifier.height(8.dp))
         CustomSearchBar("Search by url", searchQuery) { searchQuery = it }
-        if (filteredHistories.isEmpty()) {
+        if (filteredHistories.isEmpty() && searchQuery.isEmpty()) {
+            Row(
+                modifier = Modifier
+                    .padding(top = 24.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    Hourglass_empty,
+                    modifier = Modifier.padding(end = 4.dp),
+                    contentDescription = "empty list",
+                    tint = MaterialTheme.colorScheme.textMuted
+                )
+                Text(text = "History is empty", color = MaterialTheme.colorScheme.textMuted)
+            }
+
+        }
+
+        if (filteredHistories.isEmpty() && searchQuery.isNotEmpty()) {
             NotFoundMessage(searchQuery)
         } else {
             ExpandedHistoryItem(
@@ -194,7 +218,7 @@ fun HistoryHeader(
                 .size(20.dp)
                 .clickable {
                     showDropdown = true
-                }, tint = MaterialTheme.colorScheme.tertiary
+                }, tint = MaterialTheme.colorScheme.iconTint
         )
         Icon(
             Delete_sweep, contentDescription = "delete list by date",
@@ -203,7 +227,7 @@ fun HistoryHeader(
                 .clickable {
                     callbacks.onDeleteHistoriesClick(histories.map { it.id })
                 },
-            tint = MaterialTheme.colorScheme.tertiary
+            tint = MaterialTheme.colorScheme.iconTint
         )
         if (showDropdown) {
             SaveToCollectionDialog(

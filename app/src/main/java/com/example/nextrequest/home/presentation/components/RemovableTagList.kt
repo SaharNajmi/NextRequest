@@ -33,7 +33,7 @@ fun RemovableTagList(items: KeyValueList?, onRemoveItem: (String, String) -> Uni
     ) {
         items?.forEach { (key, value) ->
             Text(
-                text = "$key: $value", color = Color.Black,
+                text = "$key: $value", color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier
                     .clickable {
                         onRemoveItem(key, value)
@@ -41,7 +41,6 @@ fun RemovableTagList(items: KeyValueList?, onRemoveItem: (String, String) -> Uni
                     .padding(horizontal = 8.dp)
                     .background(MaterialTheme.colorScheme.primaryContainer, shape = MaterialTheme.shapes.small)
                     .padding(horizontal = 4.dp),
-             //   color = MaterialTheme.colorScheme.background
             )
         }
     }

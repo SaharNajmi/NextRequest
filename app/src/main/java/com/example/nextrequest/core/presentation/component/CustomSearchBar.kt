@@ -11,8 +11,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.nextrequest.core.presentation.theme.Silver
 import com.example.nextrequest.core.presentation.icons.Search
+import com.example.nextrequest.core.presentation.theme.Silver
+import com.example.nextrequest.core.presentation.theme.focusedBorderColor
+import com.example.nextrequest.core.presentation.theme.unfocusedBorderColor
 
 @Composable
 fun CustomSearchBar(
@@ -37,8 +39,8 @@ fun CustomSearchBar(
             )
         },
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+            focusedBorderColor = MaterialTheme.colorScheme.focusedBorderColor,
+            unfocusedBorderColor = MaterialTheme.colorScheme.unfocusedBorderColor,
         ),
     )
 }

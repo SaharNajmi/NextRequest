@@ -1,10 +1,12 @@
 package com.example.nextrequest.core.presentation.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -15,7 +17,6 @@ private val lightScheme = lightColorScheme(
     onSecondary = onSecondaryLight,
     secondaryContainer = secondaryContainerLight,
     onSecondaryContainer = onSecondaryContainerLight,
-    tertiary = tertiaryLight,
     error = errorLight,
     outline = outlineLight,
     errorContainer = errorContainerLight,
@@ -32,14 +33,12 @@ private val darkScheme = darkColorScheme(
     onSecondary = onSecondaryDark,
     secondaryContainer = secondaryContainerDark,
     onSecondaryContainer = onSecondaryContainerDark,
-    tertiary = tertiaryDark,
     error = errorDark,
     outline = outlineDark,
     errorContainer = errorContainerDark,
     background = backgroundDark,
     onBackground = onBackgroundDark,
 )
-
 
 @Composable
 fun AppTheme(
@@ -52,3 +51,26 @@ fun AppTheme(
         colorScheme = colors, typography = Typography, content = content
     )
 }
+
+val ColorScheme.textMuted
+    @Composable
+    get() = if (isSystemInDarkTheme()) Color(0xFF585958) else Color(0xFF888888)
+
+
+val ColorScheme.iconTint
+    @Composable
+    get() = if (isSystemInDarkTheme())
+        Color(0xFFFFFFFF) else
+        Color(0xFF2F409D)
+
+val ColorScheme.iconOnBackground
+    @Composable
+    get() = if (isSystemInDarkTheme())
+        Color(0xFF585958) else
+        Color(0xFFBEBBBB)
+
+val ColorScheme.focusedBorderColor
+    get() =primary.copy(alpha = 0.5f)
+
+val ColorScheme.unfocusedBorderColor
+    get() =primary.copy(alpha = 0.4f)
