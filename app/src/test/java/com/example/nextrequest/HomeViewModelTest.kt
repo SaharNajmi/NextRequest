@@ -12,10 +12,13 @@ import com.example.nextrequest.home.presentation.Loadable
 import com.example.nextrequest.home.presentation.HomeUiState
 import com.example.nextrequest.home.presentation.HomeViewModel
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertFalse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -285,6 +288,36 @@ class HomeViewModelTest {
         coVerify(exactly = 1) { collectionRepo.getCollectionRequest(any<Int>()) }
 
         viewModel.uiState.first().response shouldBe Loadable.Empty
+    }
+
+    @Test
+    fun `checkValidUrl returns true when url is valid`() {
+        viewModel.checkValidUrl("https://example.com").shouldBe(true)
+        viewModel.checkValidUrl("http://example.com/path").shouldBe(true)
+        viewModel.checkValidUrl("https://sub.domain.com").shouldBe(true)
+    }
+
+    @Test
+    fun `checkValidUrl returns false when url is invalid`() {
+        viewModel.checkValidUrl("invalid-url").shouldBe(false)
+        viewModel.checkValidUrl("test .com").shouldBe(false)
+        viewModel.checkValidUrl("htp:/example").shouldBe(false)
+    }
+
+    @Test
+    fun `checkValidUrl sets error state for invalid urls`() {
+        val actual = viewModel.checkValidUrl("bad-url")
+        actual shouldBe false
+        viewModel.uiState.value.response shouldBe
+                Loadable.NetworkError("Please enter a valid URL")
+    }
+
+    @Test
+    fun `checkValidUrl does not change state for valid urls`() {
+        val actual = viewModel.checkValidUrl("https://example.com")
+        actual shouldBe true
+        viewModel.uiState.value.response shouldNotBe
+                Loadable.NetworkError("Please enter a valid URL")
     }
 
 }
