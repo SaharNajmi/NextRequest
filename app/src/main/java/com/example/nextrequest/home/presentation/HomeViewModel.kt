@@ -44,6 +44,8 @@ class HomeViewModel @Inject constructor(
         val requestData = uiState.value.data
         if (requestData.requestUrl.isBlank()) return
 
+        if (!checkValidUrl(requestData.baseUrl)) return
+
         viewModelScope.launch(dispatcher) {
             _uiState.value = _uiState.value.copy(response = Loadable.Loading)
             try {
@@ -107,6 +109,19 @@ class HomeViewModel @Inject constructor(
                     requestUrl = newUrl,
                 )
             )
+    }
+
+    private fun isValidUrl(url: String): Boolean = try {
+        java.net.URL(url)
+        true
+    } catch (e: Exception) {
+        false
+    }
+
+    fun checkValidUrl(url: String) = isValidUrl(url).also { valid ->
+        if (!valid) _uiState.value = _uiState.value.copy(
+            response = Loadable.NetworkError("Please enter a valid URL")
+        )
     }
 
     fun updateHttpMethod(newHttpMethod: HttpMethod) {

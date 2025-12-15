@@ -9,7 +9,7 @@ fun Exception.getNetworkErrorMessage(): String {
         is UnknownHostException -> "Unknown Host"
         is SocketTimeoutException -> "Connection timed out"
         is ConnectException -> "Couldn't connect to the server"
-        is UnresolvedAddressException -> "Unable to resolve host. Check the URL or your network"
+        is UnresolvedAddressException -> "The host cannot be reached. Please Check the URL or your internet connection"
         is HttpException -> {
             val code = this.code()
             when (code) {
