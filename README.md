@@ -1,10 +1,10 @@
 # NextRequest
 A Postman-inspired API client for executing requests and inspecting responses.
 
-## 📱 Features
-- **Home:** Send API requests easily
-- **History:** View past requests
-- **Collections:** Organize and save your requests
+## 📱 Pages
+- **Home:** Execute API requests
+- **History:** Review and reuse past requests
+- **Collections:** Organize requests into custom groups
 
 ## 🛠 Technology
 - **Architecture:** MVVM
