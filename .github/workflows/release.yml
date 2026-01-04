@@ -40,11 +40,14 @@ jobs:
           java-version: 17
           cache: 'gradle'
 
+      - name: Calculate versionCode
+        run: echo "VERSION_CODE=$(( GITHUB_RUN_NUMBER + 10 ))" >> $GITHUB_ENV
+
       - name: Version Bump
         uses: chkfung/android-version-actions@v1.2.3
         with:
           gradlePath: app/build.gradle.kts
-          versionCode: ${{ github.run_number + 10 }}
+          versionCode: ${{ env.VERSION_CODE }}
 
       - name: Assemble Release Bundle
         run: ./gradlew bundleRelease
