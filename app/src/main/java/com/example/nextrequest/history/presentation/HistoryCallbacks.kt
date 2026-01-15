@@ -8,4 +8,6 @@ data class HistoryCallbacks(
     val onAddHistoriesToCollection: (List<History>, String) -> Unit,
     val onHeaderClick: (String) -> Unit,
     val onDeleteHistoriesClick: (historyIds: List<Int>) -> Unit,
-    val onDeleteHistoryClick: (Int) -> Unit)
+    val onDeleteHistoryClick: (Int) -> Unit,
+    val onCreateNewCollectionClick: () -> Unit,
+)

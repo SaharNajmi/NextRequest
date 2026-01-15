@@ -2,6 +2,7 @@ package com.example.nextrequest.history.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nextrequest.collection.domain.model.Collection
 import com.example.nextrequest.collection.domain.repository.CollectionRepository
 import com.example.nextrequest.collection.presentation.model.CollectionEntry
 import com.example.nextrequest.history.data.mapper.toRequest
@@ -94,6 +95,13 @@ class HistoryViewModel @Inject constructor(
         val requests = histories.map { it.toRequest() }
         viewModelScope.launch(dispatcher) {
             requests.forEach { collectionRepository.insertRequestToCollection(collectionId, it) }
+        }
+    }
+
+    fun createNewCollection() {
+        viewModelScope.launch(dispatcher) {
+            collectionRepository.insertCollection(Collection())
+            getCollections()
         }
     }
 }

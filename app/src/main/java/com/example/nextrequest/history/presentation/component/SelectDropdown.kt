@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
@@ -29,14 +30,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.nextrequest.collection.presentation.model.CollectionEntry
+import com.example.nextrequest.core.presentation.icons.Add
 
 @Composable
 fun SaveToCollectionDialog(
     items: Set<CollectionEntry>,
     onDismiss: () -> Unit,
     onSave: (String) -> Unit,
+    onAddNewCollection: () -> Unit,
 ) {
-    var selectedItem by remember { mutableStateOf(items.firstOrNull()) }
+    var selectedItem by remember(items) { mutableStateOf(items.firstOrNull()) }
     Dialog(onDismissRequest = { onDismiss() }) {
         Surface(
             shape = RoundedCornerShape(12.dp),
@@ -55,6 +58,13 @@ fun SaveToCollectionDialog(
                         .padding(vertical = 2.dp),
                 ) {
 
+                    if (items.isEmpty()) {
+                        item {
+                            AddNewCollection {
+                                onAddNewCollection()
+                            }
+                        }
+                    }
                     items(items.toList()) { entry ->
                         val backgroundColor: Color =
                             if (selectedItem?.id == entry.id) MaterialTheme.colorScheme.secondaryContainer
@@ -63,7 +73,7 @@ fun SaveToCollectionDialog(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(backgroundColor, RoundedCornerShape(4.dp))
-                               // .clickable { selectedItem = entry }
+                                // .clickable { selectedItem = entry }
                                 .padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -96,5 +106,19 @@ fun SaveToCollectionDialog(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun AddNewCollection(onAddNewCollection: () -> Unit) {
+    TextButton(onClick = {
+        onAddNewCollection()
+    }) {
+        Icon(
+            imageVector = Add,
+            contentDescription = "Add first collection"
+        )
+        Spacer(Modifier.width(4.dp))
+        Text("Add new collection")
     }
 }
