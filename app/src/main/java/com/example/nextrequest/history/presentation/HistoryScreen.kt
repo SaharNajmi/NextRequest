@@ -101,7 +101,8 @@ fun HistoryScreen(
         },
         onDeleteHistoryClick = { historyId ->
             viewModel.deleteHistoryRequest(historyId)
-        }
+        },
+        onCreateNewCollectionClick = { viewModel.createNewCollection() }
     )
     Column(modifier = Modifier.padding(12.dp)) {
         Spacer(modifier = Modifier.height(24.dp))
@@ -231,10 +232,14 @@ fun HistoryHeader(
         )
         if (showDropdown) {
             SaveToCollectionDialog(
-                collectionEntries,
-                { showDropdown = false }) { collectionId ->
-                callbacks.onAddHistoriesToCollection(histories, collectionId)
-            }
+                items = collectionEntries,
+                onDismiss = { showDropdown = false },
+                onSave = { collectionId ->
+                    callbacks.onAddHistoriesToCollection(histories, collectionId)
+                },
+                onAddNewCollection = {
+                    callbacks.onCreateNewCollectionClick()
+                })
         }
     }
 }
@@ -292,10 +297,14 @@ private fun HistoryItem(
         )
         if (showDropdown) {
             SaveToCollectionDialog(
-                collectionNames,
-                { showDropdown = false }) { collectionId ->
-                callbacks.onAddHistoryToCollection(items[index], collectionId)
-            }
+                items = collectionNames,
+                onDismiss = { showDropdown = false },
+                onSave = { collectionId ->
+                    callbacks.onAddHistoryToCollection(items[index], collectionId)
+                },
+                onAddNewCollection = {
+                    callbacks.onCreateNewCollectionClick()
+                })
         }
     }
 }
