@@ -1,6 +1,11 @@
 name: Run test
 
 on:
+  push:
+    branches:
+      - main
+      - bugfix
+
   pull_request:
     branches: [main]
 
