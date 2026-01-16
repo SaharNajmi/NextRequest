@@ -1,1 +1,2 @@
-Initial Release
+- Fixed bug with SaveToCollectionDialog
+- Improved HTTP request error handling
