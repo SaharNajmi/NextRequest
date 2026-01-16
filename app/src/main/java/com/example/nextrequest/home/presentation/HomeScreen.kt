@@ -296,7 +296,6 @@ private fun RequestLine(
                 .clickable { isHttpMethodExpanded = true },
             contentDescription = "drop down icon"
         )
-
         DropdownMenu(
             expanded = isHttpMethodExpanded,
             onDismissRequest = { isHttpMethodExpanded = false },
@@ -319,6 +318,13 @@ private fun RequestLine(
             httpMethods.forEach { option ->
                 DropdownMenuItem(
                     text = { Text(option.name, color = option.color) },
+                    modifier = Modifier
+                        .background(
+                            color = if (option == selectedHttpMethod)
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                            else
+                                Color.Transparent
+                        ),
                     onClick = {
                         isHttpMethodExpanded = false
                         onHttpMethodChanged(option)
