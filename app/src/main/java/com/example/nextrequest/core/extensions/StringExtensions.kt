@@ -8,7 +8,7 @@ import com.google.gson.JsonParser
 fun String.formatJson(): String {
     return try {
         val jsonElement = JsonParser.parseString(this)
-        GsonBuilder().setPrettyPrinting().create().toJson(jsonElement)
+        GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(jsonElement)
     } catch (e: Exception) {
         this
     }
