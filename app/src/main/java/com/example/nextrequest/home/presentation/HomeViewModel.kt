@@ -7,7 +7,6 @@ import com.example.nextrequest.collection.domain.repository.CollectionRepository
 import com.example.nextrequest.core.KeyValueList
 import com.example.nextrequest.core.domain.model.ApiRequest
 import com.example.nextrequest.core.domain.model.ApiResponse
-import com.example.nextrequest.core.domain.repository.ApiService
 import com.example.nextrequest.core.extensions.buildUrlWithParams
 import com.example.nextrequest.core.extensions.mapKeyValuePairsToQueryParameter
 import com.example.nextrequest.core.extensions.removeParameterFromUrl
@@ -17,6 +16,7 @@ import com.example.nextrequest.home.data.mapper.httpRequestToHistory
 import com.example.nextrequest.home.data.mapper.httpRequestToRequest
 import com.example.nextrequest.home.data.mapper.toHttpRequest
 import com.example.nextrequest.home.data.mapper.toHttpResponse
+import com.example.nextrequest.home.domain.repository.HomeRepository
 import com.example.nextrequest.home.presentation.util.getNetworkErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -28,7 +28,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val apiService: ApiService,
+    private val homeRepository: HomeRepository,
     private val historyRepository: HistoryRepository,
     private val collectionRepository: CollectionRepository,
     private val dispatcher: CoroutineDispatcher,
@@ -49,7 +49,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch(dispatcher) {
             _uiState.value = _uiState.value.copy(response = Loadable.Loading)
             try {
-                val result = apiService.sendRequest(
+                val result = homeRepository.sendRequest(
                     method = requestData.httpMethod.name,
                     url = requestData.baseUrl,
                     headers = requestData.headers,
