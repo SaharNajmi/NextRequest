@@ -1,24 +1,22 @@
 package com.example.nextrequest
 
-import com.example.nextrequest.core.models.HttpMethod
+import com.example.nextrequest.collection.domain.model.Request
+import com.example.nextrequest.collection.domain.repository.CollectionRepository
 import com.example.nextrequest.core.KeyValueList
 import com.example.nextrequest.core.domain.model.ApiRequest
+import com.example.nextrequest.core.models.HttpMethod
 import com.example.nextrequest.history.domain.model.History
-import com.example.nextrequest.collection.domain.model.Request
-import com.example.nextrequest.core.domain.repository.ApiService
-import com.example.nextrequest.collection.domain.repository.CollectionRepository
 import com.example.nextrequest.history.domain.repository.HistoryRepository
-import com.example.nextrequest.home.presentation.Loadable
+import com.example.nextrequest.home.domain.repository.HomeRepository
 import com.example.nextrequest.home.presentation.HomeUiState
 import com.example.nextrequest.home.presentation.HomeViewModel
+import com.example.nextrequest.home.presentation.Loadable
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertFalse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -36,17 +34,17 @@ class HomeViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     lateinit var viewModel: HomeViewModel
     lateinit var historyRepo: HistoryRepository
-    lateinit var apiService: ApiService
+    lateinit var homeRepo: HomeRepository
     lateinit var collectionRepo: CollectionRepository
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
-        apiService = mockk<ApiService>()
         historyRepo = mockk<HistoryRepository>(relaxed = true)
+        homeRepo = mockk<HomeRepository>(relaxed = true)
         collectionRepo = mockk<CollectionRepository>(relaxed = true)
 
-        viewModel = HomeViewModel(apiService, historyRepo, collectionRepo, testDispatcher)
+        viewModel = HomeViewModel(homeRepo, historyRepo, collectionRepo, testDispatcher)
     }
 
     @After
@@ -98,7 +96,7 @@ class HomeViewModelTest {
         viewModel.sendRequest()
 
         coVerify(exactly = 0) {
-            apiService.sendRequest(any<String>(), any<String>())
+            homeRepo.sendRequest(any<String>(), any<String>())
             historyRepo.insertHistoryRequest(any<History>())
             collectionRepo.updateCollectionRequest(
                 any<String>(),
@@ -114,7 +112,7 @@ class HomeViewModelTest {
         viewModel.sendRequest()
         testDispatcher.scheduler.advanceUntilIdle()//or advanceUntilIdle()
         coVerify(exactly = 1) {
-            apiService.sendRequest(
+            homeRepo.sendRequest(
                 any<String>(),
                 any<String>(),
                 any<KeyValueList>(),
