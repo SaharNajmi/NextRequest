@@ -97,7 +97,8 @@ fun SaveToCollectionDialog(
                         Text("Cancel")
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    TextButton(onClick = {
+                    TextButton(enabled = items.isNotEmpty(),
+                        onClick = {
                         selectedItem?.let { onSave(it.id) }
                         onDismiss()
                     }) {
@@ -110,7 +111,7 @@ fun SaveToCollectionDialog(
 }
 
 @Composable
-fun AddNewCollection(onAddNewCollection: () -> Unit) {
+private fun AddNewCollection(onAddNewCollection: () -> Unit) {
     TextButton(onClick = {
         onAddNewCollection()
     }) {
