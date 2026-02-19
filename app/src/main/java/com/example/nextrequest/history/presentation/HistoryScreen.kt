@@ -4,23 +4,25 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.nextrequest.collection.presentation.model.CollectionEntry
+import com.example.nextrequest.core.presentation.UiState
 import com.example.nextrequest.core.presentation.color
 import com.example.nextrequest.core.presentation.component.CustomSearchBar
 import com.example.nextrequest.core.presentation.component.CustomToolbar
@@ -61,20 +64,12 @@ fun HistoryScreen(
     viewModel: HistoryViewModel,
     onHistoryItemClick: (Int) -> Unit,
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+
     LaunchedEffect(Unit) {
         viewModel.getHistories()
-        viewModel.getCollections()
     }
-    val expandedState: State<List<ExpandableHistoryItem>> =
-        viewModel.expandedStates.collectAsState()
-    val histories by viewModel.historyEntry.collectAsState()
-    val collectionNames by viewModel.collectionNames.collectAsState()
-    var searchQuery by remember { mutableStateOf("") }
-    val filteredHistories: List<HistoryEntry> = searchHistories(
-        histories, searchQuery
-    )
-
     val callbacks = HistoryCallbacks(
         onHistoryItemClick,
         onAddHistoryToCollection = { history, collectionId ->
@@ -104,10 +99,63 @@ fun HistoryScreen(
         },
         onCreateNewCollectionClick = { viewModel.createNewCollection() }
     )
-    Column(modifier = Modifier.padding(12.dp)) {
-        Spacer(modifier = Modifier.height(24.dp))
-        CustomToolbar("History", navController)
-        Spacer(Modifier.height(8.dp))
+    Scaffold(modifier = Modifier.fillMaxSize(),
+        topBar = {
+            Column(modifier = Modifier.padding(horizontal = 12.dp)) {
+                Spacer(modifier = Modifier.height(36.dp))
+                CustomToolbar("History", navController)
+            }
+        }
+    ) { padding ->
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+        ) {
+            when (uiState) {
+                UiState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                is UiState.Error -> {
+                    Text(
+                        text = "Error: ${(uiState as UiState.Error).message}",
+                        modifier = Modifier.padding(16.dp), color = Color.Red
+                    )
+                }
+
+                is UiState.Success -> {
+                    HistoryScreenContent(
+                        navController,
+                        (uiState as UiState.Success<HistoryUiModel>).data,
+                        callbacks
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun HistoryScreenContent(
+    navController: NavController,
+    historyUiModel: HistoryUiModel,
+    callbacks: HistoryCallbacks,
+) {
+    val expandedState = historyUiModel.expandedStates
+    val histories = historyUiModel.historyEntries
+    val collectionNames = historyUiModel.collectionNames
+    var searchQuery by remember { mutableStateOf("") }
+    val filteredHistories: List<HistoryEntry> = searchHistories(
+        histories, searchQuery
+    )
+    Column(modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp, top = 8.dp)) {
         CustomSearchBar("Search by url", searchQuery) { searchQuery = it }
         if (filteredHistories.isEmpty() && searchQuery.isEmpty()) {
             Row(
@@ -145,7 +193,7 @@ fun HistoryScreen(
 private fun ExpandedHistoryItem(
     historyEntries: List<HistoryEntry>,
     collectionEntries: Set<CollectionEntry>,
-    expandedState: State<List<ExpandableHistoryItem>>,
+    expandedState: List<ExpandableHistoryItem>,
     callbacks: HistoryCallbacks,
 ) {
     historyEntries.forEach { historyEntry ->
@@ -155,7 +203,7 @@ private fun ExpandedHistoryItem(
                     Modifier.padding(vertical = 8.dp),
                     historyEntry.dateCreated,
                     collectionEntries,
-                    expandedState.value.firstOrNull { it.dateCreated == historyEntry.dateCreated }?.isExpanded
+                    expandedState.firstOrNull { it.dateCreated == historyEntry.dateCreated }?.isExpanded
                         ?: false,
                     historyEntry.histories,
                     callbacks
@@ -165,8 +213,7 @@ private fun ExpandedHistoryItem(
                 AnimatedVisibility(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    visible = expandedState.value.firstOrNull { it.dateCreated == historyEntry.dateCreated }?.isExpanded
-                        ?: false
+                    visible = expandedState.firstOrNull { it.dateCreated == historyEntry.dateCreated }?.isExpanded ?: false
                 ) {
                     HistoryItem(
                         Modifier
@@ -308,6 +355,3 @@ private fun HistoryItem(
         }
     }
 }
-
-
-

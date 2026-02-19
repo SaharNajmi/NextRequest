@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.nextrequest.collection.domain.model.Collection
 import com.example.nextrequest.collection.domain.repository.CollectionRepository
 import com.example.nextrequest.collection.presentation.model.CollectionEntry
+import com.example.nextrequest.core.presentation.UiState
 import com.example.nextrequest.history.data.mapper.toRequest
 import com.example.nextrequest.history.domain.formatDate
 import com.example.nextrequest.history.domain.model.History
@@ -13,6 +14,8 @@ import com.example.nextrequest.history.presentation.model.ExpandableHistoryItem
 import com.example.nextrequest.history.presentation.model.HistoryEntry
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -24,36 +27,60 @@ class HistoryViewModel @Inject constructor(
     val collectionRepository: CollectionRepository,
     private val dispatcher: CoroutineDispatcher,
 ) : ViewModel() {
-
-    private val _historyEntry =
-        MutableStateFlow<List<HistoryEntry>>(listOf())
-    val historyEntry: StateFlow<List<HistoryEntry>> = _historyEntry
-
-    private val _expandedStates = MutableStateFlow<List<ExpandableHistoryItem>>(listOf())
-    val expandedStates: StateFlow<List<ExpandableHistoryItem>> = _expandedStates
-
-    private val _collectionNames =
-        MutableStateFlow<Set<CollectionEntry>>(setOf())
-    val collectionNames: StateFlow<Set<CollectionEntry>> = _collectionNames
+    private val _uiState = MutableStateFlow<UiState<HistoryUiModel>>(UiState.Loading)
+    val uiState: StateFlow<UiState<HistoryUiModel>> = _uiState
 
     fun getHistories() {
-        viewModelScope.launch(dispatcher) {
-            val result =
-                historyRepository.getAllHistories()
-            val grouped: Map<String, List<History>> = result.groupBy { formatDate(it.createdAt) }
-            _historyEntry.value = grouped.map { (date, histories) ->
-                _expandedStates.value = _expandedStates.value + ExpandableHistoryItem(date, false)
-                HistoryEntry(dateCreated = date, histories = histories)
+        viewModelScope.launch {
+            val oldExpandedStates = (_uiState.value as? UiState.Success)?.data?.expandedStates?.associateBy { it.dateCreated } ?: emptyMap()
+            _uiState.value = UiState.Loading
+            try {
+                val historiesDeferred =
+                    async(Dispatchers.IO) { historyRepository.getAllHistories() }
+                val collectionsDeferred =
+                    async(Dispatchers.IO) { collectionRepository.getAllCollections() }
+
+                val histories = historiesDeferred.await()
+                val collections = collectionsDeferred.await()
+
+                val grouped: Map<String, List<History>> =
+                    histories.groupBy { formatDate(it.createdAt) }
+
+                val historyEntries = grouped.map { (date, histories) ->
+                    HistoryEntry(dateCreated = date, histories = histories)
+                }
+
+                val expandedStates = grouped.keys.map { date ->
+                    oldExpandedStates[date] ?: ExpandableHistoryItem(date, false)
+                }
+                val collectionEntries = collections.map {
+                    CollectionEntry(it.collectionId, it.collectionName)
+                }.toSet()
+
+                val data = HistoryUiModel(
+                    historyEntries = historyEntries,
+                    expandedStates = expandedStates,
+                    collectionNames = collectionEntries
+                )
+
+                _uiState.value = UiState.Success(data)
+
+            } catch (e: Exception) {
+                _uiState.value = UiState.Error(e.localizedMessage ?: "Unknown error")
             }
         }
     }
 
     fun toggleExpanded(dateCreated: String) {
-        _expandedStates.value =
-            _expandedStates.value.map {
-                if (it.dateCreated == dateCreated) it.copy(isExpanded = !it.isExpanded)
-                else it
+        val current = _uiState.value
+        if (current is UiState.Success) {
+            val newExpanded = current.data.expandedStates.map { item ->
+                if (item.dateCreated == dateCreated) item.copy(isExpanded = !item.isExpanded)
+                else item
             }
+            val newData = current.data.copy(expandedStates = newExpanded)
+            _uiState.value = UiState.Success(newData)
+        }
     }
 
     fun deleteHistoryRequest(historyId: Int) {
@@ -70,12 +97,26 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
-    fun getCollections() {
+    private fun getCollections() {
         viewModelScope.launch(dispatcher) {
-            val collections = collectionRepository.getAllCollections()
-            _collectionNames.value = collections.map {
-                CollectionEntry(it.collectionId, it.collectionName)
-            }.toSet()
+            try {
+                val collections = collectionRepository.getAllCollections()
+                val collectionEntries = collections.map {
+                    CollectionEntry(it.collectionId, it.collectionName)
+                }.toSet()
+
+                val currentData = (_uiState.value as? UiState.Success)?.data
+                    ?: HistoryUiModel()
+
+                _uiState.value = UiState.Success(
+                    currentData.copy(collectionNames = collectionEntries)
+                )
+
+            } catch (e: Exception) {
+                _uiState.value = UiState.Error(
+                    e.localizedMessage ?: "Unknown error"
+                )
+            }
         }
     }
 
