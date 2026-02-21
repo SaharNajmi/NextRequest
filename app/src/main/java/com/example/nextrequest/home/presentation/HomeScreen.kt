@@ -1,5 +1,6 @@
 package com.example.nextrequest.home.presentation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -91,6 +92,7 @@ fun HomeScreen(
     onNavigateToHistory: () -> Unit,
     onNavigateToCollection: () -> Unit,
 ) {
+    println(requestId.toString() + "vvvv")
     val uiState by homeViewModel.uiState.collectAsState()
     LaunchedEffect(requestId, source) {
         if (requestId != null && source != null) {

@@ -28,24 +28,25 @@ fun AppNavHost(
     ) {
         composable(
             Screens.HomeScreen.route,
-            arguments = listOf(navArgument(Screens.Companion.ARG_REQUEST_ID) {
+            arguments = listOf(navArgument(Screens.ARG_REQUEST_ID) {
                 type = NavType.StringType
                 nullable = true
                 defaultValue = null
-            }, navArgument(Screens.Companion.ARG_SOURCE) {
+            }, navArgument(Screens.ARG_SOURCE) {
                 type = NavType.StringType
                 nullable = true
                 defaultValue = null
-            }, navArgument(Screens.Companion.ARG_COLLECTION_ID) {
+            }, navArgument(Screens.ARG_COLLECTION_ID) {
                 type = NavType.StringType
                 nullable = true
                 defaultValue = null
             })
         ) { backStackEntry ->
             var requestId =
-                backStackEntry.arguments?.getString(Screens.Companion.ARG_REQUEST_ID)?.toIntOrNull()
-            var source = backStackEntry.arguments?.getString(Screens.Companion.ARG_SOURCE)
-            val collectionId = backStackEntry.arguments?.getString((Screens.Companion.ARG_COLLECTION_ID))
+                backStackEntry.arguments?.getString(Screens.ARG_REQUEST_ID)?.toIntOrNull()
+            var source = backStackEntry.arguments?.getString(Screens.ARG_SOURCE)
+            val collectionId =
+                backStackEntry.arguments?.getString((Screens.ARG_COLLECTION_ID))
             HomeScreen(
                 homeViewModel,
                 requestId,
@@ -68,9 +69,11 @@ fun AppNavHost(
                     navController.navigate(
                         Screens.HomeScreen.createRoute(
                             requestId,
-                            Screens.Companion.ROUTE_HISTORY_SCREEN
+                            Screens.ROUTE_HISTORY_SCREEN
                         )
-                    )
+                    ) {
+                        popUpTo(navController.graph.id) { inclusive = false }
+                    }
                 }
             )
         }
@@ -82,10 +85,12 @@ fun AppNavHost(
                     navController.navigate(
                         Screens.HomeScreen.createRoute(
                             requestId,
-                            Screens.Companion.ROUTE_COLLECTION_SCREEN,
+                            Screens.ROUTE_COLLECTION_SCREEN,
                             collectionId
                         )
-                    )
+                    ){
+                        popUpTo(navController.graph.id) { inclusive = false }
+                    }
                 })
         }
     }

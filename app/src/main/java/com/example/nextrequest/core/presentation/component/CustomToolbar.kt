@@ -14,13 +14,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.nextrequest.core.presentation.icons.Arrow_back_ios
+import com.example.nextrequest.core.presentation.navigation.Screens
+import com.example.nextrequest.core.presentation.navigation.Screens.Companion.ROUTE_HISTORY_SCREEN
+import com.example.nextrequest.core.presentation.navigation.Screens.Companion.ROUTE_HOME_SCREEN
 
 @Composable
 fun CustomToolbar(title: String, navController: NavController) {
     Box(Modifier.fillMaxWidth()) {
         IconButton(onClick = {
-            navController.popBackStack()
+            navController.navigate(ROUTE_HOME_SCREEN) {
+                popUpTo(navController.graph.id) {
+                    inclusive = false
+                }
+            }
         }) {
             Icon(
                 imageVector = Arrow_back_ios,
