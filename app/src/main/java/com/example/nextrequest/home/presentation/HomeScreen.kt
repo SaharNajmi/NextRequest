@@ -42,9 +42,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -81,7 +83,6 @@ import com.example.nextrequest.home.presentation.components.TextVisibilityTextFi
 import com.example.nextrequest.home.presentation.util.getHeaderValue
 import com.sahar.nextrequest.R
 import kotlinx.coroutines.launch
-
 
 @Composable()
 fun HomeScreen(
@@ -360,7 +361,7 @@ fun RequestParametersSection(
     callbacks: HomeCallbacks,
 ) {
     val radioHttpParameterOptions = RadioHttpParameterOptions.entries.toList()
-    var (selectedOption, onOptionSelected) = remember { mutableStateOf(radioHttpParameterOptions[0]) }
+    var (selectedOption, onOptionSelected) = rememberSaveable() { mutableStateOf(radioHttpParameterOptions[0]) }
 
     Column(modifier = modifier.fillMaxWidth()) {
         HttpParameterSelection(radioHttpParameterOptions, selectedOption, onOptionSelected)

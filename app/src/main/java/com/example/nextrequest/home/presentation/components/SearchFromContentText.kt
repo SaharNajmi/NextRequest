@@ -25,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,14 +49,14 @@ import com.example.nextrequest.home.domain.buildHighlightedTextLines
 @Composable
 fun SearchFromContentText(
     contentText: String,
-    isSearchVisible: Boolean,
+    isSearchCardVisible: Boolean,
     onDismissSearch: () -> Unit,
 ) {
     val formattedJson = remember(contentText) { contentText.formatJson() }
     val lines = remember(formattedJson) { formattedJson.lines() }
     val listState = rememberLazyListState()
-    var searchQuery by remember { mutableStateOf("") }
-    var targetMatchIndex by remember { mutableStateOf(0) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    var targetMatchIndex by rememberSaveable { mutableStateOf(0) }
 
     val highlightedTextLines = remember(lines, searchQuery) {
         buildHighlightedTextLines(lines, searchQuery)
@@ -77,8 +78,8 @@ fun SearchFromContentText(
     }
 
     Column(modifier = Modifier.padding(8.dp)) {
-        SearchBar(
-            isVisible = isSearchVisible,
+        SearchBarCard(
+            isVisible = isSearchCardVisible,
             searchQuery = searchQuery,
             totalMatches = totalMatches,
             targetMatchIndex = targetMatchIndex,
@@ -111,7 +112,7 @@ fun SearchFromContentText(
 }
 
 @Composable
-fun SearchBar(
+fun SearchBarCard(
     isVisible: Boolean,
     searchQuery: String,
     totalMatches: Int,
