@@ -73,6 +73,7 @@ fun AppNavHost(
                         )
                     ) {
                         popUpTo(navController.graph.id) { inclusive = false }
+                        launchSingleTop = true
                     }
                 }
             )
@@ -90,6 +91,7 @@ fun AppNavHost(
                         )
                     ){
                         popUpTo(navController.graph.id) { inclusive = false }
+                        launchSingleTop = true
                     }
                 })
         }
