@@ -1,13 +1,17 @@
 package com.example.nextrequest
 
-import com.example.nextrequest.history.domain.formatDate
 import com.example.nextrequest.collection.domain.model.Collection
-import com.example.nextrequest.history.presentation.model.ExpandableHistoryItem
-import com.example.nextrequest.history.domain.model.History
 import com.example.nextrequest.collection.domain.repository.CollectionRepository
+import com.example.nextrequest.core.presentation.UiState
+import com.example.nextrequest.history.domain.formatDate
+import com.example.nextrequest.history.domain.model.History
 import com.example.nextrequest.history.domain.repository.HistoryRepository
+import com.example.nextrequest.history.presentation.HistoryUiModel
 import com.example.nextrequest.history.presentation.HistoryViewModel
+import com.example.nextrequest.history.presentation.model.ExpandableHistoryItem
+import io.kotest.inspectors.forAll
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -55,24 +59,27 @@ class HistoryViewModelTest {
         coEvery { historyRepository.getAllHistories() } returns histories
 
         viewModel.getHistories()
-//          testDispatcher.scheduler.advanceUntilIdle()
         advanceUntilIdle()
-        val grouped = viewModel.historyEntry.value
-        grouped.size shouldBe 2
-        grouped[0].dateCreated shouldBe formatDate(today)
-        grouped[1].dateCreated shouldBe formatDate(yesterday)
+//        val uiState = viewModel.uiState.value.shouldBeInstanceOf<UiState.Success<HistoryUiModel>>()
+        with((viewModel.uiState.value as UiState.Success).data) {
+            historyEntries.size shouldBe 2
+            historyEntries[0].dateCreated shouldBe formatDate(today)
+            historyEntries[1].dateCreated shouldBe formatDate(yesterday)
 
-        grouped[0].histories.size shouldBe 2
-        grouped[1].histories.size shouldBe 1
+            historyEntries[0].histories.size shouldBe 2
+            historyEntries[1].histories.size shouldBe 1
 
-        val expanded = viewModel.expandedStates.value
-        expanded.size shouldBe 2
+            expandedStates.size shouldBe 2
+            expandedStates.forAll { it.isExpanded shouldBe false }
+        }
     }
 
     @Test
     fun `toggleExpanded flips isExpanded for the selected date`() = runTest {
         val today = LocalDate.now()
         val yesterday = LocalDate.now().minusDays(1)
+        val todayFormatted = formatDate(today)
+        val yesterdayFormatted = formatDate(yesterday)
         val histories = listOf(
             History(id = 1, requestUrl = "url1", createdAt = today),
             History(id = 2, requestUrl = "url2", createdAt = yesterday),
@@ -83,27 +90,24 @@ class HistoryViewModelTest {
 
         viewModel.getHistories()
         advanceUntilIdle()
-        viewModel.toggleExpanded(formatDate(today))
 
-        val expectedStateFirst = listOf(
-            ExpandableHistoryItem(formatDate(today), isExpanded = true),
-            ExpandableHistoryItem(formatDate(yesterday), isExpanded = false)
+        viewModel.toggleExpanded(todayFormatted)
+        (viewModel.uiState.value as UiState.Success).data.expandedStates shouldBe listOf(
+            ExpandableHistoryItem(todayFormatted, isExpanded = true),
+            ExpandableHistoryItem(yesterdayFormatted, isExpanded = false)
         )
-        viewModel.expandedStates.value shouldBe expectedStateFirst
 
-        viewModel.toggleExpanded(formatDate(yesterday))
-        val expectedStateSecond = listOf(
-            ExpandableHistoryItem(formatDate(today), isExpanded = true),
-            ExpandableHistoryItem(formatDate(yesterday), isExpanded = true)
+        viewModel.toggleExpanded(yesterdayFormatted)
+        (viewModel.uiState.value as UiState.Success).data.expandedStates shouldBe listOf(
+            ExpandableHistoryItem(todayFormatted, isExpanded = true),
+            ExpandableHistoryItem(yesterdayFormatted, isExpanded = true)
         )
-        viewModel.expandedStates.value shouldBe expectedStateSecond
 
-        viewModel.toggleExpanded(formatDate(today))
-        val expectedStateThird = listOf(
-            ExpandableHistoryItem(formatDate(today), isExpanded = false),
-            ExpandableHistoryItem(formatDate(yesterday), isExpanded = true)
+        viewModel.toggleExpanded(todayFormatted)
+        (viewModel.uiState.value as UiState.Success).data.expandedStates shouldBe listOf(
+            ExpandableHistoryItem(todayFormatted, isExpanded = false),
+            ExpandableHistoryItem(yesterdayFormatted, isExpanded = true)
         )
-        viewModel.expandedStates.value shouldBe expectedStateThird
     }
 
     @Test
@@ -117,6 +121,7 @@ class HistoryViewModelTest {
         coEvery { collectionRepository.getAllCollections() } returns collections
         viewModel.getCollections()
         advanceUntilIdle()
-        viewModel.collectionNames.value.size shouldBe 2
+        val uiState = viewModel.uiState.value as UiState.Success
+        uiState.data.collectionNames.size shouldBe 2
     }
 }

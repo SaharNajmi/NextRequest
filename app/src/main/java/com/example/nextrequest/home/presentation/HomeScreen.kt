@@ -1,6 +1,5 @@
 package com.example.nextrequest.home.presentation
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -42,7 +41,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -93,7 +91,6 @@ fun HomeScreen(
     onNavigateToHistory: () -> Unit,
     onNavigateToCollection: () -> Unit,
 ) {
-    println(requestId.toString() + "vvvv")
     val uiState by homeViewModel.uiState.collectAsState()
     LaunchedEffect(requestId, source) {
         if (requestId != null && source != null) {
@@ -120,20 +117,17 @@ fun HomeScreen(
         onNavigateToHistory = onNavigateToHistory,
         onNavigateToCollection = onNavigateToCollection,
         onCopyClick = {
-            val textToCopy =
-                (uiState.response as? Loadable.Success)?.data?.response
-                    ?: (uiState.response as? Loadable.Error)?.message
+            val textToCopy = (uiState.response as? Loadable.Success)?.data?.response
+                ?: (uiState.response as? Loadable.Error)?.message
             textToCopy?.let {
                 clipboard.setText(AnnotatedString(it))
                 scope.launch {
                     snackbarHostState.showSnackbar("Copied to clipboard")
                 }
             }
-        }
-    )
+        })
     Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.BottomCenter
+        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter
     ) {
         SnackbarHost(hostState = snackbarHostState, snackbar = { data ->
             Snackbar(
@@ -165,8 +159,7 @@ fun HomeScreen(
                 )
             }
             RequestBuilder(
-                uiState,
-                callbacks = callbacks
+                uiState, callbacks = callbacks
             )
         }
     }
@@ -184,9 +177,7 @@ fun BaseTextIconButton(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                imageVector = icon,
-                contentDescription = label,
-                tint = tint
+                imageVector = icon, contentDescription = label, tint = tint
             )
             Text(label, color = tint)
         }
@@ -199,8 +190,13 @@ fun RequestBuilder(
     callbacks: HomeCallbacks,
 ) {
     val httpMethods = listOf(
-        HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH,
-        HttpMethod.DELETE, HttpMethod.HEAD, HttpMethod.OPTIONS
+        HttpMethod.GET,
+        HttpMethod.POST,
+        HttpMethod.PUT,
+        HttpMethod.PATCH,
+        HttpMethod.DELETE,
+        HttpMethod.HEAD,
+        HttpMethod.OPTIONS
     )
     val statusCode: Int? = (uiState.response as? Loadable.Success)?.data?.statusCode
     var isSearchVisible by remember { mutableStateOf(false) }
@@ -221,11 +217,9 @@ fun RequestBuilder(
                 .padding(start = 12.dp)
         )
         Button(
-            modifier = Modifier
-                .padding(4.dp),
+            modifier = Modifier.padding(4.dp),
             shape = RoundedCornerShape(4.dp),
-            onClick = { callbacks.onSendRequestClick() }
-        ) {
+            onClick = { callbacks.onSendRequestClick() }) {
             Text(text = "Send", fontWeight = FontWeight.Bold)
         }
     }
@@ -248,11 +242,9 @@ fun RequestBuilder(
     Spacer(modifier = Modifier.height(8.dp))
 
     ResponseBodyTopBar(
-        statusCode, isSearchVisible,
-        onSearchClick = {
+        statusCode, isSearchVisible, onSearchClick = {
             isSearchVisible = it
-        },
-        callbacks = callbacks
+        }, callbacks = callbacks
     )
 
     HorizontalDivider(
@@ -264,8 +256,7 @@ fun RequestBuilder(
     ResponseBody(
         response = uiState.response,
         isSearchVisible = isSearchVisible,
-        onDismissSearch = { isSearchVisible = false }
-    )
+        onDismissSearch = { isSearchVisible = false })
 }
 
 @Composable
@@ -280,8 +271,7 @@ private fun RequestLine(
     var isHttpMethodExpanded: Boolean by remember { mutableStateOf(false) }
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .border(
+        modifier = modifier.border(
                 shape = RoundedCornerShape(4.dp),
                 border = BorderStroke(0.5.dp, color = MaterialTheme.colorScheme.primary)
             ),
@@ -295,8 +285,7 @@ private fun RequestLine(
                 .clickable { isHttpMethodExpanded = true })
         Icon(
             imageVector = Arrow_drop_down,
-            modifier = Modifier
-                .clickable { isHttpMethodExpanded = true },
+            modifier = Modifier.clickable { isHttpMethodExpanded = true },
             contentDescription = "drop down icon"
         )
         DropdownMenu(
@@ -304,9 +293,7 @@ private fun RequestLine(
             onDismissRequest = { isHttpMethodExpanded = false },
             modifier = Modifier
                 .shadow(
-                    elevation = 12.dp,
-                    shape = RoundedCornerShape(8.dp),
-                    clip = false
+                    elevation = 12.dp, shape = RoundedCornerShape(8.dp), clip = false
                 )
                 .border(
                     width = 2.dp,
@@ -314,19 +301,17 @@ private fun RequestLine(
                     shape = RoundedCornerShape(8.dp)
                 )
                 .background(
-                    color = MaterialTheme.colorScheme.background,
-                    shape = RoundedCornerShape(8.dp)
+                    color = MaterialTheme.colorScheme.background, shape = RoundedCornerShape(8.dp)
                 )
         ) {
             httpMethods.forEach { option ->
                 DropdownMenuItem(
                     text = { Text(option.name, color = option.color) },
-                    modifier = Modifier
-                        .background(
-                            color = if (option == selectedHttpMethod)
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                            else
-                                Color.Transparent
+                    modifier = Modifier.background(
+                            color = if (option == selectedHttpMethod) MaterialTheme.colorScheme.primary.copy(
+                                alpha = 0.12f
+                            )
+                            else Color.Transparent
                         ),
                     onClick = {
                         isHttpMethodExpanded = false
@@ -361,17 +346,16 @@ fun RequestParametersSection(
     callbacks: HomeCallbacks,
 ) {
     val radioHttpParameterOptions = RadioHttpParameterOptions.entries.toList()
-    var (selectedOption, onOptionSelected) = rememberSaveable() { mutableStateOf(radioHttpParameterOptions[0]) }
+    var (selectedOption, onOptionSelected) = rememberSaveable() {
+        mutableStateOf(
+            radioHttpParameterOptions[0]
+        )
+    }
 
     Column(modifier = modifier.fillMaxWidth()) {
         HttpParameterSelection(radioHttpParameterOptions, selectedOption, onOptionSelected)
         HttpParameterBody(
-            modifier,
-            selectedOption,
-            headers,
-            params,
-            body,
-            callbacks
+            modifier, selectedOption, headers, params, body, callbacks
         )
     }
 }
@@ -392,20 +376,20 @@ private fun HttpParameterSelection(
             Row(
                 modifier = Modifier
                     .selectable(
-                        selected = (option == selectedOption),
-                        onClick = {
+                        selected = (option == selectedOption), onClick = {
                             onOptionSelected(option)
                         }, role = Role.RadioButton
                     )
-                    .padding(bottom = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(bottom = 12.dp), verticalAlignment = Alignment.CenterVertically
             ) {
                 RadioButton(
-                    selected = (option == selectedOption), onClick = null,
+                    selected = (option == selectedOption),
+                    onClick = null,
                     colors = RadioButtonDefaults.colors(
                         selectedColor = MaterialTheme.colorScheme.primary,
                         unselectedColor = MaterialTheme.colorScheme.primary
-                    ), modifier = Modifier.padding(end = 2.dp)
+                    ),
+                    modifier = Modifier.padding(end = 2.dp)
                 )
                 Text(text = option.name)
             }
@@ -459,8 +443,7 @@ private fun StatusCode(statusCode: Int?) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
             text = "Status ",
-            modifier = Modifier
-                .padding(start = 24.dp),
+            modifier = Modifier.padding(start = 24.dp),
             color = MaterialTheme.colorScheme.textMuted,
             fontSize = 12.sp
         )
@@ -488,11 +471,9 @@ fun ParamsSection(
         }
         Spacer(modifier = Modifier.height(4.dp))
         RemovableTagList(
-            items = params,
-            onRemoveItem = { key, value ->
+            items = params, onRemoveItem = { key, value ->
                 callbacks.onRemoveParameter(key, value)
-            }
-        )
+            })
     }
 }
 
@@ -504,15 +485,16 @@ fun AuthSection(
 ) {
     Column(modifier) {
         Text(
-            text = "Bearer Token", modifier = Modifier
+            text = "Bearer Token",
+            modifier = Modifier
                 .clip(RoundedCornerShape(4.dp))
                 .background(MaterialTheme.colorScheme.primaryContainer)
-                .padding(4.dp), color = MaterialTheme.colorScheme.onBackground
+                .padding(4.dp),
+            color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(Modifier.height(8.dp))
         TextVisibilityTextField(
-            headers?.getHeaderValue("Authorization") ?: "",
-            onTextChange = {
+            headers?.getHeaderValue("Authorization") ?: "", onTextChange = {
                 callbacks.onAddHeader("Authorization", it)
             })
     }
@@ -530,11 +512,9 @@ fun HeaderSection(
         }
         Spacer(modifier = Modifier.height(4.dp))
         RemovableTagList(
-            items = headers,
-            onRemoveItem = { key, value ->
+            items = headers, onRemoveItem = { key, value ->
                 callbacks.onRemoveHeader(key, value)
-            }
-        )
+            })
     }
 }
 
@@ -551,8 +531,11 @@ fun HttpParameterBodySection(
             callbacks.onBodyChanged(it)
         },
         maxLines = Int.MAX_VALUE,
-        modifier = modifier
-            .border(1.dp, MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(8.dp)),
+        modifier = modifier.border(
+                1.dp,
+                MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(8.dp)
+            ),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
@@ -580,7 +563,9 @@ private fun ResponseBodyTopBar(
             text = "{ } JSON",
             fontSize = 14.sp,
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.onPrimary, shape = RoundedCornerShape(8.dp))
+                .background(
+                    MaterialTheme.colorScheme.onPrimary, shape = RoundedCornerShape(8.dp)
+                )
                 .padding(6.dp, 2.dp)
         )
 
@@ -594,19 +579,16 @@ private fun ResponseBodyTopBar(
                 .size(24.dp)
         ) {
             Icon(
-                imageVector = Search,
-                contentDescription = "search"
+                imageVector = Search, contentDescription = "search"
             )
         }
         IconButton(
             onClick = {
                 callbacks.onCopyClick()
-            },
-            modifier = Modifier.size(24.dp)
+            }, modifier = Modifier.size(24.dp)
         ) {
             Icon(
-                imageVector = Content_copy,
-                contentDescription = "copy response"
+                imageVector = Content_copy, contentDescription = "copy response"
             )
         }
     }
@@ -621,9 +603,7 @@ fun ResponseBody(
     when (response) {
         is Loadable.Success -> {
             SearchFromContentText(
-                response.data.response,
-                isSearchVisible,
-                onDismissSearch = onDismissSearch
+                response.data.response, isSearchVisible, onDismissSearch = onDismissSearch
             )
             if (response.data.imageResponse != null) {
                 Image(
@@ -636,13 +616,15 @@ fun ResponseBody(
 
         is Loadable.Error -> Text(
             text = "Error: ${response.message}",
-            modifier = Modifier.padding(16.dp), color = Color.Red
+            modifier = Modifier.padding(16.dp),
+            color = Color.Red
         )
 
         Loadable.Loading -> CircularProgressIndicator()
         is Loadable.NetworkError -> Text(
             text = "Error: ${response.message}",
-            modifier = Modifier.padding(16.dp), color = Color.Red
+            modifier = Modifier.padding(16.dp),
+            color = Color.Red
         )
 
         is Loadable.Empty -> {

@@ -36,9 +36,9 @@ class HistoryViewModel @Inject constructor(
             _uiState.value = UiState.Loading
             try {
                 val historiesDeferred =
-                    async(Dispatchers.IO) { historyRepository.getAllHistories() }
+                    async(dispatcher) { historyRepository.getAllHistories() }
                 val collectionsDeferred =
-                    async(Dispatchers.IO) { collectionRepository.getAllCollections() }
+                    async(dispatcher) { collectionRepository.getAllCollections() }
 
                 val histories = historiesDeferred.await()
                 val collections = collectionsDeferred.await()
@@ -97,7 +97,7 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
-    private fun getCollections() {
+    fun getCollections() {
         viewModelScope.launch(dispatcher) {
             try {
                 val collections = collectionRepository.getAllCollections()
