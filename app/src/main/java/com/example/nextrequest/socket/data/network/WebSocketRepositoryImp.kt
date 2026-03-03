@@ -41,7 +41,7 @@ class WebSocketRepositoryImp() : WebSocketRepository {
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 CoroutineScope(Dispatchers.IO).launch {
-                    _messages.emit(WebSocketMessage(text))
+                    _messages.emit(WebSocketMessage(text, false))
                 }
             }
 
@@ -62,8 +62,11 @@ class WebSocketRepositoryImp() : WebSocketRepository {
         _isConnected.value = false
     }
 
-    override fun sendMessage(message: WebSocketMessage) {
-        webSocket?.send(message.text)
+    override fun sendMessage(message: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            webSocket?.send(message)
+            _messages.emit(WebSocketMessage(message, true))
+        }
     }
 
     override fun close() {

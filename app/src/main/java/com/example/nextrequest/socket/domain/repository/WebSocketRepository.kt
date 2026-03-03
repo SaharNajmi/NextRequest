@@ -7,6 +7,6 @@ interface WebSocketRepository {
     val isConnected: Flow<Boolean>
     fun connect(url: String)
     fun disconnect()
-    fun sendMessage(message: WebSocketMessage)
+    fun sendMessage(message: String)
     fun close()
 }
