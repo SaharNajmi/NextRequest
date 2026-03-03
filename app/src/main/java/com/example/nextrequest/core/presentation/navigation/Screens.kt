@@ -12,13 +12,14 @@ sealed class Screens(val route: String) {
 
     object HistoryScreen : Screens(ROUTE_HISTORY_SCREEN)
     object CollectionScreen : Screens(ROUTE_COLLECTION_SCREEN)
-
+    object WebSocketScreen : Screens(ROUTE_WEBSOCKET_SCREEN)
 
     companion object {
         //routs
         const val ROUTE_HISTORY_SCREEN = "history_Screen"
         const val ROUTE_COLLECTION_SCREEN = "collection_screen"
         const val ROUTE_HOME_SCREEN = "home_screen"
+        const val ROUTE_WEBSOCKET_SCREEN = "websocket_screen"
 
         //args
         const val ARG_REQUEST_ID = "request_id"

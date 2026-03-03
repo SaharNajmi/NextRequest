@@ -90,6 +90,7 @@ fun HomeScreen(
     collectionId: String?,
     onNavigateToHistory: () -> Unit,
     onNavigateToCollection: () -> Unit,
+    onNavigateToWebSocket: () -> Unit,
 ) {
     val uiState by homeViewModel.uiState.collectAsState()
     LaunchedEffect(requestId, source) {
@@ -116,6 +117,7 @@ fun HomeScreen(
         onClearDataClick = { homeViewModel.clearData() },
         onNavigateToHistory = onNavigateToHistory,
         onNavigateToCollection = onNavigateToCollection,
+        onNavigateToWebSocket = onNavigateToWebSocket,
         onCopyClick = {
             val textToCopy = (uiState.response as? Loadable.Success)?.data?.response
                 ?: (uiState.response as? Loadable.Error)?.message
@@ -141,6 +143,20 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(horizontal = 8.dp, vertical = 24.dp)
         ) {
+
+            TextButton(
+                onClick = callbacks.onNavigateToWebSocket,
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(R.drawable.websocket),
+                        contentDescription = "Switch request type to websocket",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Text("Create WebSocket", color = MaterialTheme.colorScheme.primary)
+                }
+            }
             Row {
                 BaseTextIconButton(
                     onClick = { callbacks.onNavigateToHistory() },
@@ -272,9 +288,9 @@ private fun RequestLine(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier.border(
-                shape = RoundedCornerShape(4.dp),
-                border = BorderStroke(0.5.dp, color = MaterialTheme.colorScheme.primary)
-            ),
+            shape = RoundedCornerShape(4.dp),
+            border = BorderStroke(0.5.dp, color = MaterialTheme.colorScheme.primary)
+        ),
     ) {
         Text(
             selectedHttpMethod.name,
@@ -308,11 +324,11 @@ private fun RequestLine(
                 DropdownMenuItem(
                     text = { Text(option.name, color = option.color) },
                     modifier = Modifier.background(
-                            color = if (option == selectedHttpMethod) MaterialTheme.colorScheme.primary.copy(
-                                alpha = 0.12f
-                            )
-                            else Color.Transparent
-                        ),
+                        color = if (option == selectedHttpMethod) MaterialTheme.colorScheme.primary.copy(
+                            alpha = 0.12f
+                        )
+                        else Color.Transparent
+                    ),
                     onClick = {
                         isHttpMethodExpanded = false
                         onHttpMethodChanged(option)
@@ -532,10 +548,10 @@ fun HttpParameterBodySection(
         },
         maxLines = Int.MAX_VALUE,
         modifier = modifier.border(
-                1.dp,
-                MaterialTheme.colorScheme.primary,
-                shape = RoundedCornerShape(8.dp)
-            ),
+            1.dp,
+            MaterialTheme.colorScheme.primary,
+            shape = RoundedCornerShape(8.dp)
+        ),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,

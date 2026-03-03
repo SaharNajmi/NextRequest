@@ -14,6 +14,8 @@ import com.example.nextrequest.history.presentation.HistoryScreen
 import com.example.nextrequest.history.presentation.HistoryViewModel
 import com.example.nextrequest.home.presentation.HomeScreen
 import com.example.nextrequest.home.presentation.HomeViewModel
+import com.example.nextrequest.socket.presentation.component.WebSocketScreen
+import com.example.nextrequest.socket.presentation.component.WebSocketViewModel
 
 @Composable
 fun AppNavHost(
@@ -21,6 +23,7 @@ fun AppNavHost(
     homeViewModel: HomeViewModel = hiltViewModel(),
     historyViewModel: HistoryViewModel = hiltViewModel(),
     collectionViewModel: CollectionViewModel = hiltViewModel(),
+    webSocketViewModel: WebSocketViewModel = hiltViewModel(),
 ) {
     NavHost(
         navController = navController,
@@ -57,6 +60,9 @@ fun AppNavHost(
                 },
                 onNavigateToCollection = {
                     navController.navigate(Screens.CollectionScreen.route)
+                },
+                onNavigateToWebSocket = {
+                    navController.navigate(Screens.WebSocketScreen.route)
                 }
             )
         }
@@ -89,11 +95,14 @@ fun AppNavHost(
                             Screens.ROUTE_COLLECTION_SCREEN,
                             collectionId
                         )
-                    ){
+                    ) {
                         popUpTo(navController.graph.id) { inclusive = false }
                         launchSingleTop = true
                     }
                 })
+        }
+        composable(Screens.WebSocketScreen.route) {
+            WebSocketScreen(navController, webSocketViewModel)
         }
     }
 }
