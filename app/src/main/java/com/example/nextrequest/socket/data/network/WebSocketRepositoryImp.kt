@@ -1,9 +1,13 @@
 package com.example.nextrequest.socket.data.network
 
+import com.example.nextrequest.core.data.di.IoDispatcher
 import com.example.nextrequest.socket.domain.repository.WebSocketMessage
 import com.example.nextrequest.socket.domain.repository.WebSocketRepository
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,11 +19,15 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
+import javax.inject.Inject
 
-class WebSocketRepositoryImp() : WebSocketRepository {
+class WebSocketRepositoryImp @Inject constructor(
+    val client: OkHttpClient ,
+    @IoDispatcher dispatcher: CoroutineDispatcher
+) : WebSocketRepository {
 
-    private val client = OkHttpClient()
     private var webSocket: WebSocket? = null
+    private val scope = CoroutineScope(SupervisorJob() + dispatcher)
 
     private val _messages = MutableSharedFlow<WebSocketMessage>()
     override val messages: Flow<WebSocketMessage> = _messages.asSharedFlow()
@@ -36,11 +44,11 @@ class WebSocketRepositoryImp() : WebSocketRepository {
 
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 _isConnected.value = true
-                webSocket.send("Connected to serve!")
+                webSocket.send("Connected to server")
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
-                CoroutineScope(Dispatchers.IO).launch {
+                scope.launch {
                     _messages.emit(WebSocketMessage(text, false))
                 }
             }
@@ -51,9 +59,11 @@ class WebSocketRepositoryImp() : WebSocketRepository {
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+               scope.launch {
+                    _messages.emit(WebSocketMessage("Connection closed $reason", false))
+                }
                 _isConnected.value = false
             }
-
         })
     }
 
@@ -63,7 +73,7 @@ class WebSocketRepositoryImp() : WebSocketRepository {
     }
 
     override fun sendMessage(message: String) {
-        CoroutineScope(Dispatchers.IO).launch {
+        scope.launch {
             webSocket?.send(message)
             _messages.emit(WebSocketMessage(message, true))
         }
@@ -72,5 +82,6 @@ class WebSocketRepositoryImp() : WebSocketRepository {
     override fun close() {
         webSocket?.close(1000, "connection closed")
         _isConnected.value = false
+        scope.cancel()
     }
 }
