@@ -48,6 +48,9 @@ android {
             merges += "META-INF/LICENSE-notice.md"
         }
     }
+    tasks.withType<Test>().configureEach {
+        useJUnitPlatform()
+    }
 }
 
 dependencies {
@@ -91,4 +94,5 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.client.websockets)
+
 }
