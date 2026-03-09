@@ -5,7 +5,6 @@ import com.example.nextrequest.socket.domain.repository.WebSocketMessage
 import com.example.nextrequest.socket.domain.repository.WebSocketRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
@@ -23,13 +22,11 @@ import javax.inject.Inject
 
 class WebSocketRepositoryImp @Inject constructor(
     val client: OkHttpClient ,
-    @IoDispatcher dispatcher: CoroutineDispatcher
+    private val scope: CoroutineScope
 ) : WebSocketRepository {
 
     private var webSocket: WebSocket? = null
-    private val scope = CoroutineScope(SupervisorJob() + dispatcher)
-
-    private val _messages = MutableSharedFlow<WebSocketMessage>()
+    private val _messages = MutableSharedFlow<WebSocketMessage>(replay = 1)
     override val messages: Flow<WebSocketMessage> = _messages.asSharedFlow()
 
     private val _isConnected = MutableStateFlow(false)
@@ -81,7 +78,7 @@ class WebSocketRepositoryImp @Inject constructor(
 
     override fun close() {
         webSocket?.close(1000, "connection closed")
-        _isConnected.value = false
         scope.cancel()
+        _isConnected.value = false
     }
 }
