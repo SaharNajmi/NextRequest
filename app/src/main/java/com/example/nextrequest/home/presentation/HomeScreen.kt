@@ -64,11 +64,11 @@ import com.example.nextrequest.core.domain.model.ApiResponse
 import com.example.nextrequest.core.models.HttpMethod
 import com.example.nextrequest.core.presentation.color
 import com.example.nextrequest.core.presentation.icons.Add
-import com.example.nextrequest.core.presentation.icons.Arrow_drop_down
 import com.example.nextrequest.core.presentation.icons.Collections_bookmark
 import com.example.nextrequest.core.presentation.icons.Content_copy
 import com.example.nextrequest.core.presentation.icons.History
 import com.example.nextrequest.core.presentation.icons.Search
+import com.example.nextrequest.core.presentation.icons.TriangleDown
 import com.example.nextrequest.core.presentation.navigation.Screens
 import com.example.nextrequest.core.presentation.theme.Silver
 import com.example.nextrequest.core.presentation.theme.iconOnBackground
@@ -300,7 +300,7 @@ private fun RequestLine(
                 .padding(12.dp)
                 .clickable { isHttpMethodExpanded = true })
         Icon(
-            imageVector = Arrow_drop_down,
+            imageVector = TriangleDown,
             modifier = Modifier.clickable { isHttpMethodExpanded = true },
             contentDescription = "drop down icon"
         )

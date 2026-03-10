@@ -6,11 +6,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
-val Arrow_drop_down: ImageVector
+val TriangleDown: ImageVector
     get() {
-        if (_Arrow_drop_down != null) return _Arrow_drop_down!!
+        if (_triangle_down != null) return _triangle_down!!
         
-        _Arrow_drop_down = ImageVector.Builder(
+        _triangle_down = ImageVector.Builder(
             name = "Arrow_drop_down",
             defaultWidth = 24.dp,
             defaultHeight = 24.dp,
@@ -27,8 +27,8 @@ val Arrow_drop_down: ImageVector
             }
         }.build()
         
-        return _Arrow_drop_down!!
+        return _triangle_down!!
     }
 
-private var _Arrow_drop_down: ImageVector? = null
+private var _triangle_down: ImageVector? = null
 

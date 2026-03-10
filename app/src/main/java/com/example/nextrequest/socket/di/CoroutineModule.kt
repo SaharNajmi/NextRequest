@@ -15,7 +15,7 @@ object CoroutineModule {
 
     @Provides
     @Singleton
-    fun provideApplicationScope(@IoDispatcher dispatcher: CoroutineDispatcher): CoroutineScope {
+    fun provideCoroutineScope(@IoDispatcher dispatcher: CoroutineDispatcher): CoroutineScope {
         return CoroutineScope(dispatcher)
     }
 }
