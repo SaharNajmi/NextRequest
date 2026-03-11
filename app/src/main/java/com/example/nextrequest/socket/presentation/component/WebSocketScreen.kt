@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -37,6 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.nextrequest.core.presentation.UiState
 import com.example.nextrequest.core.presentation.component.CustomToolbar
 import com.example.nextrequest.core.presentation.icons.ArrowDown
 import com.example.nextrequest.core.presentation.icons.ArrowDropDown
@@ -44,13 +47,13 @@ import com.example.nextrequest.core.presentation.icons.ArrowDropUp
 import com.example.nextrequest.core.presentation.icons.ArrowUp
 import com.example.nextrequest.core.presentation.theme.Silver
 import com.example.nextrequest.socket.presentation.component.model.MessageUiModel
+import com.example.nextrequest.socket.presentation.component.model.WebSocketUiModel
 
 @Composable
 fun WebSocketScreen(navController: NavController, viewModel: WebSocketViewModel) {
-    val messages by viewModel.messages.collectAsState()
-    val isConnected by viewModel.isConnected.collectAsState(false)
+    val uiState by viewModel.uiState.collectAsState()
     var messageText by remember { mutableStateOf("") }
-    var requestUrl by remember { mutableStateOf("wss://ws.postman-echo.com/rawcc") }
+    var requestUrl by remember { mutableStateOf("") }
     val callbacks = WebSocketCallbacks(
         onConnectClick = {
             viewModel.connect(requestUrl)
@@ -71,11 +74,14 @@ fun WebSocketScreen(navController: NavController, viewModel: WebSocketViewModel)
             }
         }
     ) { padding ->
+        val isConnected =
+            (uiState as? UiState.Success<WebSocketUiModel>)?.data?.isConnected ?: false
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(vertical = 8.dp, horizontal = 24.dp)
+                .padding(vertical = 8.dp, horizontal = 12.dp)
         ) {
             RequestLine(
                 callbacks = callbacks,
@@ -113,14 +119,33 @@ fun WebSocketScreen(navController: NavController, viewModel: WebSocketViewModel)
                     Text("Send")
                 }
             }
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            ) {
-                items(messages) {
-                    MessageItem(it)
+            when (val state = uiState) {
+                is UiState.Error -> {
+                    Text(
+                        text = "Error: ${state.message}",
+                        modifier = Modifier.padding(16.dp), color = Color.Red
+                    )
+                }
 
+                UiState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                is UiState.Success -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                    ) {
+                        items(state.data.messages) {
+                            MessageItem(it)
+                        }
+                    }
                 }
             }
         }
