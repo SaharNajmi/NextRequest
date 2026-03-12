@@ -1,7 +1,7 @@
 package com.example.nextrequest.history.di
 
 import com.example.nextrequest.core.data.db.AppDatabase
-import com.example.nextrequest.history.data.dao.HistoryRequestDao
+import com.example.nextrequest.history.data.dao.HistoryDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,6 +12,6 @@ import dagger.hilt.components.SingletonComponent
 object HistoryDatabaseModule {
 
     @Provides
-    fun provideHistoryDao(db: AppDatabase): HistoryRequestDao =
-        db.historyRequestDao()
+    fun provideHistoryDao(db: AppDatabase): HistoryDao =
+        db.historyDao()
 }

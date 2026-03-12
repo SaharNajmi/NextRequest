@@ -5,13 +5,13 @@ import com.example.nextrequest.history.domain.model.History
 interface HistoryRepository {
     suspend fun getAllHistories(): List<History>
 
-    suspend fun insertHistoryRequest(history: History)
+    suspend fun insertHistoryHttp(history: History)
 
-    suspend fun updateHistoryRequest(historyItem: History)
+    suspend fun updateHistory(historyItem: History)
 
-    suspend fun deleteHistoryRequest(historyId: Int)
+    suspend fun deleteHistory(historyId: Int)
 
-    suspend fun deleteHistoriesRequest(ids: List<Int>)
+    suspend fun deleteHistories(ids: List<Int>)
 
-    suspend fun getHistoryRequest(historyId: Int): History
+    suspend fun getHistory(historyId: Int): History
 }

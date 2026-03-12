@@ -193,7 +193,7 @@ class HomeViewModel @Inject constructor(
         response: ApiResponse,
     ) {
         viewModelScope.launch(dispatcher) {
-            historyRepository.insertHistoryRequest(
+            historyRepository.insertHistoryHttp(
                 httpRequestToHistory(apiRequest, response)
             )
         }
@@ -201,7 +201,7 @@ class HomeViewModel @Inject constructor(
 
     fun loadRequestFromHistory(historyId: Int) {
         viewModelScope.launch(dispatcher) {
-            val saved = historyRepository.getHistoryRequest(historyId)
+            val saved = historyRepository.getHistory(historyId)
             val response = if (saved.statusCode != null)
                 Loadable.Success(
                     saved.toHttpResponse()

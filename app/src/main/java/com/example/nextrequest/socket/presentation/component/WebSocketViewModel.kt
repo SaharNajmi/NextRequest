@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,9 +22,7 @@ class WebSocketViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState =
         MutableStateFlow<UiState<WebSocketUiModel>>(
-            UiState.Success(
-                WebSocketUiModel(false, emptyList())
-            )
+            UiState.Success(WebSocketUiModel(false, emptyList()))
         )
     val uiState: StateFlow<UiState<WebSocketUiModel>> = _uiState.asStateFlow()
 
@@ -38,7 +38,6 @@ class WebSocketViewModel @Inject constructor(
                     _uiState.value =
                         UiState.Success(current.copy(messages = listOf(message.toUi()) + current.messages))
                 }
-            repository
         }
         viewModelScope.launch {
             repository.isConnected
@@ -48,7 +47,6 @@ class WebSocketViewModel @Inject constructor(
                     _uiState.value =
                         UiState.Success(current.copy(isConnected = connected))
                 }
-            repository
         }
     }
 
@@ -80,6 +78,6 @@ class WebSocketViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        repository.disconnect()
+        repository.close()
     }
 }

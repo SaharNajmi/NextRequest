@@ -3,7 +3,7 @@ package com.example.nextrequest
 import com.example.nextrequest.home.domain.buildHighlightedTextLines
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class SearchFromContentTextTest() {
     @Test

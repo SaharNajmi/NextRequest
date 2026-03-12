@@ -1,7 +1,7 @@
 package com.example.nextrequest.history.di
 
 import com.example.nextrequest.core.data.di.IoDispatcher
-import com.example.nextrequest.history.data.dao.HistoryRequestDao
+import com.example.nextrequest.history.data.dao.HistoryDao
 import com.example.nextrequest.history.data.repository.HistoryRepositoryImp
 import com.example.nextrequest.history.domain.repository.HistoryRepository
 import dagger.Module
@@ -16,10 +16,10 @@ import kotlinx.coroutines.CoroutineDispatcher
 object HistoryModule {
 
     @Provides
-    fun provideHistoryRequestRepository(
-        historyRequestDao: HistoryRequestDao,
+    fun provideHistoryRepository(
+        historyDao: HistoryDao,
         @IoDispatcher dispatcher: CoroutineDispatcher,
     ): HistoryRepository =
-        HistoryRepositoryImp(historyRequestDao, dispatcher)
+        HistoryRepositoryImp(historyDao, dispatcher)
 
 }

@@ -24,9 +24,9 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -37,7 +37,7 @@ class HomeViewModelTest {
     lateinit var homeRepo: HomeRepository
     lateinit var collectionRepo: CollectionRepository
 
-    @Before
+    @BeforeEach
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         historyRepo = mockk<HistoryRepository>(relaxed = true)
@@ -47,7 +47,7 @@ class HomeViewModelTest {
         viewModel = HomeViewModel(homeRepo, historyRepo, collectionRepo, testDispatcher)
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         Dispatchers.resetMain()
     }
@@ -59,7 +59,7 @@ class HomeViewModelTest {
         viewModel.sendRequest()
         // viewModel.uiState.value.response.shouldBeTypeOf<Loadable.Loading>
         testDispatcher.scheduler.advanceUntilIdle()
-        coVerify(exactly = 1) { historyRepo.insertHistoryRequest(any()) }
+        coVerify(exactly = 1) { historyRepo.insertHistoryHttp(any()) }
     }
 
     @Test
@@ -97,7 +97,7 @@ class HomeViewModelTest {
 
         coVerify(exactly = 0) {
             homeRepo.sendRequest(any<String>(), any<String>())
-            historyRepo.insertHistoryRequest(any<History>())
+            historyRepo.insertHistoryHttp(any<History>())
             collectionRepo.updateCollectionRequest(
                 any<String>(),
                 any<Request>()
@@ -218,12 +218,12 @@ class HomeViewModelTest {
 //        every { savedRequest.statusCode } returns 200
 //        every { savedRequest.toHttpResponse() } answers { ApiResponse("url response", 200) }
 //        every { savedRequest.toHttpRequest() } answers { ApiRequest(requestUrl = "/test") }
-        coEvery { historyRepo.getHistoryRequest(1) } returns savedRequest
+        coEvery { historyRepo.getHistory(1) } returns savedRequest
 
         viewModel.loadRequestFromHistory(1)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        coVerify(exactly = 1) { historyRepo.getHistoryRequest(1) }
+        coVerify(exactly = 1) { historyRepo.getHistory(1) }
         (viewModel.uiState.first().response as Loadable.Success).data.statusCode shouldBe 200
     }
 
@@ -233,11 +233,11 @@ class HomeViewModelTest {
         every { savedRequest.statusCode } returns null
         every { savedRequest.requestUrl } returns "/test"
         every { savedRequest.response } returns "error"
-        coEvery { historyRepo.getHistoryRequest(any<Int>()) } returns savedRequest
+        coEvery { historyRepo.getHistory(any<Int>()) } returns savedRequest
 
         viewModel.loadRequestFromHistory(1)
         testDispatcher.scheduler.advanceUntilIdle()
-        coVerify(exactly = 1) { historyRepo.getHistoryRequest(any<Int>()) }
+        coVerify(exactly = 1) { historyRepo.getHistory(any<Int>()) }
 
         viewModel.uiState.first().response shouldBe Loadable.Error("error")
         (viewModel.uiState.first().response as? Loadable.Success)?.data?.statusCode shouldBe null

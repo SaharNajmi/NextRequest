@@ -8,23 +8,23 @@ import androidx.room.Update
 import com.example.nextrequest.history.data.entity.HistoryEntity
 
 @Dao
-interface HistoryRequestDao {
+interface HistoryDao {
     @Query("SELECT * FROM histories ORDER by id DESC")
     suspend fun getAllHistories(): List<HistoryEntity>
 
     @Insert(onConflict = OnConflictStrategy.Companion.IGNORE)
-    suspend fun insertHistoryRequest(history: HistoryEntity)
+    suspend fun insertHistory(history: HistoryEntity)
 
     @Update
-    suspend fun updateHistoryRequest(history: HistoryEntity)
+    suspend fun updateHistory(history: HistoryEntity)
 
     @Query("DELETE FROM histories WHERE id = :historyId")
-    suspend fun deleteHistoryRequest(historyId: Int)
+    suspend fun deleteHistory(historyId: Int)
 
     @Query("DELETE FROM histories WHERE id in (:ids)")
-    suspend fun deleteHistoriesRequest(ids: List<Int>)
+    suspend fun deleteHistories(ids: List<Int>)
 
     @Query("SELECT * FROM histories WHERE id= :historyId ")
-    suspend fun getHistoryRequest(historyId: Int): HistoryEntity
+    suspend fun getHistory(historyId: Int): HistoryEntity
 
 }

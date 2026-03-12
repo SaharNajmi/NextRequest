@@ -14,7 +14,6 @@ import com.example.nextrequest.history.presentation.model.ExpandableHistoryItem
 import com.example.nextrequest.history.presentation.model.HistoryEntry
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -83,16 +82,16 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
-    fun deleteHistoryRequest(historyId: Int) {
+    fun deleteHistory(historyId: Int) {
         viewModelScope.launch(dispatcher) {
-            historyRepository.deleteHistoryRequest(historyId)
+            historyRepository.deleteHistory(historyId)
             getHistories()
         }
     }
 
-    fun deleteHistoriesRequest(historyIds: List<Int>) {
+    fun deleteHistories(historyIds: List<Int>) {
         viewModelScope.launch(dispatcher) {
-            historyRepository.deleteHistoriesRequest(historyIds)
+            historyRepository.deleteHistories(historyIds)
             getHistories()
         }
     }
@@ -120,7 +119,7 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
-    fun addHistoryRequestToCollection(history: History, collectionId: String) {
+    fun addHistoryToCollection(history: History, collectionId: String) {
         viewModelScope.launch(dispatcher) {
             collectionRepository.insertRequestToCollection(
                 collectionId,
@@ -129,7 +128,7 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
-    fun addHistoryRequestsToCollection(
+    fun addHistoriesToCollection(
         histories: List<History>,
         collectionId: String,
     ) {

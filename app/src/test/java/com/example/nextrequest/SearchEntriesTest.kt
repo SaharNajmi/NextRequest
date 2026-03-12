@@ -9,7 +9,7 @@ import com.example.nextrequest.history.domain.searchHistories
 import com.example.nextrequest.history.presentation.model.HistoryEntry
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class SearchEntriesTest {
     @Test
@@ -21,14 +21,14 @@ class SearchEntriesTest {
             History(requestUrl = "url3"),
             History(requestUrl = "url5"),
         )
-        val historyRequests: List<HistoryEntry> = listOf(
+        val histories: List<HistoryEntry> = listOf(
             HistoryEntry("12 Aug", history),
             HistoryEntry(
                 "14 Aug", history + History(requestUrl = "request55")
             )
         )
 
-        val result = searchHistories(historyRequests, "5")
+        val result = searchHistories(histories, "5")
         result shouldBe listOf(
             HistoryEntry("12 Aug", listOf(History(requestUrl = "url5"))),
             HistoryEntry(
@@ -44,14 +44,14 @@ class SearchEntriesTest {
             History(requestUrl = "url1"),
             History(requestUrl = "url2")
         )
-        val historyRequests = listOf(
+        val histories = listOf(
             HistoryEntry("12 Aug", history),
             HistoryEntry(
                 "14 Aug", history + History(requestUrl = "url3")
             )
         )
 
-        val result = searchHistories(historyRequests, "4")
+        val result = searchHistories(histories, "4")
         result.shouldBeEmpty()
     }
 

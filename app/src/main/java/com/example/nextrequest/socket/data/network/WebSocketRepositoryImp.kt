@@ -18,8 +18,8 @@ import okhttp3.WebSocketListener
 import javax.inject.Inject
 
 class WebSocketRepositoryImp @Inject constructor(
-    val client: OkHttpClient ,
-    private val scope: CoroutineScope
+    val client: OkHttpClient,
+    private val scope: CoroutineScope,
 ) : WebSocketRepository {
 
     private var webSocket: WebSocket? = null
@@ -53,17 +53,12 @@ class WebSocketRepositoryImp @Inject constructor(
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-               scope.launch {
+                scope.launch {
                     _messages.emit(WebSocketMessage("Connection closed $reason", false))
                 }
                 _isConnected.value = false
             }
         })
-    }
-
-    override fun disconnect() {
-        webSocket?.close(1000, "User disconnected")
-        _isConnected.value = false
     }
 
     override fun sendMessage(message: String) {
@@ -73,9 +68,12 @@ class WebSocketRepositoryImp @Inject constructor(
         }
     }
 
+    override fun disconnect() {
+        webSocket?.close(1000, "User disconnected")
+    }
+
     override fun close() {
         webSocket?.close(1000, "connection closed")
         scope.cancel()
-        _isConnected.value = false
     }
 }

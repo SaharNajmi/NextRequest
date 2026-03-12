@@ -6,12 +6,10 @@ import com.example.nextrequest.core.presentation.UiState
 import com.example.nextrequest.history.domain.formatDate
 import com.example.nextrequest.history.domain.model.History
 import com.example.nextrequest.history.domain.repository.HistoryRepository
-import com.example.nextrequest.history.presentation.HistoryUiModel
 import com.example.nextrequest.history.presentation.HistoryViewModel
 import com.example.nextrequest.history.presentation.model.ExpandableHistoryItem
 import io.kotest.inspectors.forAll
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -21,9 +19,9 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -33,7 +31,7 @@ class HistoryViewModelTest {
     lateinit var historyRepository: HistoryRepository
     lateinit var collectionRepository: CollectionRepository
 
-    @Before
+    @BeforeEach
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         historyRepository = mockk<HistoryRepository>(relaxed = true)
@@ -41,7 +39,7 @@ class HistoryViewModelTest {
         viewModel = HistoryViewModel(historyRepository, collectionRepository, testDispatcher)
     }
 
-    @After
+    @AfterEach
     fun teardown() {
         Dispatchers.resetMain()
     }

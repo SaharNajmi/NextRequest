@@ -4,7 +4,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.example.nextrequest.collection.data.dao.CollectionDao
-import com.example.nextrequest.history.data.dao.HistoryRequestDao
+import com.example.nextrequest.history.data.dao.HistoryDao
 import com.example.nextrequest.collection.data.entity.CollectionEntity
 import com.example.nextrequest.history.data.entity.HistoryEntity
 import com.example.nextrequest.collection.data.entity.RequestEntity
@@ -16,6 +16,6 @@ import com.example.nextrequest.collection.data.entity.RequestEntity
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun historyRequestDao(): HistoryRequestDao
+    abstract fun historyDao(): HistoryDao
     abstract fun collectionDao(): CollectionDao
 }
