@@ -13,3 +13,13 @@ fun WebSocketMessage.toUi(): MessageUiModel {
     )
     return MessageUiModel(this.text, this.isSentByUser, time)
 }
+
+fun MessageUiModel.toWebSocket(): WebSocketMessage {
+    val sdf = SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault())
+    val timestampLong = try {
+        sdf.parse(this.timestamp)?.time ?: System.currentTimeMillis()
+    } catch (e: Exception) {
+        System.currentTimeMillis()
+    }
+    return WebSocketMessage(this.text, this.isSentByUser, timestampLong)
+}
