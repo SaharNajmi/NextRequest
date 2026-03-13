@@ -65,7 +65,7 @@ import com.sahar.nextrequest.R
 fun HistoryScreen(
     navController: NavController,
     viewModel: HistoryViewModel,
-    onHistoryItemClick: (Int) -> Unit,
+    onHistoryItemClick: (HistoryItem) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -321,7 +321,7 @@ private fun HttpHistoryItemView(
     Row(
         modifier = modifier
             .clickable {
-                callbacks.onHistoryItemClick(item.id)
+                callbacks.onHistoryItemClick(item)
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -385,7 +385,7 @@ fun WebSocketHistoryItemView(
     Row(
         modifier = modifier
             .clickable {
-                callbacks.onHistoryItemClick(item.id)
+                callbacks.onHistoryItemClick(item)
             },
         verticalAlignment = Alignment.CenterVertically
     ) {

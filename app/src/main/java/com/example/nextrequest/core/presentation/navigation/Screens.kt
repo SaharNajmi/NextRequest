@@ -12,7 +12,10 @@ sealed class Screens(val route: String) {
 
     object HistoryScreen : Screens(ROUTE_HISTORY_SCREEN)
     object CollectionScreen : Screens(ROUTE_COLLECTION_SCREEN)
-    object WebSocketScreen : Screens(ROUTE_WEBSOCKET_SCREEN)
+    object WebSocketScreen : Screens(ROUTE_WEBSOCKET_SCREEN) {
+        fun createRoute(requestId: Int) =
+            "$ROUTE_WEBSOCKET_SCREEN?$ARG_REQUEST_ID=$requestId"
+    }
 
     companion object {
         //routs

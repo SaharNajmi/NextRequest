@@ -10,6 +10,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.nextrequest.collection.presentation.CollectionScreen
 import com.example.nextrequest.collection.presentation.CollectionViewModel
+import com.example.nextrequest.history.domain.model.HistoryItem
 import com.example.nextrequest.history.presentation.HistoryScreen
 import com.example.nextrequest.history.presentation.HistoryViewModel
 import com.example.nextrequest.home.presentation.HomeScreen
@@ -71,16 +72,31 @@ fun AppNavHost(
             HistoryScreen(
                 navController,
                 historyViewModel,
-                onHistoryItemClick = { requestId ->
-                    navController.navigate(
-                        Screens.HomeScreen.createRoute(
-                            requestId,
-                            Screens.ROUTE_HISTORY_SCREEN
-                        )
-                    ) {
-                        popUpTo(navController.graph.id) { inclusive = false }
-                        launchSingleTop = true
+                onHistoryItemClick = { item ->
+                    when(item){
+                        is HistoryItem.Http -> {
+                            navController.navigate(
+                                Screens.HomeScreen.createRoute(
+                                    item.id,
+                                    Screens.ROUTE_HISTORY_SCREEN
+                                )
+                            ) {
+                                popUpTo(navController.graph.id) { inclusive = false }
+                                launchSingleTop = true
+                            }
+                        }
+                        is HistoryItem.WebSocket ->{
+                            navController.navigate(
+                                Screens.WebSocketScreen.createRoute(
+                                    item.id
+                                )
+                            ) {
+                                popUpTo(navController.graph.id) { inclusive = false }
+                                launchSingleTop = true
+                            }
+                        }
                     }
+
                 }
             )
         }
