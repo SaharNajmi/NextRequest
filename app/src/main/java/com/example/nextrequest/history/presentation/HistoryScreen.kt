@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -33,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -57,6 +59,7 @@ import com.example.nextrequest.history.domain.searchHistories
 import com.example.nextrequest.history.presentation.component.SaveToCollectionDialog
 import com.example.nextrequest.history.presentation.model.ExpandableHistoryItem
 import com.example.nextrequest.history.presentation.model.HistoryEntry
+import com.sahar.nextrequest.R
 
 @Composable
 fun HistoryScreen(
@@ -210,28 +213,32 @@ private fun ExpandedHistoryItem(
                     callbacks
                 )
             }
-            items(historyEntry.histories.size) { index ->
+            itemsIndexed(historyEntry.histories) { index, item ->
                 AnimatedVisibility(
                     modifier = Modifier
                         .fillMaxWidth(),
                     visible = expandedState.firstOrNull { it.dateCreated == historyEntry.dateCreated }?.isExpanded
                         ?: false
                 ) {
-                    val httpHistories = historyEntry.histories.filterIsInstance<HistoryItem.Http>()
-                    when (historyEntry.histories[index]) {
+                    when (item) {
                         is HistoryItem.Http -> {
                             HttpHistoryItemView(
                                 Modifier
                                     .padding(top = 8.dp, bottom = 8.dp, start = 12.dp),
-                                httpHistories,
+                                item,
                                 collectionEntries,
-                                index,
                                 callbacks
                             )
                         }
 
                         is HistoryItem.WebSocket -> {
-
+                            WebSocketHistoryItemView(
+                                Modifier
+                                    .padding(top = 8.dp, bottom = 8.dp, start = 12.dp),
+                                item,
+                                collectionEntries,
+                                callbacks
+                            )
                         }
                     }
 
@@ -252,7 +259,7 @@ fun HistoryHeader(
 ) {
     val expandedIcon =
         if (isExpanded) Keyboard_arrow_down else Keyboard_arrow_right
-    var showDropdown by remember { mutableStateOf(false) }
+    var showCollectionDialog by remember { mutableStateOf(false) }
 
     Row(
         modifier = modifier
@@ -277,7 +284,7 @@ fun HistoryHeader(
             modifier = Modifier
                 .size(20.dp)
                 .clickable {
-                    showDropdown = true
+                    showCollectionDialog = true
                 }, tint = MaterialTheme.colorScheme.iconTint
         )
         Icon(
@@ -289,10 +296,10 @@ fun HistoryHeader(
                 },
             tint = MaterialTheme.colorScheme.iconTint
         )
-        if (showDropdown) {
+        if (showCollectionDialog) {
             SaveToCollectionDialog(
                 items = collectionEntries,
-                onDismiss = { showDropdown = false },
+                onDismiss = { showCollectionDialog = false },
                 onSave = { collectionId ->
                     callbacks.onAddHistoriesToCollection(histories, collectionId)
                 },
@@ -306,30 +313,29 @@ fun HistoryHeader(
 @Composable
 private fun HttpHistoryItemView(
     modifier: Modifier,
-    items: List<HistoryItem.Http>,
+    item: HistoryItem.Http,
     collectionNames: Set<CollectionEntry>,
-    index: Int,
     callbacks: HistoryCallbacks,
 ) {
-    var showDropdown by remember { mutableStateOf(false) }
+    var showCollectionDialog by remember { mutableStateOf(false) }
     Row(
         modifier = modifier
             .clickable {
-                callbacks.onHistoryItemClick(items[index].id)
+                callbacks.onHistoryItemClick(item.id)
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
 
         Text(
-            text = items[index].request.httpMethod.name,
-            color = items[index].request.httpMethod.color,
+            text = item.request.httpMethod.name,
+            color = item.request.httpMethod.color,
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.padding(end = 8.dp)
         )
 
         Text(
-            text = items[index].request.requestUrl,
+            text = item.request.requestUrl,
             fontSize = 12.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -342,7 +348,7 @@ private fun HttpHistoryItemView(
             modifier = Modifier
                 .size(20.dp)
                 .clickable {
-                    showDropdown = true
+                    showCollectionDialog = true
                 }
         )
         Icon(
@@ -351,15 +357,78 @@ private fun HttpHistoryItemView(
                 .padding(horizontal = 4.dp)
                 .size(20.dp)
                 .clickable {
-                    callbacks.onDeleteHistoryClick(items[index])
+                    callbacks.onDeleteHistoryClick(item)
                 }
         )
-        if (showDropdown) {
+        if (showCollectionDialog) {
             SaveToCollectionDialog(
                 items = collectionNames,
-                onDismiss = { showDropdown = false },
+                onDismiss = { showCollectionDialog = false },
                 onSave = { collectionId ->
-                    callbacks.onAddHistoryToCollection(items[index], collectionId)
+                    callbacks.onAddHistoryToCollection(item, collectionId)
+                },
+                onAddNewCollection = {
+                    callbacks.onCreateNewCollectionClick()
+                })
+        }
+    }
+}
+
+@Composable
+fun WebSocketHistoryItemView(
+    modifier: Modifier,
+    item: HistoryItem.WebSocket,
+    collectionNames: Set<CollectionEntry>,
+    callbacks: HistoryCallbacks,
+) {
+    var showCollectionDialog by remember { mutableStateOf(false) }
+    Row(
+        modifier = modifier
+            .clickable {
+                callbacks.onHistoryItemClick(item.id)
+            },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Icon(
+            modifier = Modifier.padding(end = 8.dp),
+            painter = painterResource(R.drawable.websocket),
+            contentDescription = "Switch request type to websocket",
+            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+        )
+
+        Text(
+            text = item.request.url,
+            fontSize = 12.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 4.dp)
+        )
+        Icon(
+            imageVector = Add, contentDescription = "add request to collections",
+            modifier = Modifier
+                .size(20.dp)
+                .clickable {
+                    showCollectionDialog = true
+                }
+        )
+        Icon(
+            Delete, contentDescription = "delete",
+            Modifier
+                .padding(horizontal = 4.dp)
+                .size(20.dp)
+                .clickable {
+                    callbacks.onDeleteHistoryClick(item)
+                }
+        )
+        if (showCollectionDialog) {
+            SaveToCollectionDialog(
+                items = collectionNames,
+                onDismiss = { showCollectionDialog = false },
+                onSave = { collectionId ->
+                    callbacks.onAddHistoryToCollection(item, collectionId)
                 },
                 onAddNewCollection = {
                     callbacks.onCreateNewCollectionClick()
