@@ -3,9 +3,9 @@ package com.example.nextrequest.core.data.network
 import android.graphics.BitmapFactory
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import com.example.nextrequest.core.KeyValueList
 import com.example.nextrequest.core.domain.model.ApiResponse
 import com.example.nextrequest.core.domain.repository.ApiService
+import com.example.nextrequest.core.models.KeyValue
 import io.ktor.client.HttpClient
 import io.ktor.client.request.request
 import io.ktor.client.request.setBody
@@ -21,8 +21,8 @@ class ApiServiceImp(
     override suspend fun sendRequest(
         method: String,
         url: String,
-        headers: KeyValueList?,
-        parameters: KeyValueList?,
+        headers: List<KeyValue>?,
+        parameters: List<KeyValue>?,
         body: Any?,
     ): ApiResponse {
         val httpMethod = HttpMethod.Companion.parse(method)

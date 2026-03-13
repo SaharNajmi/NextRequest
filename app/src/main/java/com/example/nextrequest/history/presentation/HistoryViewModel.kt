@@ -6,9 +6,9 @@ import com.example.nextrequest.collection.domain.model.Collection
 import com.example.nextrequest.collection.domain.repository.CollectionRepository
 import com.example.nextrequest.collection.presentation.model.CollectionEntry
 import com.example.nextrequest.core.presentation.UiState
-import com.example.nextrequest.history.data.mapper.toRequest
 import com.example.nextrequest.history.domain.formatDate
-import com.example.nextrequest.history.domain.model.History
+import com.example.nextrequest.history.domain.mapper.toRequest
+import com.example.nextrequest.history.domain.model.HistoryItem
 import com.example.nextrequest.history.domain.repository.HistoryRepository
 import com.example.nextrequest.history.presentation.model.ExpandableHistoryItem
 import com.example.nextrequest.history.presentation.model.HistoryEntry
@@ -31,7 +31,9 @@ class HistoryViewModel @Inject constructor(
 
     fun getHistories() {
         viewModelScope.launch {
-            val oldExpandedStates = (_uiState.value as? UiState.Success)?.data?.expandedStates?.associateBy { it.dateCreated } ?: emptyMap()
+            val oldExpandedStates =
+                (_uiState.value as? UiState.Success)?.data?.expandedStates?.associateBy { it.dateCreated }
+                    ?: emptyMap()
             _uiState.value = UiState.Loading
             try {
                 val historiesDeferred =
@@ -42,8 +44,8 @@ class HistoryViewModel @Inject constructor(
                 val histories = historiesDeferred.await()
                 val collections = collectionsDeferred.await()
 
-                val grouped: Map<String, List<History>> =
-                    histories.groupBy { formatDate(it.createdAt) }
+                val grouped: Map<String, List<HistoryItem>> =
+                    histories.groupBy { formatDate(it.toRequest().createdAt) }
 
                 val historyEntries = grouped.map { (date, histories) ->
                     HistoryEntry(dateCreated = date, histories = histories)
@@ -82,16 +84,26 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
-    fun deleteHistory(historyId: Int) {
+    fun deleteHistory(historyItem: HistoryItem) {
         viewModelScope.launch(dispatcher) {
-            historyRepository.deleteHistory(historyId)
+            val id = when (historyItem) {
+                is HistoryItem.Http -> historyItem.id
+                is HistoryItem.WebSocket -> historyItem.id
+            }
+            historyRepository.deleteHistory(id)
             getHistories()
         }
     }
 
-    fun deleteHistories(historyIds: List<Int>) {
+    fun deleteHistories(histories: List<HistoryItem>) {
         viewModelScope.launch(dispatcher) {
-            historyRepository.deleteHistories(historyIds)
+            val idsToDelete = histories.map { item ->
+                when (item) {
+                    is HistoryItem.Http -> item.id
+                    is HistoryItem.WebSocket -> item.id
+                }
+            }
+            historyRepository.deleteHistories(idsToDelete)
             getHistories()
         }
     }
@@ -119,17 +131,17 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
-    fun addHistoryToCollection(history: History, collectionId: String) {
+    fun addHistoryToCollection(historyItem: HistoryItem, collectionId: String) {
         viewModelScope.launch(dispatcher) {
             collectionRepository.insertRequestToCollection(
                 collectionId,
-                history.toRequest()
+                historyItem.toRequest()
             )
         }
     }
 
     fun addHistoriesToCollection(
-        histories: List<History>,
+        histories: List<HistoryItem>,
         collectionId: String,
     ) {
         val requests = histories.map { it.toRequest() }

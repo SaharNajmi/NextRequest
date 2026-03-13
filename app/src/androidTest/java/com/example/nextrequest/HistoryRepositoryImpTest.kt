@@ -4,11 +4,12 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.example.nextrequest.core.data.db.AppDatabase
-import com.example.nextrequest.history.data.repository.HistoryRepositoryImp
-import com.example.nextrequest.history.domain.model.History
 import com.example.nextrequest.history.data.dao.HistoryDao
+import com.example.nextrequest.history.data.model.HttpRequest
+import com.example.nextrequest.history.data.model.WebSocketRequest
+import com.example.nextrequest.history.data.repository.HistoryRepositoryImp
+import com.example.nextrequest.history.domain.model.HistoryItem
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -35,39 +36,85 @@ class HistoryRepositoryImpTest {
         db.close()
     }
 
-    private suspend fun createOneHistoryItem() {
-        val item = History(requestUrl = "test.dev")
-        historyRepository.insertHistoryHttp(item)
-    }
+    private fun httpHistory(
+        id: Int = 1,
+        url: String = "test.dev",
+    ) = HistoryItem.Http(
+        HttpRequest(
+            id = id,
+            requestUrl = url
+        )
+    )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Test
-    fun getAllHistories_returnsHistories() = runTest {
-        historyRepository.insertHistoryHttp( History(requestUrl = "test.dev"))
-        historyRepository.insertHistoryHttp( History(requestUrl = "test2"))
-        val expected = historyRepository.getAllHistories()
-        assertEquals(expected.size, 2)
-    }
+    private fun webSocketHistory(
+        id: Int = 2,
+        url: String = "ws://test.dev",
+    ) = HistoryItem.WebSocket(
+        WebSocketRequest(
+            id = id,
+            url = url,
+            createdAt = System.currentTimeMillis()
+        )
+    )
+
 
     @Test
     fun insertHistory_insertsHistoryHttpIntoDatabase() = runTest {
-        createOneHistoryItem()
-        assertEquals(historyRepository.getAllHistories().size, 1)
+        historyRepository.insertHistory(httpHistory())
+        assertEquals(1, historyRepository.getAllHistories().size)
     }
 
     @Test
-    fun updateHistory_updatesExistingHistory() = runTest {
-        val item = History(id = 2, requestUrl = "test.dev")
-        historyRepository.insertHistoryHttp(item)
-        historyRepository.updateHistory(item.copy(requestUrl = "updated url"))
-        val expected = historyRepository.getAllHistories().first().requestUrl
-        assertEquals(expected, "updated url")
+    fun insertHistory_insertsWebSocketIntoDatabase() = runTest {
+        historyRepository.insertHistory(webSocketHistory())
+        assertEquals(1, historyRepository.getAllHistories().size)
+    }
+
+    @Test
+    fun updateHistory_updatesExistingWebSocketHistory() = runTest {
+        val item = webSocketHistory(12)
+        historyRepository.insertHistory(item)
+        val updated = item.copy(request = item.request.copy(url = "ws://updated.dev"))
+        historyRepository.updateHistory(updated)
+        val result = historyRepository.getAllHistories().first() as HistoryItem.WebSocket
+
+        assertEquals("ws://updated.dev", result.request.url)
+    }
+
+    @Test
+    fun updateHistory_updatesExistingHttpRequestHistory() = runTest {
+        val item = httpHistory(10)
+        historyRepository.insertHistory(item)
+        val updated = item.copy(request = item.request.copy(requestUrl = "ws://updated.dev"))
+        historyRepository.updateHistory(updated)
+        val result = historyRepository.getAllHistories().first() as HistoryItem.Http
+
+
+        assertEquals("ws://updated.dev", result.request.requestUrl)
+    }
+
+    @Test
+    fun getAllHistories_returnsHttpAndWebSocket() = runTest {
+        historyRepository.insertHistory(httpHistory(id = 1))
+        historyRepository.insertHistory(webSocketHistory(id = 2))
+        val result = historyRepository.getAllHistories()
+
+        assertEquals(2, result.size)
+    }
+
+    @Test
+    fun getHistory_returnsWebSocketHistoryById() = runTest {
+        val item = webSocketHistory(id = 20)
+        historyRepository.insertHistory(item)
+        val result = historyRepository.getHistory(20)
+
+        assertEquals(item, result)
     }
 
     @Test
     fun deleteHistory_deletesHistoryById() = runTest {
-        val item = History(id = 2, requestUrl = "test.dev")
-        historyRepository.insertHistoryHttp(item)
+        val item = HistoryItem.Http(HttpRequest(id = 2, requestUrl = "test.dev"))
+        historyRepository.insertHistory(item)
         historyRepository.deleteHistory(2)
         val expected = historyRepository.getAllHistories().size
         assertEquals(expected, 0)
@@ -75,19 +122,50 @@ class HistoryRepositoryImpTest {
 
     @Test
     fun deleteHistories_deletesMultipleHistories() = runTest {
-        historyRepository.insertHistoryHttp(History(id = 11, requestUrl = "test 11"))
-        historyRepository.insertHistoryHttp(History(id = 12, requestUrl = "test 12"))
-        historyRepository.insertHistoryHttp(History(id = 13, requestUrl = "test 13"))
+        historyRepository.insertHistory(httpHistory(11))
+        historyRepository.insertHistory(webSocketHistory(12))
+        historyRepository.insertHistory(httpHistory(13))
         historyRepository.deleteHistories(listOf(11, 12, 13))
-        val expected = historyRepository.getAllHistories().size
-        assertEquals(expected, 0)
+        val result = historyRepository.getAllHistories().size
+        assertEquals(0, result)
+    }
+
+    @Test
+    fun deleteHistories_deletesOnlySpecifiedIds() = runTest {
+        historyRepository.insertHistory(httpHistory(11))
+        historyRepository.insertHistory(webSocketHistory(12))
+        historyRepository.insertHistory(httpHistory(13))
+        historyRepository.insertHistory(httpHistory(99))
+
+        historyRepository.deleteHistories(listOf(11, 12, 13))
+
+        val result = historyRepository.getAllHistories()
+
+        assertEquals(1, result.size)
     }
 
     @Test
     fun getHistory_returnsHistoryById() = runTest {
-        val historyItem = History(id = 11, requestUrl = "test 11")
-        historyRepository.insertHistoryHttp(historyItem)
+        val historyItem = HistoryItem.Http(HttpRequest(id = 11, requestUrl = "test 11"))
+        historyRepository.insertHistory(historyItem)
         val expected = historyRepository.getHistory(11)
         assertEquals(expected, historyItem)
+    }
+
+    @Test
+    fun getHistory_returnsHttpAndWebSocketById() = runTest {
+        val http = httpHistory(11)
+        val webSocket = webSocketHistory(12)
+        historyRepository.insertHistory(http)
+        historyRepository.insertHistory(webSocket)
+
+        val httpResult = historyRepository.getHistory(11)
+        val webSocketResult = historyRepository.getHistory(12)
+
+        assert(httpResult is HistoryItem.Http)
+        assert(webSocketResult is HistoryItem.WebSocket)
+
+        assertEquals(http, httpResult)
+        assertEquals(webSocket, webSocketResult)
     }
 }

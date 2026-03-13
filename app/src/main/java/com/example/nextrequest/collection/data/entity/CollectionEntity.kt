@@ -5,7 +5,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.example.nextrequest.core.models.HttpMethod
-import com.example.nextrequest.core.KeyValueList
+import com.example.nextrequest.core.models.KeyValue
 
 @Entity(tableName = "collections")
 data class CollectionEntity(
@@ -40,5 +40,5 @@ data class RequestEntity(
     val createdAt: Long,
     val statusCode: Int?,
     val body: String? = null,
-    val headers: KeyValueList? = null,
+    val headers: List<KeyValue>? = null,
 )

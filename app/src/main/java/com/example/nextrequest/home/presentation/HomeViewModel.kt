@@ -4,13 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nextrequest.collection.domain.model.Request
 import com.example.nextrequest.collection.domain.repository.CollectionRepository
-import com.example.nextrequest.core.KeyValueList
 import com.example.nextrequest.core.domain.model.ApiRequest
 import com.example.nextrequest.core.domain.model.ApiResponse
 import com.example.nextrequest.core.extensions.buildUrlWithParams
 import com.example.nextrequest.core.extensions.mapKeyValuePairsToQueryParameter
 import com.example.nextrequest.core.extensions.removeParameterFromUrl
 import com.example.nextrequest.core.models.HttpMethod
+import com.example.nextrequest.core.models.KeyValue
+import com.example.nextrequest.history.domain.model.HistoryItem
 import com.example.nextrequest.history.domain.repository.HistoryRepository
 import com.example.nextrequest.home.data.mapper.httpRequestToHistory
 import com.example.nextrequest.home.data.mapper.httpRequestToRequest
@@ -125,11 +126,11 @@ class HomeViewModel @Inject constructor(
     }
 
     fun updateHttpMethod(newHttpMethod: HttpMethod) {
-        _uiState.value = _uiState.value.copy(_uiState.value.data.copy(httpMethod = newHttpMethod))
+        _uiState.value = _uiState.value.copy(data = _uiState.value.data.copy(httpMethod = newHttpMethod))
     }
 
     fun updateBody(body: String) {
-        _uiState.value = _uiState.value.copy(_uiState.value.data.copy(body = body))
+        _uiState.value = _uiState.value.copy(data = _uiState.value.data.copy(body = body))
     }
 
     fun addHeader(key: String, value: String) {
@@ -138,7 +139,7 @@ class HomeViewModel @Inject constructor(
         if (key.isBlank() || value.isBlank())
             return
         val modifiedValue = if (key.equals("Authorization", ignoreCase = true)) {
-            currentHeaders.removeIf { it.first.equals("Authorization", ignoreCase = true) }
+            currentHeaders.removeIf { it.key.equals("Authorization", ignoreCase = true) }
             if (value.startsWith("Bearer ")) {
                 value
             } else "Bearer $value"
@@ -146,7 +147,7 @@ class HomeViewModel @Inject constructor(
             value
         }
 
-        currentHeaders.add(key to modifiedValue)
+        currentHeaders.add(KeyValue(key, modifiedValue))
 
         _uiState.value =
             _uiState.value.copy(data = _uiState.value.data.copy(headers = currentHeaders))
@@ -154,7 +155,7 @@ class HomeViewModel @Inject constructor(
 
     fun removeHeader(key: String, value: String) {
         val currentHeaders = _uiState.value.data.headers
-        val updatedHeaders = currentHeaders?.filterNot { it.first == key && it.second == value }
+        val updatedHeaders = currentHeaders?.filterNot { it.key == key && it.value == value }
         _uiState.value =
             _uiState.value.copy(
                 data = _uiState.value.data.copy(
@@ -166,7 +167,7 @@ class HomeViewModel @Inject constructor(
     fun addParameter(key: String, value: String) {
         if (key.isBlank()) return
         val currentParams = _uiState.value.data.params
-        val updatedParams = currentParams.orEmpty() + (key to value)
+        val updatedParams = currentParams.orEmpty() + KeyValue(key, value)
         updateParamsUiState(updatedParams)
     }
 
@@ -176,7 +177,7 @@ class HomeViewModel @Inject constructor(
         updateRequestUrl(newUrl)
     }
 
-    private fun updateParamsUiState(params: KeyValueList) {
+    private fun updateParamsUiState(params: List<KeyValue>) {
         val url = _uiState.value.data.requestUrl.buildUrlWithParams(
             params.mapKeyValuePairsToQueryParameter()
         )
@@ -193,7 +194,7 @@ class HomeViewModel @Inject constructor(
         response: ApiResponse,
     ) {
         viewModelScope.launch(dispatcher) {
-            historyRepository.insertHistoryHttp(
+            historyRepository.insertHistory(
                 httpRequestToHistory(apiRequest, response)
             )
         }
@@ -201,20 +202,28 @@ class HomeViewModel @Inject constructor(
 
     fun loadRequestFromHistory(historyId: Int) {
         viewModelScope.launch(dispatcher) {
-            val saved = historyRepository.getHistory(historyId)
-            val response = if (saved.statusCode != null)
-                Loadable.Success(
-                    saved.toHttpResponse()
-                )
-            else
-                Loadable.Error(
-                    saved.toHttpResponse().response
-                )
+            when (val saved = historyRepository.getHistory(historyId)) {
+                is HistoryItem.Http -> {
+                    val response = if (saved.toHttpResponse().statusCode != null)
+                        Loadable.Success(
+                            saved.toHttpResponse()
+                        )
+                    else
+                        Loadable.Error(
+                            saved.toHttpResponse().response
+                        )
 
-            _uiState.value = HomeUiState(
-                saved.toHttpRequest(),
-                response
-            )
+                    _uiState.value = HomeUiState(
+                        saved.toHttpRequest(),
+                        response
+                    )
+                }
+
+                is HistoryItem.WebSocket -> {
+                    //todo
+                }
+
+            }
         }
     }
 

@@ -2,10 +2,12 @@ package com.example.nextrequest
 
 import com.example.nextrequest.collection.domain.model.Request
 import com.example.nextrequest.collection.domain.repository.CollectionRepository
-import com.example.nextrequest.core.KeyValueList
 import com.example.nextrequest.core.domain.model.ApiRequest
+import com.example.nextrequest.core.domain.model.ApiResponse
 import com.example.nextrequest.core.models.HttpMethod
-import com.example.nextrequest.history.domain.model.History
+import com.example.nextrequest.core.models.KeyValue
+import com.example.nextrequest.history.data.model.HttpRequest
+import com.example.nextrequest.history.domain.model.HistoryItem
 import com.example.nextrequest.history.domain.repository.HistoryRepository
 import com.example.nextrequest.home.domain.repository.HomeRepository
 import com.example.nextrequest.home.presentation.HomeUiState
@@ -27,7 +29,6 @@ import kotlinx.coroutines.test.setMain
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
@@ -56,16 +57,18 @@ class HomeViewModelTest {
     fun `sendRequest should save response to history`() = runTest {
         viewModel.updateHttpMethod(HttpMethod.GET)
         viewModel.updateRequestUrl("http://example.com")
+        coEvery { homeRepo.sendRequest(any(), any(), any(), any(), any<Any>()) }
         viewModel.sendRequest()
         // viewModel.uiState.value.response.shouldBeTypeOf<Loadable.Loading>
         testDispatcher.scheduler.advanceUntilIdle()
-        coVerify(exactly = 1) { historyRepo.insertHistoryHttp(any()) }
+        coVerify(exactly = 1) { historyRepo.insertHistory(any()) }
     }
 
     @Test
     fun `sendRequest should updates collection if collectionId is provided`() = runTest {
         viewModel.updateHttpMethod(HttpMethod.GET)
         viewModel.updateRequestUrl("http://example.com")
+        coEvery { homeRepo.sendRequest(any(), any(), any(), any(), any<Any>()) }
         viewModel.sendRequest(collectionId = "1232")
         testDispatcher.scheduler.advanceUntilIdle()
         coVerify(exactly = 1) {
@@ -97,7 +100,7 @@ class HomeViewModelTest {
 
         coVerify(exactly = 0) {
             homeRepo.sendRequest(any<String>(), any<String>())
-            historyRepo.insertHistoryHttp(any<History>())
+            historyRepo.insertHistory(any<HistoryItem>())
             collectionRepo.updateCollectionRequest(
                 any<String>(),
                 any<Request>()
@@ -106,17 +109,19 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `sendRequest should call repository when requestUrl is not empty`() = runTest {
+    fun `sendRequest should calnnl repository when requestUrl is not empty`() = runTest {
         viewModel.updateHttpMethod(HttpMethod.GET)
         viewModel.updateRequestUrl("http://example.com")
+        coEvery { homeRepo.sendRequest(any(), any(), any(), any(), any<Any>()) }
+
         viewModel.sendRequest()
         testDispatcher.scheduler.advanceUntilIdle()//or advanceUntilIdle()
         coVerify(exactly = 1) {
             homeRepo.sendRequest(
                 any<String>(),
                 any<String>(),
-                any<KeyValueList>(),
-                any<KeyValueList>(),
+                any<List<KeyValue>>(),
+                any<List<KeyValue>>(),
                 any<Any>(),
             )
         }
@@ -152,8 +157,8 @@ class HomeViewModelTest {
         val key = "Authorization"
         val value = "token"
         viewModel.addHeader(key, value)
-        viewModel.uiState.value.data.headers?.get(0)?.first shouldBe key
-        viewModel.uiState.value.data.headers?.get(0)?.second shouldBe "Bearer $value"
+        viewModel.uiState.value.data.headers?.get(0)?.key shouldBe key
+        viewModel.uiState.value.data.headers?.get(0)?.value shouldBe "Bearer $value"
 
         viewModel.addHeader(key, value)
         viewModel.uiState.value.data.headers?.size shouldBe 1
@@ -168,7 +173,7 @@ class HomeViewModelTest {
         viewModel.addHeader("Set-Cookie", "SESSIONID=abc123")
         viewModel.addHeader("Set-Cookie", "USER_PREFS=dark_mode")
 
-        viewModel.uiState.value.data.headers?.get(0)?.second shouldBe "Bearer anotherToken"
+        viewModel.uiState.value.data.headers?.get(0)?.value shouldBe "Bearer anotherToken"
         viewModel.uiState.value.data.headers?.size shouldBe 3
     }
 
@@ -178,7 +183,7 @@ class HomeViewModelTest {
         val value = "application/json"
         viewModel.addHeader(key, value)
 
-        viewModel.uiState.value.data.headers?.get(0) shouldBe Pair(key, value)
+        viewModel.uiState.value.data.headers?.get(0) shouldBe KeyValue(key, value)
     }
 
     @Test
@@ -199,7 +204,7 @@ class HomeViewModelTest {
         viewModel.addParameter(key, value)
 
         viewModel.uiState.value.data.params?.size shouldBe 1
-        viewModel.uiState.value.data.params?.get(0) shouldBe Pair(key, value)
+        viewModel.uiState.value.data.params?.get(0) shouldBe KeyValue(key, value)
     }
 
 
@@ -214,7 +219,7 @@ class HomeViewModelTest {
     @Test
     fun `loadRequestFromHistory returns success when statusCode is not null`() = runTest {
         val savedRequest =
-            History(requestUrl = "/test", statusCode = 200, response = "url response")
+            HistoryItem.Http(HttpRequest(requestUrl = "/test", statusCode = 200, response = "url response"))
 //        every { savedRequest.statusCode } returns 200
 //        every { savedRequest.toHttpResponse() } answers { ApiResponse("url response", 200) }
 //        every { savedRequest.toHttpRequest() } answers { ApiRequest(requestUrl = "/test") }
@@ -229,10 +234,14 @@ class HomeViewModelTest {
 
     @Test
     fun `loadRequestFromHistory returns error when statusCode is null`() = runTest {
-        val savedRequest = mockk<History>(relaxed = true)
-        every { savedRequest.statusCode } returns null
-        every { savedRequest.requestUrl } returns "/test"
-        every { savedRequest.response } returns "error"
+        val savedRequest =  HistoryItem.Http(
+            HttpRequest(
+                id = 1,
+                requestUrl = "/test",
+                response = "error",
+                statusCode = null
+            )
+        )
         coEvery { historyRepo.getHistory(any<Int>()) } returns savedRequest
 
         viewModel.loadRequestFromHistory(1)
@@ -240,6 +249,7 @@ class HomeViewModelTest {
         coVerify(exactly = 1) { historyRepo.getHistory(any<Int>()) }
 
         viewModel.uiState.first().response shouldBe Loadable.Error("error")
+
         (viewModel.uiState.first().response as? Loadable.Success)?.data?.statusCode shouldBe null
         (viewModel.uiState.first().response as Loadable.Error).message shouldBe "error"
     }

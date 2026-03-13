@@ -2,9 +2,12 @@ package com.example.nextrequest
 
 import com.example.nextrequest.collection.domain.model.Collection
 import com.example.nextrequest.collection.domain.repository.CollectionRepository
+import com.example.nextrequest.core.data.extensions.toLong
 import com.example.nextrequest.core.presentation.UiState
+import com.example.nextrequest.history.data.model.HttpRequest
+import com.example.nextrequest.history.data.model.WebSocketRequest
 import com.example.nextrequest.history.domain.formatDate
-import com.example.nextrequest.history.domain.model.History
+import com.example.nextrequest.history.domain.model.HistoryItem
 import com.example.nextrequest.history.domain.repository.HistoryRepository
 import com.example.nextrequest.history.presentation.HistoryViewModel
 import com.example.nextrequest.history.presentation.model.ExpandableHistoryItem
@@ -49,16 +52,15 @@ class HistoryViewModelTest {
         val today = LocalDate.now()
         val yesterday = LocalDate.now().minusDays(1)
         val histories = listOf(
-            History(id = 1, requestUrl = "url1", createdAt = today),
-            History(id = 2, requestUrl = "url2", createdAt = yesterday),
-            History(id = 3, requestUrl = "url3", createdAt = today),
+            HistoryItem.Http(HttpRequest(id = 1, requestUrl = "url1", createdAt = today.toLong())),
+            HistoryItem.Http(HttpRequest(id = 2, requestUrl = "url2", createdAt = yesterday.toLong())),
+            HistoryItem.WebSocket(WebSocketRequest(id = 3, url = "url3", createdAt = today.toLong())),
         )
 
         coEvery { historyRepository.getAllHistories() } returns histories
 
         viewModel.getHistories()
         advanceUntilIdle()
-//        val uiState = viewModel.uiState.value.shouldBeInstanceOf<UiState.Success<HistoryUiModel>>()
         with((viewModel.uiState.value as UiState.Success).data) {
             historyEntries.size shouldBe 2
             historyEntries[0].dateCreated shouldBe formatDate(today)
@@ -78,10 +80,11 @@ class HistoryViewModelTest {
         val yesterday = LocalDate.now().minusDays(1)
         val todayFormatted = formatDate(today)
         val yesterdayFormatted = formatDate(yesterday)
+
         val histories = listOf(
-            History(id = 1, requestUrl = "url1", createdAt = today),
-            History(id = 2, requestUrl = "url2", createdAt = yesterday),
-            History(id = 3, requestUrl = "url3", createdAt = today),
+            HistoryItem.Http(HttpRequest(id = 1, requestUrl = "url1", createdAt = today.toLong())),
+            HistoryItem.Http(HttpRequest(id = 2, requestUrl = "url2", createdAt = yesterday.toLong())),
+            HistoryItem.WebSocket(WebSocketRequest(id = 3, url = "url3", createdAt = today.toLong())),
         )
 
         coEvery { historyRepository.getAllHistories() } returns histories

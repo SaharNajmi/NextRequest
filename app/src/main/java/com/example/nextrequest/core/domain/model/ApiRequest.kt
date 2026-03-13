@@ -3,7 +3,7 @@ package com.example.nextrequest.core.domain.model
 import androidx.compose.ui.graphics.ImageBitmap
 import com.example.nextrequest.core.extensions.mapStringToKeyValuePairs
 import com.example.nextrequest.core.models.HttpMethod
-import com.example.nextrequest.core.KeyValueList
+import com.example.nextrequest.core.models.KeyValue
 import java.time.LocalDate
 
 data class ApiRequest(
@@ -11,10 +11,10 @@ data class ApiRequest(
     val requestUrl: String = "",
     val httpMethod: HttpMethod = HttpMethod.GET,
     val body: String? = null,
-    val headers: KeyValueList? = null,
+    val headers: List<KeyValue>? = null,
     val createdAt: LocalDate = LocalDate.now(),
 ) {
-    val params: KeyValueList?
+    val params: List<KeyValue>?
         get() = requestUrl.mapStringToKeyValuePairs()
     val baseUrl: String
         get() = requestUrl.substringBefore("?")

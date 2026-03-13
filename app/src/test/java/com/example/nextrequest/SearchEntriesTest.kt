@@ -3,7 +3,9 @@ package com.example.nextrequest
 import com.example.nextrequest.collection.domain.model.Collection
 import com.example.nextrequest.collection.domain.model.Request
 import com.example.nextrequest.collection.presentation.model.CollectionUiState
-import com.example.nextrequest.history.domain.model.History
+import com.example.nextrequest.history.data.model.HttpRequest
+import com.example.nextrequest.history.data.model.WebSocketRequest
+import com.example.nextrequest.history.domain.model.HistoryItem
 import com.example.nextrequest.history.domain.searchCollections
 import com.example.nextrequest.history.domain.searchHistories
 import com.example.nextrequest.history.presentation.model.HistoryEntry
@@ -12,47 +14,79 @@ import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 class SearchEntriesTest {
+
     @Test
-    fun `return histories by searching url`() {
-        val history = listOf(
-            History(requestUrl = "url1"),
-            History(requestUrl = "url2"),
-            History(requestUrl = "url3"),
-            History(requestUrl = "url3"),
-            History(requestUrl = "url5"),
+    fun `return histories by searching url for http and websocket`() {
+        val httpItems = listOf(
+            HistoryItem.Http(HttpRequest(id = 1, requestUrl = "url1")),
+            HistoryItem.Http(HttpRequest(id = 2, requestUrl = "url2")),
+            HistoryItem.Http(HttpRequest(id = 3, requestUrl = "url3")),
+            HistoryItem.Http(HttpRequest(id = 4, requestUrl = "url3")),
+            HistoryItem.Http(HttpRequest(id = 5, requestUrl = "url5")),
+            HistoryItem.Http(HttpRequest(id = 6, requestUrl = "request55"))
         )
-        val histories: List<HistoryEntry> = listOf(
-            HistoryEntry("12 Aug", history),
-            HistoryEntry(
-                "14 Aug", history + History(requestUrl = "request55")
+
+        val wsItems = listOf(
+            HistoryItem.WebSocket(
+                WebSocketRequest(
+                    id = 7,
+                    url = "ws://url5",
+                    createdAt = System.currentTimeMillis()
+                )
+            ),
+            HistoryItem.WebSocket(
+                WebSocketRequest(
+                    id = 8,
+                    url = "ws://request55",
+                    createdAt = System.currentTimeMillis()
+                )
             )
+        )
+
+        val histories: List<HistoryEntry> = listOf(
+            HistoryEntry("12 Aug", httpItems.take(5) + wsItems.take(1)),
+            HistoryEntry("14 Aug", httpItems + wsItems)
         )
 
         val result = searchHistories(histories, "5")
-        result shouldBe listOf(
-            HistoryEntry("12 Aug", listOf(History(requestUrl = "url5"))),
+
+        val expected = listOf(
+            HistoryEntry(
+                "12 Aug",
+                listOf(
+                    httpItems[4],   // url5
+                    wsItems[0]      // ws://url5
+                )
+            ),
             HistoryEntry(
                 "14 Aug",
-                listOf(History(requestUrl = "url5"), History(requestUrl = "request55"))
+                listOf(
+                    httpItems[4],   // url5
+                    httpItems[5],   // request55
+                    wsItems[0],     // ws://url5
+                    wsItems[1]      // ws://request55
+                )
             )
         )
+
+        result shouldBe expected
     }
 
     @Test
-    fun `searchHistories returns emptyList when search query doesn't match anything`() {
-        val history = listOf(
-            History(requestUrl = "url1"),
-            History(requestUrl = "url2")
-        )
+    fun `search returns empty list when no matches`() {
         val histories = listOf(
-            HistoryEntry("12 Aug", history),
             HistoryEntry(
-                "14 Aug", history + History(requestUrl = "url3")
+                "12 Aug",
+                listOf(
+                    HistoryItem.Http(HttpRequest(id = 1, requestUrl = "url1")),
+                    HistoryItem.WebSocket(WebSocketRequest(id = 2, url = "ws://url2"))
+                )
             )
         )
 
-        val result = searchHistories(histories, "4")
-        result.shouldBeEmpty()
+        val result = searchHistories(histories, "url22")
+
+        result shouldBe emptyList()
     }
 
     @Test
@@ -60,12 +94,12 @@ class SearchEntriesTest {
         val histories = listOf(
             HistoryEntry(
                 "12 Aug", histories = listOf(
-                    History(requestUrl = "url1"),
-                    History(requestUrl = "url2")
+                    HistoryItem.Http(HttpRequest(id = 1, requestUrl = "url1")),
+                    HistoryItem.Http(HttpRequest(id = 2, requestUrl = "url2")),
+                    HistoryItem.WebSocket(WebSocketRequest(id = 3, url = "ws://Url3", createdAt = System.currentTimeMillis()))
                 )
             )
         )
-
         val actual = searchHistories(histories, "URL")
         actual shouldBe histories
     }

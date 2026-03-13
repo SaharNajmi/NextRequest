@@ -59,9 +59,9 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.nextrequest.core.KeyValueList
 import com.example.nextrequest.core.domain.model.ApiResponse
 import com.example.nextrequest.core.models.HttpMethod
+import com.example.nextrequest.core.models.KeyValue
 import com.example.nextrequest.core.presentation.color
 import com.example.nextrequest.core.presentation.icons.Add
 import com.example.nextrequest.core.presentation.icons.Collections_bookmark
@@ -356,8 +356,8 @@ private fun RequestLine(
 @Composable
 fun RequestParametersSection(
     modifier: Modifier,
-    headers: KeyValueList?,
-    params: KeyValueList?,
+    headers: List<KeyValue>?,
+    params: List<KeyValue>?,
     body: String?,
     callbacks: HomeCallbacks,
 ) {
@@ -417,8 +417,8 @@ private fun HttpParameterSelection(
 private fun HttpParameterBody(
     modifier: Modifier,
     selectedOption: RadioHttpParameterOptions,
-    headers: KeyValueList?,
-    params: KeyValueList?,
+    headers: List<KeyValue>?,
+    params: List<KeyValue>?,
     body: String?,
     callbacks: HomeCallbacks,
 ) {
@@ -478,7 +478,7 @@ private fun StatusCode(statusCode: Int?) {
 
 @Composable
 fun ParamsSection(
-    params: KeyValueList?,
+    params: List<KeyValue>?,
     callbacks: HomeCallbacks,
 ) {
     Column {
@@ -496,7 +496,7 @@ fun ParamsSection(
 @Composable
 fun AuthSection(
     modifier: Modifier,
-    headers: KeyValueList?,
+    headers: List<KeyValue>?,
     callbacks: HomeCallbacks,
 ) {
     Column(modifier) {
@@ -519,7 +519,7 @@ fun AuthSection(
 
 @Composable
 fun HeaderSection(
-    headers: KeyValueList?,
+    headers: List<KeyValue>?,
     callbacks: HomeCallbacks,
 ) {
     Column {

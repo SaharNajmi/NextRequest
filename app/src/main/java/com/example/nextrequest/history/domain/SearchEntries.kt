@@ -1,23 +1,23 @@
 package com.example.nextrequest.history.domain
 
 import com.example.nextrequest.collection.presentation.model.CollectionUiState
+import com.example.nextrequest.history.domain.model.HistoryItem
 import com.example.nextrequest.history.presentation.model.HistoryEntry
 
 fun searchHistories(
     entries: List<HistoryEntry>,
-    searchQuery: String,
+    searchQuery: String
 ): List<HistoryEntry> {
     if (searchQuery.isBlank()) return entries
 
     return entries.mapNotNull { entry ->
-        val filteredHistories = entry.histories.filter {
-            it.requestUrl.contains(searchQuery, ignoreCase = true)
+        val filteredHistories = entry.histories.filter { item ->
+            when (item) {
+                is HistoryItem.Http -> item.request.requestUrl.contains(searchQuery, ignoreCase = true)
+                is HistoryItem.WebSocket -> item.request.url.contains(searchQuery, ignoreCase = true)
+            }
         }
-        if (filteredHistories.isNotEmpty()) {
-            entry.copy(histories = filteredHistories)
-        } else {
-            null
-        }
+        if (filteredHistories.isNotEmpty()) entry.copy(histories = filteredHistories) else null
     }
 }
 

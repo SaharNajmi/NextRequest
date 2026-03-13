@@ -52,7 +52,7 @@ import com.example.nextrequest.core.presentation.icons.Keyboard_arrow_down
 import com.example.nextrequest.core.presentation.icons.Keyboard_arrow_right
 import com.example.nextrequest.core.presentation.theme.iconTint
 import com.example.nextrequest.core.presentation.theme.textMuted
-import com.example.nextrequest.history.domain.model.History
+import com.example.nextrequest.history.domain.model.HistoryItem
 import com.example.nextrequest.history.domain.searchHistories
 import com.example.nextrequest.history.presentation.component.SaveToCollectionDialog
 import com.example.nextrequest.history.presentation.model.ExpandableHistoryItem
@@ -91,15 +91,16 @@ fun HistoryScreen(
         onHeaderClick = { date ->
             viewModel.toggleExpanded(date)
         },
-        onDeleteHistoriesClick = { historyIds ->
-            viewModel.deleteHistories(historyIds)
+        onDeleteHistoriesClick = { items ->
+            viewModel.deleteHistories(items)
         },
-        onDeleteHistoryClick = { historyId ->
-            viewModel.deleteHistory(historyId)
+        onDeleteHistoryClick = { item ->
+            viewModel.deleteHistory(item)
         },
         onCreateNewCollectionClick = { viewModel.createNewCollection() }
     )
-    Scaffold(modifier = Modifier.fillMaxSize(),
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             Column(modifier = Modifier.padding(horizontal = 12.dp)) {
                 Spacer(modifier = Modifier.height(36.dp))
@@ -213,16 +214,27 @@ private fun ExpandedHistoryItem(
                 AnimatedVisibility(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    visible = expandedState.firstOrNull { it.dateCreated == historyEntry.dateCreated }?.isExpanded ?: false
+                    visible = expandedState.firstOrNull { it.dateCreated == historyEntry.dateCreated }?.isExpanded
+                        ?: false
                 ) {
-                    HistoryItem(
-                        Modifier
-                            .padding(top = 8.dp, bottom = 8.dp, start = 12.dp),
-                        historyEntry.histories,
-                        collectionEntries,
-                        index,
-                        callbacks
-                    )
+                    val httpHistories = historyEntry.histories.filterIsInstance<HistoryItem.Http>()
+                    when (historyEntry.histories[index]) {
+                        is HistoryItem.Http -> {
+                            HttpHistoryItemView(
+                                Modifier
+                                    .padding(top = 8.dp, bottom = 8.dp, start = 12.dp),
+                                httpHistories,
+                                collectionEntries,
+                                index,
+                                callbacks
+                            )
+                        }
+
+                        is HistoryItem.WebSocket -> {
+
+                        }
+                    }
+
                 }
             }
         }
@@ -235,7 +247,7 @@ fun HistoryHeader(
     header: String,
     collectionEntries: Set<CollectionEntry>,
     isExpanded: Boolean,
-    histories: List<History>,
+    histories: List<HistoryItem>,
     callbacks: HistoryCallbacks,
 ) {
     val expandedIcon =
@@ -273,7 +285,7 @@ fun HistoryHeader(
             Modifier
                 .padding(horizontal = 4.dp)
                 .clickable {
-                    callbacks.onDeleteHistoriesClick(histories.map { it.id })
+                    callbacks.onDeleteHistoriesClick(histories)
                 },
             tint = MaterialTheme.colorScheme.iconTint
         )
@@ -292,9 +304,9 @@ fun HistoryHeader(
 }
 
 @Composable
-private fun HistoryItem(
+private fun HttpHistoryItemView(
     modifier: Modifier,
-    items: List<History>,
+    items: List<HistoryItem.Http>,
     collectionNames: Set<CollectionEntry>,
     index: Int,
     callbacks: HistoryCallbacks,
@@ -309,15 +321,15 @@ private fun HistoryItem(
     ) {
 
         Text(
-            text = items[index].httpMethod.name,
-            color = items[index].httpMethod.color,
+            text = items[index].request.httpMethod.name,
+            color = items[index].request.httpMethod.color,
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.padding(end = 8.dp)
         )
 
         Text(
-            text = items[index].requestUrl.toString(),
+            text = items[index].request.requestUrl,
             fontSize = 12.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -339,7 +351,7 @@ private fun HistoryItem(
                 .padding(horizontal = 4.dp)
                 .size(20.dp)
                 .clickable {
-                    callbacks.onDeleteHistoryClick(items[index].id)
+                    callbacks.onDeleteHistoryClick(items[index])
                 }
         )
         if (showDropdown) {

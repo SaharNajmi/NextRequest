@@ -1,7 +1,7 @@
 package com.example.nextrequest.core.extensions
 
-import com.example.nextrequest.core.KeyValueList
 import com.example.nextrequest.core.models.HttpMethod
+import com.example.nextrequest.core.models.KeyValue
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
 
@@ -14,7 +14,7 @@ fun String.formatJson(): String {
     }
 }
 
-fun String.mapStringToKeyValuePairs(): KeyValueList {
+fun String.mapStringToKeyValuePairs(): List<KeyValue> {
     if (this.isEmpty())
         return emptyList()
 
@@ -30,11 +30,11 @@ fun String.mapStringToKeyValuePairs(): KeyValueList {
             val parts = it.split("=")
             val key = parts.getOrNull(0) ?: ""
             val value = parts.getOrNull(1) ?: ""
-            key to value
+            KeyValue(key, value)
         }
 }
 
-fun KeyValueList.mapKeyValuePairsToQueryParameter(): String {
+fun List<KeyValue>.mapKeyValuePairsToQueryParameter(): String {
     return this.joinToString("&") { (prefix, postfix) ->
         "$prefix=$postfix"
     }

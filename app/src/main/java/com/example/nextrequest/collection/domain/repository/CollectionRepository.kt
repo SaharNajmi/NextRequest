@@ -2,6 +2,7 @@ package com.example.nextrequest.collection.domain.repository
 
 import com.example.nextrequest.collection.domain.model.Collection
 import com.example.nextrequest.collection.domain.model.Request
+import com.example.nextrequest.history.domain.model.HistoryItem
 
 interface CollectionRepository {
     suspend fun insertCollection(collection: Collection)

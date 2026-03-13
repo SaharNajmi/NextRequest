@@ -2,7 +2,7 @@ package com.example.nextrequest.collection.domain.model
 
 import androidx.compose.ui.graphics.ImageBitmap
 import com.example.nextrequest.core.models.HttpMethod
-import com.example.nextrequest.core.KeyValueList
+import com.example.nextrequest.core.models.KeyValue
 import java.time.LocalDate
 import java.util.UUID
 
@@ -22,5 +22,5 @@ data class Request(
     val imageResponse: ImageBitmap? = null,
     val statusCode: Int? = null,
     val body: String? = null,
-    val headers: KeyValueList? = null,
+    val headers: List<KeyValue>? = null,
 )
