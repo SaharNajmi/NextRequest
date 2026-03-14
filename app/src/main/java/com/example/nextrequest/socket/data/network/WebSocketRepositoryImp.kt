@@ -37,8 +37,10 @@ class WebSocketRepositoryImp @Inject constructor(
         webSocket = client.newWebSocket(request, object : WebSocketListener() {
 
             override fun onOpen(webSocket: WebSocket, response: Response) {
-                _isConnected.value = true
-                webSocket.send("Connected to server")
+                scope.launch {
+                    _messages.emit(WebSocketMessage("Connected to $url", false))
+                    _isConnected.value = true
+                }
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
@@ -48,15 +50,17 @@ class WebSocketRepositoryImp @Inject constructor(
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                _isConnected.value = false
-                t.printStackTrace()
+                scope.launch {
+                    _messages.emit(WebSocketMessage(t.message.toString(), false))
+                    _isConnected.value = false
+                }
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                 scope.launch {
-                    _messages.emit(WebSocketMessage("Connection closed $reason", false))
+                    _messages.emit(WebSocketMessage("Disconnected from $url $reason", false))
+                    _isConnected.value = false
                 }
-                _isConnected.value = false
             }
         })
     }
