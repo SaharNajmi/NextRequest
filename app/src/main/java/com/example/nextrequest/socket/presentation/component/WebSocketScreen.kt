@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,15 +46,35 @@ import com.example.nextrequest.core.presentation.icons.ArrowDown
 import com.example.nextrequest.core.presentation.icons.ArrowDropDown
 import com.example.nextrequest.core.presentation.icons.ArrowDropUp
 import com.example.nextrequest.core.presentation.icons.ArrowUp
+import com.example.nextrequest.core.presentation.navigation.Screens
 import com.example.nextrequest.core.presentation.theme.Silver
 import com.example.nextrequest.socket.presentation.component.model.MessageUiModel
 import com.example.nextrequest.socket.presentation.component.model.WebSocketUiModel
 
 @Composable
-fun WebSocketScreen(navController: NavController, viewModel: WebSocketViewModel) {
+fun WebSocketScreen(
+    requestId: Int? = null,
+    source: String?,
+    navController: NavController,
+    viewModel: WebSocketViewModel,
+) {
     val uiState by viewModel.uiState.collectAsState()
     var messageText by remember { mutableStateOf("") }
     var requestUrl by remember { mutableStateOf("") }
+
+    LaunchedEffect(requestId, source) {
+        if (requestId != null && source != null) {
+            when (source) {
+                Screens.ROUTE_HISTORY_SCREEN -> viewModel.loadRequestFromHistory(requestId)
+                Screens.ROUTE_COLLECTION_SCREEN -> viewModel.loadRequestFromCollection(requestId)
+            }
+        }
+    }
+
+    LaunchedEffect(uiState) {
+        requestUrl = (uiState as? UiState.Success<WebSocketUiModel>)?.data?.url ?: ""
+    }
+
     val callbacks = WebSocketCallbacks(
         onConnectClick = {
             viewModel.connect(requestUrl)

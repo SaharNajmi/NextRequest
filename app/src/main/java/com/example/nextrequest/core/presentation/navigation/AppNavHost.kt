@@ -46,9 +46,9 @@ fun AppNavHost(
                 defaultValue = null
             })
         ) { backStackEntry ->
-            var requestId =
+            val requestId =
                 backStackEntry.arguments?.getString(Screens.ARG_REQUEST_ID)?.toIntOrNull()
-            var source = backStackEntry.arguments?.getString(Screens.ARG_SOURCE)
+            val source = backStackEntry.arguments?.getString(Screens.ARG_SOURCE)
             val collectionId =
                 backStackEntry.arguments?.getString((Screens.ARG_COLLECTION_ID))
             HomeScreen(
@@ -73,7 +73,7 @@ fun AppNavHost(
                 navController,
                 historyViewModel,
                 onHistoryItemClick = { item ->
-                    when(item){
+                    when (item) {
                         is HistoryItem.Http -> {
                             navController.navigate(
                                 Screens.HomeScreen.createRoute(
@@ -85,10 +85,12 @@ fun AppNavHost(
                                 launchSingleTop = true
                             }
                         }
-                        is HistoryItem.WebSocket ->{
+
+                        is HistoryItem.WebSocket -> {
                             navController.navigate(
                                 Screens.WebSocketScreen.createRoute(
-                                    item.id
+                                    item.id,
+                                    Screens.ROUTE_HISTORY_SCREEN
                                 )
                             ) {
                                 popUpTo(navController.graph.id) { inclusive = false }
@@ -117,8 +119,27 @@ fun AppNavHost(
                     }
                 })
         }
-        composable(Screens.WebSocketScreen.route) {
-            WebSocketScreen(navController, webSocketViewModel)
+        composable(
+            Screens.WebSocketScreen.route,
+            arguments = listOf(navArgument(Screens.ARG_REQUEST_ID) {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            }, navArgument(Screens.ARG_SOURCE) {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            })
+        ) { backStackEntry ->
+            val requestId =
+                backStackEntry.arguments?.getString(Screens.ARG_REQUEST_ID)?.toIntOrNull()
+            val source = backStackEntry.arguments?.getString(Screens.ARG_SOURCE)
+            WebSocketScreen(
+                requestId,
+                source,
+                navController,
+                webSocketViewModel
+            )
         }
     }
 }

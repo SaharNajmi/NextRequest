@@ -2,17 +2,24 @@ package com.example.nextrequest.socket.presentation.component
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nextrequest.collection.domain.repository.CollectionRepository
+import com.example.nextrequest.core.domain.model.ApiRequest
 import com.example.nextrequest.core.presentation.UiState
 import com.example.nextrequest.history.data.model.WebSocketRequest
 import com.example.nextrequest.history.domain.model.HistoryItem
 import com.example.nextrequest.history.domain.repository.HistoryRepository
 import com.example.nextrequest.history.presentation.HistoryViewModel
+import com.example.nextrequest.home.data.mapper.toHttpRequest
+import com.example.nextrequest.home.data.mapper.toHttpResponse
+import com.example.nextrequest.home.presentation.HomeUiState
+import com.example.nextrequest.home.presentation.Loadable
 import com.example.nextrequest.socket.domain.repository.WebSocketMessage
 import com.example.nextrequest.socket.domain.repository.WebSocketRepository
 import com.example.nextrequest.socket.presentation.component.mapper.toUi
 import com.example.nextrequest.socket.presentation.component.mapper.toWebSocket
 import com.example.nextrequest.socket.presentation.component.model.WebSocketUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,6 +27,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
@@ -28,10 +36,12 @@ import javax.inject.Inject
 class WebSocketViewModel @Inject constructor(
     private val repository: WebSocketRepository,
     private val historyRepository: HistoryRepository,
+    private val collectionRepository: CollectionRepository,
+    private val dispatcher: CoroutineDispatcher,
 ) : ViewModel() {
     private val _uiState =
         MutableStateFlow<UiState<WebSocketUiModel>>(
-            UiState.Success(WebSocketUiModel(false, emptyList()))
+            UiState.Success(WebSocketUiModel(false, "", emptyList()))
         )
     val uiState: StateFlow<UiState<WebSocketUiModel>> = _uiState.asStateFlow()
     private var currentUrl: String? = null
@@ -44,7 +54,7 @@ class WebSocketViewModel @Inject constructor(
                 }
                 .collect { message ->
                     val current = (_uiState.value as? UiState.Success)?.data
-                        ?: WebSocketUiModel(isConnected = false, messages = emptyList())
+                        ?: WebSocketUiModel(isConnected = false, url = "", messages = emptyList())
                     _uiState.value =
                         UiState.Success(current.copy(messages = listOf(message.toUi()) + current.messages))
                 }
@@ -53,13 +63,14 @@ class WebSocketViewModel @Inject constructor(
             repository.isConnected
                 .collect { connected ->
                     val current = (_uiState.value as? UiState.Success)?.data
-                        ?: WebSocketUiModel(isConnected = false, messages = emptyList())
+                        ?: WebSocketUiModel(isConnected = false, url = "", messages = emptyList())
 
                     if (current.isConnected && !connected) {
                         saveWebSocketHistory()
                     }
                     _uiState.value =
-                        UiState.Success(current.copy(isConnected = connected))
+                        UiState.Success(current.copy(isConnected = connected,
+                            url = currentUrl ?: current.url))
                 }
         }
     }
@@ -110,6 +121,32 @@ class WebSocketViewModel @Inject constructor(
             historyRepository.insertHistory(historyItem)
         }
     }
+
+    fun loadRequestFromHistory(historyId: Int) {
+        viewModelScope.launch(dispatcher) {
+            when (val saved = historyRepository.getHistory(historyId)) {
+                is HistoryItem.Http -> {}
+
+                is HistoryItem.WebSocket -> {
+                    _uiState.value = UiState.Success(
+                        WebSocketUiModel(
+                            isConnected = false,
+                            url = saved.request.url,
+                            messages = saved.request.messages.map { it.toUi() }
+                        )
+                    )
+                }
+
+            }
+        }
+    }
+
+    fun loadRequestFromCollection(requestId: Int) {
+        viewModelScope.launch(dispatcher) {
+            //todo
+        }
+    }
+
 
     override fun onCleared() {
         super.onCleared()
