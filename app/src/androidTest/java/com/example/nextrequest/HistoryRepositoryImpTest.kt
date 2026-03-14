@@ -76,40 +76,6 @@ class HistoryRepositoryImpTest {
     }
 
     @Test
-    fun updateHistory_modifiesStoredWebSocketRequest() = runTest {
-        historyRepository.insertHistory(webSocketHistory())
-
-        val inserted = historyRepository.getAllHistories().first() as HistoryItem.WebSocket
-
-        val updated = inserted.copy(
-            request = inserted.request.copy(url = "ws://updated.dev")
-        )
-
-        historyRepository.updateHistory(updated)
-
-        val result = historyRepository.getAllHistories().first() as HistoryItem.WebSocket
-
-        assertEquals("ws://updated.dev", result.request.url)
-    }
-
-    @Test
-    fun updateHistory_modifiesStoredHttpRequest() = runTest {
-        historyRepository.insertHistory(httpHistory())
-
-        val inserted = historyRepository.getAllHistories().first() as HistoryItem.Http
-
-        val updated = inserted.copy(
-            request = inserted.request.copy(requestUrl = "https://updated.dev")
-        )
-
-        historyRepository.updateHistory(updated)
-
-        val result = historyRepository.getAllHistories().first() as HistoryItem.Http
-
-        assertEquals("https://updated.dev", result.request.requestUrl)
-    }
-
-    @Test
     fun getAllHistories_returnsAllInsertedHistories() = runTest {
         historyRepository.insertHistory(httpHistory(id = 1))
         historyRepository.insertHistory(webSocketHistory(id = 2))

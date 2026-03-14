@@ -12,7 +12,7 @@ interface HistoryDao {
     @Query("SELECT * FROM histories ORDER by id DESC")
     suspend fun getAllHistories(): List<HistoryEntity>
 
-    @Insert(onConflict = OnConflictStrategy.Companion.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertHistory(history: HistoryEntity)
 
     @Update

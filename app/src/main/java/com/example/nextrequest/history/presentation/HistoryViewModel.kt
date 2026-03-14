@@ -18,6 +18,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -44,15 +45,17 @@ class HistoryViewModel @Inject constructor(
                 val histories = historiesDeferred.await()
                 val collections = collectionsDeferred.await()
 
-                val grouped: Map<String, List<HistoryItem>> =
-                    histories.groupBy { formatDate(it.toRequest().createdAt) }
+                val grouped: Map<LocalDate, List<HistoryItem>> =
+                    histories.groupBy { it.toRequest().createdAt }
 
-                val historyEntries = grouped.map { (date, histories) ->
-                    HistoryEntry(dateCreated = date, histories = histories)
+                val historyEntries = grouped
+                    .toSortedMap(compareByDescending { it })
+                    .map { (date, histories) ->
+                    HistoryEntry(dateCreated = formatDate(date), histories = histories)
                 }
 
                 val expandedStates = grouped.keys.map { date ->
-                    oldExpandedStates[date] ?: ExpandableHistoryItem(date, false)
+                    oldExpandedStates[formatDate(date)] ?: ExpandableHistoryItem(formatDate(date), false)
                 }
                 val collectionEntries = collections.map {
                     CollectionEntry(it.collectionId, it.collectionName)
