@@ -27,12 +27,14 @@ fun HistoryItem.toEntity(): HistoryEntity {
     val gson = Gson()
     return when (this) {
         is HistoryItem.Http -> HistoryEntity(
+            id = id,
             type = RequestType.Http,
             data = gson.toJson(this.request),
             createdAt = this.request.createdAt
         )
 
         is HistoryItem.WebSocket -> HistoryEntity(
+            id = id,
             type = RequestType.WebSocket,
             data = gson.toJson(this.request),
             createdAt = this.request.createdAt

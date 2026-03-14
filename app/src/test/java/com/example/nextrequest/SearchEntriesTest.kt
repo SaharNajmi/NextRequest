@@ -18,25 +18,23 @@ class SearchEntriesTest {
     @Test
     fun `return histories by searching url for http and websocket`() {
         val httpItems = listOf(
-            HistoryItem.Http(HttpRequest(id = 1, requestUrl = "url1")),
-            HistoryItem.Http(HttpRequest(id = 2, requestUrl = "url2")),
-            HistoryItem.Http(HttpRequest(id = 3, requestUrl = "url3")),
-            HistoryItem.Http(HttpRequest(id = 4, requestUrl = "url3")),
-            HistoryItem.Http(HttpRequest(id = 5, requestUrl = "url5")),
-            HistoryItem.Http(HttpRequest(id = 6, requestUrl = "request55"))
+            HistoryItem.Http(id = 1, HttpRequest(requestUrl = "url1")),
+            HistoryItem.Http(id = 2, HttpRequest(requestUrl = "url2")),
+            HistoryItem.Http(id = 3, HttpRequest(requestUrl = "url3")),
+            HistoryItem.Http(id = 4, HttpRequest(requestUrl = "url3")),
+            HistoryItem.Http(id = 5, HttpRequest(requestUrl = "url5")),
+            HistoryItem.Http(id = 6, HttpRequest(requestUrl = "request55"))
         )
 
         val wsItems = listOf(
             HistoryItem.WebSocket(
-                WebSocketRequest(
-                    id = 7,
+                id = 7, WebSocketRequest(
                     url = "ws://url5",
                     createdAt = System.currentTimeMillis()
                 )
             ),
             HistoryItem.WebSocket(
-                WebSocketRequest(
-                    id = 8,
+                id = 8, WebSocketRequest(
                     url = "ws://request55",
                     createdAt = System.currentTimeMillis()
                 )
@@ -78,8 +76,8 @@ class SearchEntriesTest {
             HistoryEntry(
                 "12 Aug",
                 listOf(
-                    HistoryItem.Http(HttpRequest(id = 1, requestUrl = "url1")),
-                    HistoryItem.WebSocket(WebSocketRequest(id = 2, url = "ws://url2"))
+                    HistoryItem.Http(id = 1, HttpRequest(requestUrl = "url1")),
+                    HistoryItem.WebSocket(id = 2, WebSocketRequest(url = "ws://url2"))
                 )
             )
         )
@@ -94,9 +92,14 @@ class SearchEntriesTest {
         val histories = listOf(
             HistoryEntry(
                 "12 Aug", histories = listOf(
-                    HistoryItem.Http(HttpRequest(id = 1, requestUrl = "url1")),
-                    HistoryItem.Http(HttpRequest(id = 2, requestUrl = "url2")),
-                    HistoryItem.WebSocket(WebSocketRequest(id = 3, url = "ws://Url3", createdAt = System.currentTimeMillis()))
+                    HistoryItem.Http(id = 1, HttpRequest(requestUrl = "url1")),
+                    HistoryItem.Http(id = 2, HttpRequest(requestUrl = "url2")),
+                    HistoryItem.WebSocket(
+                        id = 3, WebSocketRequest(
+                            url = "ws://Url3",
+                            createdAt = System.currentTimeMillis()
+                        )
+                    )
                 )
             )
         )

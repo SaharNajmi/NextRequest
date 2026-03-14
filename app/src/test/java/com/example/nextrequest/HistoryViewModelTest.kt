@@ -52,9 +52,15 @@ class HistoryViewModelTest {
         val today = LocalDate.now()
         val yesterday = LocalDate.now().minusDays(1)
         val histories = listOf(
-            HistoryItem.Http(HttpRequest(id = 1, requestUrl = "url1", createdAt = today.toLong())),
-            HistoryItem.Http(HttpRequest(id = 2, requestUrl = "url2", createdAt = yesterday.toLong())),
-            HistoryItem.WebSocket(WebSocketRequest(id = 3, url = "url3", createdAt = today.toLong())),
+            HistoryItem.Http(id = 1, HttpRequest(requestUrl = "url1", createdAt = today.toLong())),
+            HistoryItem.Http(
+                id = 2,
+                HttpRequest(requestUrl = "url2", createdAt = yesterday.toLong())
+            ),
+            HistoryItem.WebSocket(
+                id = 3,
+                WebSocketRequest(url = "url3", createdAt = today.toLong())
+            ),
         )
 
         coEvery { historyRepository.getAllHistories() } returns histories
@@ -82,9 +88,19 @@ class HistoryViewModelTest {
         val yesterdayFormatted = formatDate(yesterday)
 
         val histories = listOf(
-            HistoryItem.Http(HttpRequest(id = 1, requestUrl = "url1", createdAt = today.toLong())),
-            HistoryItem.Http(HttpRequest(id = 2, requestUrl = "url2", createdAt = yesterday.toLong())),
-            HistoryItem.WebSocket(WebSocketRequest(id = 3, url = "url3", createdAt = today.toLong())),
+            HistoryItem.Http(id = 1, HttpRequest(requestUrl = "url1", createdAt = today.toLong())),
+            HistoryItem.Http(
+                id = 2, HttpRequest(
+                    requestUrl = "url2",
+                    createdAt = yesterday.toLong()
+                )
+            ),
+            HistoryItem.WebSocket(
+                id = 3, WebSocketRequest(
+                    url = "url3",
+                    createdAt = today.toLong()
+                )
+            ),
         )
 
         coEvery { historyRepository.getAllHistories() } returns histories

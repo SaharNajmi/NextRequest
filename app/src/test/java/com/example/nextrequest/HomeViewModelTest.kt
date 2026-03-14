@@ -219,10 +219,10 @@ class HomeViewModelTest {
     @Test
     fun `loadRequestFromHistory returns success when statusCode is not null`() = runTest {
         val savedRequest =
-            HistoryItem.Http(HttpRequest(requestUrl = "/test", statusCode = 200, response = "url response"))
-//        every { savedRequest.statusCode } returns 200
-//        every { savedRequest.toHttpResponse() } answers { ApiResponse("url response", 200) }
-//        every { savedRequest.toHttpRequest() } answers { ApiRequest(requestUrl = "/test") }
+            HistoryItem.Http(
+                id = 1,
+                HttpRequest(requestUrl = "/test", statusCode = 200, response = "url response")
+            )
         coEvery { historyRepo.getHistory(1) } returns savedRequest
 
         viewModel.loadRequestFromHistory(1)
@@ -234,9 +234,8 @@ class HomeViewModelTest {
 
     @Test
     fun `loadRequestFromHistory returns error when statusCode is null`() = runTest {
-        val savedRequest =  HistoryItem.Http(
-            HttpRequest(
-                id = 1,
+        val savedRequest = HistoryItem.Http(
+            id = 1, HttpRequest(
                 requestUrl = "/test",
                 response = "error",
                 statusCode = null

@@ -9,27 +9,32 @@ import com.example.nextrequest.collection.domain.model.Collection
 import com.example.nextrequest.collection.domain.model.Request
 import com.example.nextrequest.collection.domain.repository.CollectionRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CollectionRepositoryImpTest {
-
+    private val dispatcher = StandardTestDispatcher()
     lateinit var collectionRepository: CollectionRepository
     private lateinit var db: AppDatabase
     private var collectionId = "123"
 
     @Before
     fun setup() {
+        Dispatchers.setMain(dispatcher)
         val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
             .allowMainThreadQueries()
             .build()
 
-       val dao = db.collectionDao()
-        collectionRepository = CollectionRepositoryImp(dao, Dispatchers.IO)
+        val dao = db.collectionDao()
+        collectionRepository = CollectionRepositoryImp(dao, dispatcher)
     }
 
     @After
