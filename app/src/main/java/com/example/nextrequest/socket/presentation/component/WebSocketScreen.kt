@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -177,6 +178,7 @@ fun WebSocketScreen(
 fun MessageItem(message: MessageUiModel) {
     var expandedText by remember { mutableStateOf(false) }
     val maxLines = if (expandedText) Int.MAX_VALUE else 1
+    var isOverflowing by remember { mutableStateOf(false) }
     Column() {
         Row(
             modifier = Modifier
@@ -206,7 +208,11 @@ fun MessageItem(message: MessageUiModel) {
                     .padding(start = 4.dp, end = 4.dp),
                 maxLines = maxLines,
                 overflow = TextOverflow.Ellipsis,
-                fontSize = 12.sp
+                fontSize = 12.sp, onTextLayout = { textLayoutResult ->
+                    if (!expandedText) {
+                        isOverflowing = textLayoutResult.hasVisualOverflow
+                    }
+                }
             )
             Text(message.timestamp, fontSize = 12.sp, fontWeight = FontWeight.Light)
             Icon(
@@ -214,8 +220,10 @@ fun MessageItem(message: MessageUiModel) {
                 contentDescription = "expanded",
                 modifier = Modifier
                     .padding(start = 2.dp)
-                    .clickable { expandedText = !expandedText }
-            )
+                    .clickable(enabled = isOverflowing || expandedText) {
+                        expandedText = !expandedText
+                    }
+                    .alpha(if (isOverflowing || expandedText) 1f else 0f))
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 0.5.dp)
     }
