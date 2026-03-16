@@ -6,6 +6,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.example.nextrequest.core.models.HttpMethod
 import com.example.nextrequest.core.models.KeyValue
+import com.example.nextrequest.history.domain.model.RequestType
 
 @Entity(tableName = "collections")
 data class CollectionEntity(
@@ -15,7 +16,7 @@ data class CollectionEntity(
 )
 
 @Entity(
-    tableName = "requests",
+    tableName = "collection_items",
     // primaryKeys = ["collectionId", "id"],
     foreignKeys = [
         ForeignKey(
@@ -27,18 +28,28 @@ data class CollectionEntity(
     ],
     indices = [Index("collectionId")]
 )
-@Suppress("ArrayInDataClass")
-data class RequestEntity(
+data class CollectionItemEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val collectionId: String,
     val requestName: String,
-    val requestUrl: String?,
-    val httpMethod: HttpMethod,
-    val response: String,
-    val imageResponse: ByteArray? = null,
-    val createdAt: Long,
-    val statusCode: Int?,
-    val body: String? = null,
-    val headers: List<KeyValue>? = null,
+    val type: RequestType,
+    val data: String,
+    val createdAt: Long
 )
+
+//@Suppress("ArrayInDataClass")
+//data class RequestEntity(
+//    @PrimaryKey(autoGenerate = true)
+//    val id: Int = 0,
+//    val collectionId: String,
+//    val requestName: String,
+//    val requestUrl: String?,
+//    val httpMethod: HttpMethod,
+//    val response: String,
+//    val imageResponse: ByteArray? = null,
+//    val createdAt: Long,
+//    val statusCode: Int?,
+//    val body: String? = null,
+//    val headers: List<KeyValue>? = null,
+//)

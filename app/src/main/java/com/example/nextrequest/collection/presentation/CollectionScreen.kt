@@ -46,6 +46,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -54,9 +55,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.nextrequest.collection.domain.model.Request
+import com.example.nextrequest.collection.domain.model.CollectionItem
 import com.example.nextrequest.collection.presentation.model.CollectionUiState
-import com.example.nextrequest.core.extensions.parseHttpMethodFromString
 import com.example.nextrequest.core.presentation.color
 import com.example.nextrequest.core.presentation.component.CustomSearchBar
 import com.example.nextrequest.core.presentation.component.CustomToolbar
@@ -71,12 +71,13 @@ import com.example.nextrequest.core.presentation.theme.Silver
 import com.example.nextrequest.core.presentation.theme.focusedBorderColor
 import com.example.nextrequest.core.presentation.theme.iconTint
 import com.example.nextrequest.history.domain.searchCollections
+import com.sahar.nextrequest.R
 
 @Composable
 fun CollectionScreen(
     navController: NavController,
     viewModel: CollectionViewModel,
-    onCollectionItemClick: (Int, String) -> Unit,
+    onCollectionItemClick: (CollectionItem, String) -> Unit,
 ) {
     LaunchedEffect(Unit) {
         viewModel.getCollections()
@@ -91,7 +92,11 @@ fun CollectionScreen(
         onCollectionItemClick = onCollectionItemClick,
         onRenameRequestClick = { id, newName -> viewModel.changeRequestName(id, newName) },
         onRenameCollectionClick = { collection -> viewModel.updateCollection(collection) },
-        onCreateEmptyRequestClick = { collectionId -> viewModel.createAnEmptyRequest(collectionId) },
+        onCreateEmptyRequestClick = { collectionId ->
+            viewModel.createAnEmptyRequest(
+                collectionId
+            )
+        },
         onCreateNewCollectionClick = { viewModel.createNewCollection() },
         onHeaderClick = { collectionId -> viewModel.toggleExpanded(collectionId) },
         onDeleteCollectionClick = { collectionId -> viewModel.deleteCollection(collectionId) },
@@ -176,13 +181,13 @@ private fun ExpandedCollectionItems(
 ) {
     LazyColumn {
         collections.forEachIndexed { index, collection ->
-            val allRequests = collection.collection.requests
+            val allRequests = collection.requestCollection.items
             item {
                 CollectionHeader(
                     Modifier
                         .fillMaxWidth()
                         .padding(vertical = 2.dp),
-                    collection.collection.collectionName,
+                    collection.requestCollection.collectionName,
                     collection.isExpanded,
                     collection,
                     callbacks
@@ -197,27 +202,26 @@ private fun ExpandedCollectionItems(
                     ) {
                         AddARequestButton(
                             Modifier.padding(12.dp),
-                            collection.collection.collectionId,
+                            collection.requestCollection.collectionId,
                             callbacks
                         )
                     }
                 }
             } else {
-                items(allRequests.size, key = { i -> allRequests[i].id }) { index ->
+                items(allRequests.size, key = { i -> allRequests[i].requestId }) { index ->
                     AnimatedVisibility(
                         modifier = Modifier.fillMaxWidth(),
                         visible = collection.isExpanded == true
                     ) {
                         //  key(allRequests[index].id) {
-                        CollectionItem(
+                        CollectionItemView(
                             Modifier
                                 .padding(top = 2.dp, bottom = 2.dp, start = 12.dp),
                             allRequests[index],
-                            collection.collection.collectionId,
+                            collection.requestCollection.collectionId,
                             callbacks
                         )
                     }
-                    // }
                 }
             }
         }
@@ -248,7 +252,7 @@ fun CollectionHeader(
             .background(if (isExpanded) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = { callbacks.onHeaderClick(collection.collection.collectionId) }) {
+        IconButton(onClick = { callbacks.onHeaderClick(collection.requestCollection.collectionId) }) {
             Icon(
                 imageVector = icon,
                 contentDescription = "isExpandedIcon",
@@ -269,9 +273,9 @@ fun CollectionHeader(
                     if (!focusState.isFocused && isEditable) {
                         isEditable = false
                         val newName = text.text
-                        if (collection.collection.collectionName != newName) {
+                        if (collection.requestCollection.collectionName != newName) {
                             callbacks.onRenameCollectionClick(
-                                collection.collection.copy(
+                                collection.requestCollection.copy(
                                     collectionName = newName
                                 )
                             )
@@ -300,7 +304,7 @@ fun CollectionHeader(
             Modifier
                 .padding(horizontal = 4.dp)
                 .clickable {
-                    callbacks.onCreateEmptyRequestClick(collection.collection.collectionId)
+                    callbacks.onCreateEmptyRequestClick(collection.requestCollection.collectionId)
                 },
             tint = MaterialTheme.colorScheme.iconTint
         )
@@ -327,7 +331,7 @@ fun CollectionHeader(
             Modifier
                 .padding(horizontal = 4.dp)
                 .clickable {
-                    callbacks.onDeleteCollectionClick(collection.collection.collectionId)
+                    callbacks.onDeleteCollectionClick(collection.requestCollection.collectionId)
                 },
             tint = MaterialTheme.colorScheme.iconTint
         )
@@ -347,14 +351,15 @@ fun AddARequestButton(modifier: Modifier, collectionId: String, callbacks: Colle
 }
 
 @Composable
-private fun CollectionItem(
+private fun CollectionItemView(
     modifier: Modifier,
-    request: Request,
+    collectionItem: CollectionItem,
     collectionId: String,
     callbacks: CollectionCallbacks,
 ) {
-    val requestName = request.requestName.substringAfter(" ")
-    val displayText = if (requestName.length > 35) requestName.take(35) + "..." else requestName
+
+    val displayText =
+        if (collectionItem.requestName.length > 35) collectionItem.requestName.take(35) + "..." else collectionItem.requestName
 
     var text by remember {
         mutableStateOf(TextFieldValue(displayText, TextRange(displayText.length)))
@@ -364,24 +369,36 @@ private fun CollectionItem(
     val focusRequester = remember { FocusRequester() }
     var isEditable by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
-    val httpMethod = request.requestName.parseHttpMethodFromString()
+
     if (interactionSource.collectIsPressedAsState().value) {
-        callbacks.onCollectionItemClick(request.id, collectionId)
+        callbacks.onCollectionItemClick(collectionItem, collectionId)
     }
 
     Row(
         modifier = modifier
             .clickable {
-                callbacks.onCollectionItemClick(request.id, collectionId)
+                callbacks.onCollectionItemClick(collectionItem, collectionId)
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = httpMethod.name,
-            color = httpMethod.color,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Medium
-        )
+        when (collectionItem) {
+            is CollectionItem.Http -> {
+                Text(
+                    text = collectionItem.request.httpMethod.name,
+                    color = collectionItem.request.httpMethod.color,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+            is CollectionItem.WebSocket -> {
+                Icon(
+                    painter = painterResource(R.drawable.websocket),
+                    contentDescription = "websocket icon",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
 
         OutlinedTextField(
             value = text,
@@ -396,14 +413,14 @@ private fun CollectionItem(
                 .focusable(isEditable)
                 .focusRequester(focusRequester)
                 .combinedClickable(onClick = {
-                    callbacks.onCollectionItemClick(request.id, collectionId)
+                    callbacks.onCollectionItemClick(collectionItem, collectionId)
                 })
                 .onFocusChanged { focusState ->
                     if (!focusState.isFocused && isEditable) {
                         isEditable = false
                         callbacks.onRenameRequestClick(
-                            request.id,
-                            "${httpMethod.name} ${text.text}"
+                            collectionItem.requestId,
+                            text.text
                         )
                     }
                 },
@@ -447,7 +464,7 @@ private fun CollectionItem(
                 .padding(horizontal = 4.dp)
                 .size(20.dp)
                 .clickable {
-                    callbacks.onDeleteRequestClick(request.id)
+                    callbacks.onDeleteRequestClick(collectionItem.requestId)
                 }
         )
     }

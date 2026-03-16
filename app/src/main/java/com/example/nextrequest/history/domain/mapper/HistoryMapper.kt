@@ -1,14 +1,14 @@
 package com.example.nextrequest.history.domain.mapper
 
-import com.example.nextrequest.collection.domain.model.Request
-import com.example.nextrequest.core.data.extensions.toImageBitmap
+import com.example.nextrequest.collection.domain.model.CollectionItem
 import com.example.nextrequest.core.data.extensions.toLocalDate
+import com.example.nextrequest.core.domain.model.HttpRequest
+import com.example.nextrequest.core.domain.model.WebSocketRequest
 import com.example.nextrequest.history.data.entity.HistoryEntity
-import com.example.nextrequest.history.data.model.HttpRequest
-import com.example.nextrequest.history.data.model.WebSocketRequest
 import com.example.nextrequest.history.domain.model.HistoryItem
 import com.example.nextrequest.history.domain.model.RequestType
 import com.google.gson.Gson
+import java.time.LocalDate
 
 fun HistoryEntity.toDomain(): HistoryItem {
     val gson = Gson()
@@ -40,21 +40,22 @@ fun HistoryItem.toEntity(): HistoryEntity {
     }
 }
 
-fun HistoryItem.toRequest(): Request {
-    return when (this) {
-        is HistoryItem.Http -> Request(
-            requestName = "${this.request.httpMethod} ${this.request.requestUrl}",
-            requestUrl = this.request.requestUrl,
-            httpMethod = this.request.httpMethod,
-            response = this.request.response,
-            imageResponse = this.request.imageResponse?.toImageBitmap(),
-            createdAt = this.request.createdAt.toLocalDate(),
-            statusCode = this.request.statusCode,
-            body = this.request.body,
-            headers = this.request.headers
-        )
-
-        is HistoryItem.WebSocket -> Request()
-    }
+fun HistoryItem.toCollectionItem(): CollectionItem {
+        return when (this) {
+            is HistoryItem.Http -> CollectionItem.Http(
+                requestId = 0,
+                requestName ="${this.request.httpMethod} ${this.request.requestUrl}",
+                request = this.request
+            )
+            is HistoryItem.WebSocket -> CollectionItem.WebSocket(
+                requestId = 0,
+                requestName ="WebSocket ${this.request.url}",
+                request = this.request
+            )
+        }
 }
 
+fun HistoryItem.getCreatedAt(): LocalDate = when (this) {
+    is HistoryItem.Http -> request.createdAt.toLocalDate()
+    is HistoryItem.WebSocket -> request.createdAt.toLocalDate()
+}

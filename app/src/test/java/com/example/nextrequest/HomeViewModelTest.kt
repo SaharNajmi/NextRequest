@@ -1,12 +1,12 @@
 package com.example.nextrequest
 
-import com.example.nextrequest.collection.domain.model.Request
+import com.example.nextrequest.collection.domain.model.CollectionItem
 import com.example.nextrequest.collection.domain.repository.CollectionRepository
 import com.example.nextrequest.core.domain.model.ApiRequest
-import com.example.nextrequest.core.domain.model.ApiResponse
+import com.example.nextrequest.core.domain.model.HttpRequest
 import com.example.nextrequest.core.models.HttpMethod
 import com.example.nextrequest.core.models.KeyValue
-import com.example.nextrequest.history.data.model.HttpRequest
+import com.example.nextrequest.core.presentation.navigation.Screens
 import com.example.nextrequest.history.domain.model.HistoryItem
 import com.example.nextrequest.history.domain.repository.HistoryRepository
 import com.example.nextrequest.home.domain.repository.HomeRepository
@@ -17,7 +17,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -72,9 +71,9 @@ class HomeViewModelTest {
         viewModel.sendRequest(collectionId = "1232")
         testDispatcher.scheduler.advanceUntilIdle()
         coVerify(exactly = 1) {
-            collectionRepo.updateCollectionRequest(
+            collectionRepo.updateCollectionItem(
                 "1232",
-                any<Request>()
+                any<CollectionItem>()
             )
         }
     }
@@ -86,9 +85,9 @@ class HomeViewModelTest {
         viewModel.sendRequest(collectionId = null)
 
         coVerify(exactly = 0) {
-            collectionRepo.updateCollectionRequest(
+            collectionRepo.updateCollectionItem(
                 any<String>(),
-                any<Request>()
+                any<CollectionItem>()
             )
         }
 
@@ -101,9 +100,9 @@ class HomeViewModelTest {
         coVerify(exactly = 0) {
             homeRepo.sendRequest(any<String>(), any<String>())
             historyRepo.insertHistory(any<HistoryItem>())
-            collectionRepo.updateCollectionRequest(
+            collectionRepo.updateCollectionItem(
                 any<String>(),
-                any<Request>()
+                any<CollectionItem>()
             )
         }
     }
@@ -225,7 +224,7 @@ class HomeViewModelTest {
             )
         coEvery { historyRepo.getHistory(1) } returns savedRequest
 
-        viewModel.loadRequestFromHistory(1)
+        viewModel.loadRequest(1, Screens.ROUTE_HISTORY_SCREEN)
         testDispatcher.scheduler.advanceUntilIdle()
 
         coVerify(exactly = 1) { historyRepo.getHistory(1) }
@@ -243,7 +242,7 @@ class HomeViewModelTest {
         )
         coEvery { historyRepo.getHistory(any<Int>()) } returns savedRequest
 
-        viewModel.loadRequestFromHistory(1)
+        viewModel.loadRequest(1, Screens.ROUTE_HISTORY_SCREEN)
         testDispatcher.scheduler.advanceUntilIdle()
         coVerify(exactly = 1) { historyRepo.getHistory(any<Int>()) }
 
@@ -252,49 +251,36 @@ class HomeViewModelTest {
         (viewModel.uiState.first().response as? Loadable.Success)?.data?.statusCode shouldBe null
         (viewModel.uiState.first().response as Loadable.Error).message shouldBe "error"
     }
-
     @Test
     fun `loadRequestFromCollection returns success when statusCode is not null`() = runTest {
-        val savedRequest =
-            Request(requestUrl = "/test", statusCode = 200, response = "url response")
-        coEvery { collectionRepo.getCollectionRequest(1) } returns savedRequest
+        val savedCollectionItem = CollectionItem.Http(
+            requestId = 1,
+            requestName = "test request",
+            request = HttpRequest(requestUrl = "/test", statusCode = 200, response = "url response")
+        )
+        coEvery { collectionRepo.getCollectionItem(1) } returns savedCollectionItem
 
-        viewModel.loadRequestFromCollection(1)
+        viewModel.loadRequest(1, Screens.ROUTE_COLLECTION_SCREEN)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        coVerify(exactly = 1) { collectionRepo.getCollectionRequest(1) }
+        coVerify(exactly = 1) { collectionRepo.getCollectionItem(1) }
         (viewModel.uiState.first().response as Loadable.Success).data.statusCode shouldBe 200
     }
 
     @Test
     fun `loadRequestFromCollection returns error when statusCode is null`() = runTest {
-        val savedRequest = mockk<Request>(relaxed = true)
-        every { savedRequest.statusCode } returns null
-        every { savedRequest.requestUrl } returns "/test"
-        every { savedRequest.response } returns "error"
-        coEvery { collectionRepo.getCollectionRequest(any<Int>()) } returns savedRequest
+        val savedCollectionItem = CollectionItem.Http(
+            requestId = 1,
+            requestName = "test request",
+            request = HttpRequest(requestUrl = "/test", statusCode = null, response = "error")
+        )
+        coEvery { collectionRepo.getCollectionItem(1) } returns savedCollectionItem
 
-        viewModel.loadRequestFromCollection(1)
+        viewModel.loadRequest(1, Screens.ROUTE_COLLECTION_SCREEN)
         testDispatcher.scheduler.advanceUntilIdle()
-        coVerify(exactly = 1) { collectionRepo.getCollectionRequest(any<Int>()) }
 
-        viewModel.uiState.first().response shouldBe Loadable.Error("error")
-        (viewModel.uiState.first().response as? Loadable.Success)?.data?.statusCode shouldBe null
+        coVerify(exactly = 1) { collectionRepo.getCollectionItem(1) }
         (viewModel.uiState.first().response as Loadable.Error).message shouldBe "error"
-    }
-
-    @Test
-    fun `loadRequestFromCollection returns empty result when requestUrl is null`() = runTest {
-        val savedRequest = mockk<Request>(relaxed = true)
-        every { savedRequest.requestUrl } returns null
-        every { savedRequest.statusCode } returns null
-        coEvery { collectionRepo.getCollectionRequest(any<Int>()) } returns savedRequest
-
-        viewModel.loadRequestFromCollection(1)
-        testDispatcher.scheduler.advanceUntilIdle()
-        coVerify(exactly = 1) { collectionRepo.getCollectionRequest(any<Int>()) }
-
-        viewModel.uiState.first().response shouldBe Loadable.Empty
     }
 
     @Test

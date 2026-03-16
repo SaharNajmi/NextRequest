@@ -2,19 +2,23 @@ package com.example.nextrequest.home.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.nextrequest.collection.domain.model.Request
+import com.example.nextrequest.collection.domain.model.CollectionItem
 import com.example.nextrequest.collection.domain.repository.CollectionRepository
 import com.example.nextrequest.core.domain.model.ApiRequest
 import com.example.nextrequest.core.domain.model.ApiResponse
+import com.example.nextrequest.core.domain.model.HttpRequest
 import com.example.nextrequest.core.extensions.buildUrlWithParams
 import com.example.nextrequest.core.extensions.mapKeyValuePairsToQueryParameter
 import com.example.nextrequest.core.extensions.removeParameterFromUrl
 import com.example.nextrequest.core.models.HttpMethod
 import com.example.nextrequest.core.models.KeyValue
+import com.example.nextrequest.core.presentation.navigation.Screens
 import com.example.nextrequest.history.domain.model.HistoryItem
 import com.example.nextrequest.history.domain.repository.HistoryRepository
+import com.example.nextrequest.home.data.mapper.buildHttpRequestFromApi
 import com.example.nextrequest.home.data.mapper.httpRequestToHistory
-import com.example.nextrequest.home.data.mapper.httpRequestToRequest
+import com.example.nextrequest.home.data.mapper.toApiRequest
+import com.example.nextrequest.home.data.mapper.toApiResponse
 import com.example.nextrequest.home.data.mapper.toHttpRequest
 import com.example.nextrequest.home.data.mapper.toHttpResponse
 import com.example.nextrequest.home.domain.repository.HomeRepository
@@ -69,7 +73,7 @@ class HomeViewModel @Inject constructor(
                 if (collectionId != null) {
                     updateCollectionRequest(
                         collectionId = collectionId,
-                        httpRequestToRequest(
+                        buildHttpRequestFromApi(
                             apiRequest = requestData,
                             apiResponse = result
                         )
@@ -89,7 +93,7 @@ class HomeViewModel @Inject constructor(
                 if (collectionId != null) {
                     updateCollectionRequest(
                         collectionId = collectionId,
-                        httpRequestToRequest(
+                        buildHttpRequestFromApi(
                             apiRequest = requestData,
                             apiResponse = ApiResponse(error.getNetworkErrorMessage())
                         )
@@ -126,7 +130,8 @@ class HomeViewModel @Inject constructor(
     }
 
     fun updateHttpMethod(newHttpMethod: HttpMethod) {
-        _uiState.value = _uiState.value.copy(data = _uiState.value.data.copy(httpMethod = newHttpMethod))
+        _uiState.value =
+            _uiState.value.copy(data = _uiState.value.data.copy(httpMethod = newHttpMethod))
     }
 
     fun updateBody(body: String) {
@@ -200,53 +205,45 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun loadRequestFromHistory(historyId: Int) {
+    fun loadRequest(requestId: Int, source: String) {
         viewModelScope.launch(dispatcher) {
-            when (val saved = historyRepository.getHistory(historyId)) {
-                is HistoryItem.Http -> {
-                    val response = if (saved.toHttpResponse().statusCode != null)
-                        Loadable.Success(
-                            saved.toHttpResponse()
-                        )
-                    else
-                        Loadable.Error(
-                            saved.toHttpResponse().response
-                        )
-
-                    _uiState.value = HomeUiState(
-                        saved.toHttpRequest(),
-                        response
-                    )
+            val httpRequest: HttpRequest? = when (source) {
+                Screens.ROUTE_HISTORY_SCREEN -> {
+                    when (val saved = historyRepository.getHistory(requestId)) {
+                        is HistoryItem.Http -> saved.request
+                        is HistoryItem.WebSocket -> null
+                    }
                 }
-
-                is HistoryItem.WebSocket -> {
-                    //todo
+                Screens.ROUTE_COLLECTION_SCREEN -> {
+                    when (val saved = collectionRepository.getCollectionItem(requestId)) {
+                        is CollectionItem.Http -> saved.request
+                        is CollectionItem.WebSocket -> null
+                    }
                 }
-
+                else -> null
             }
-        }
-    }
 
-    fun loadRequestFromCollection(requestId: Int) {
-        viewModelScope.launch(dispatcher) {
-            val saved = collectionRepository.getCollectionRequest(requestId)
-
-            val response = when {
-                saved.statusCode != null -> Loadable.Success(saved.toHttpResponse())
-                saved.requestUrl == null -> Loadable.Empty
-                else -> Loadable.Error(saved.toHttpResponse().response)
+            val response: Loadable<ApiResponse> = when {
+                httpRequest == null -> Loadable.Empty
+                httpRequest.statusCode != null -> Loadable.Success(httpRequest.toApiResponse())
+                else -> Loadable.Error(httpRequest.response)
             }
 
             _uiState.value = HomeUiState(
-                saved.toHttpRequest(),
-                response
+                data = httpRequest?.toApiRequest() ?: ApiRequest(),
+                response = response
             )
         }
     }
 
-    fun updateCollectionRequest(collectionId: String, request: Request) {
+    fun updateCollectionRequest(collectionId: String, request: HttpRequest) {
         viewModelScope.launch(dispatcher) {
-            collectionRepository.updateCollectionRequest(collectionId, request)
+            val item = CollectionItem.Http(
+                requestId = 0,
+                requestName = request.requestUrl,
+                request = request
+            )
+            collectionRepository.updateCollectionItem(collectionId, item)
         }
     }
 }

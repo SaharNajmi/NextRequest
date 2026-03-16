@@ -54,12 +54,14 @@ class WebSocketRepositoryImpTest {
     }
 
     @Test
-    fun `connect should update isConnected and send initial message`() = runTest {
+    fun `connect should update isConnected and emit connected message`() = runTest {
         repository.connect("ws://test-url")
         listenerSlot.captured.onOpen(mockWebSocket, mockk())
         testScope.advanceUntilIdle()
+
         repository.isConnected.first().shouldBeTrue()
-        verify { mockWebSocket.send("Connected to server") }
+        repository.messages.first().text shouldBe "Connected to ws://test-url"
+        repository.messages.first().isSentByUser shouldBe false
     }
 
     @Test

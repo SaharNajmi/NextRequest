@@ -1,29 +1,18 @@
 package com.example.nextrequest.collection.domain.repository
 
-import com.example.nextrequest.collection.domain.model.Collection
-import com.example.nextrequest.collection.domain.model.Request
-import com.example.nextrequest.history.domain.model.HistoryItem
+import com.example.nextrequest.collection.domain.model.RequestCollection
+import com.example.nextrequest.collection.domain.model.CollectionItem
 
 interface CollectionRepository {
-    suspend fun insertCollection(collection: Collection)
-
-    suspend fun getAllCollections(): List<Collection>
-
-    suspend fun getRequestName(requestId: Int): String
-
-    suspend fun updateCollection(collection: Collection)
-
-    suspend fun updateCollectionRequest(collectionId: String, request: Request)
-
+    suspend fun getAllCollections(): List<RequestCollection>
+    suspend fun insertCollection(requestCollection: RequestCollection)
+    suspend fun updateCollection(requestCollection: RequestCollection)
     suspend fun deleteCollection(collectionId: String)
-
-    suspend fun insertRequestToCollection(collectionId: String, request: Request)
-
-    suspend fun getCollectionRequests(collectionId: String): List<Request>
-
-    suspend fun getCollectionRequest(requestId: Int): Request
-
-    suspend fun deleteRequestFromCollection(requestId: Int)
-
-    suspend fun changeRequestName(requestId: Int, requestName: String)
+    suspend fun insertItemToCollection(collectionId: String, item: CollectionItem)
+    suspend fun updateCollectionItem(collectionId: String, collectionItem: CollectionItem)
+    suspend fun getCollectionItems(collectionId: String): List<CollectionItem>
+    suspend fun getCollectionItem(requestId: Int): CollectionItem
+    suspend fun deleteItemFromCollection(itemId: Int)
+    suspend fun getRequestName(itemId: Int): String
+    suspend fun changeRequestName(itemId: Int, requestName: String)
 }

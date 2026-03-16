@@ -69,7 +69,6 @@ import com.example.nextrequest.core.presentation.icons.Content_copy
 import com.example.nextrequest.core.presentation.icons.History
 import com.example.nextrequest.core.presentation.icons.Search
 import com.example.nextrequest.core.presentation.icons.TriangleDown
-import com.example.nextrequest.core.presentation.navigation.Screens
 import com.example.nextrequest.core.presentation.theme.Silver
 import com.example.nextrequest.core.presentation.theme.iconOnBackground
 import com.example.nextrequest.core.presentation.theme.textMuted
@@ -95,12 +94,10 @@ fun HomeScreen(
     val uiState by homeViewModel.uiState.collectAsState()
     LaunchedEffect(requestId, source) {
         if (requestId != null && source != null) {
-            when (source) {
-                Screens.ROUTE_HISTORY_SCREEN -> homeViewModel.loadRequestFromHistory(requestId)
-                Screens.ROUTE_COLLECTION_SCREEN -> homeViewModel.loadRequestFromCollection(requestId)
-            }
+            homeViewModel.loadRequest(requestId, source)
         }
     }
+
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val clipboard = LocalClipboardManager.current

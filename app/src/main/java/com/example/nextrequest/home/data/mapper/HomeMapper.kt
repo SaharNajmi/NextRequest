@@ -1,30 +1,29 @@
 package com.example.nextrequest.home.data.mapper
 
-import com.example.nextrequest.collection.domain.model.Request
 import com.example.nextrequest.core.data.extensions.toByteArray
 import com.example.nextrequest.core.data.extensions.toImageBitmap
 import com.example.nextrequest.core.data.extensions.toLong
 import com.example.nextrequest.core.domain.model.ApiRequest
 import com.example.nextrequest.core.domain.model.ApiResponse
-import com.example.nextrequest.history.data.model.HttpRequest
+import com.example.nextrequest.core.domain.model.HttpRequest
 import com.example.nextrequest.history.domain.model.HistoryItem
 
-fun Request.toHttpRequest(): ApiRequest =
-    ApiRequest(
-        id = id,
-        requestUrl = requestUrl ?: "",
+fun HttpRequest.toApiRequest(): ApiRequest {
+    return ApiRequest(
+        requestUrl = requestUrl,
         httpMethod = httpMethod,
         body = body,
         headers = headers
     )
+}
 
-
-fun Request.toHttpResponse(): ApiResponse =
-    ApiResponse(
+fun HttpRequest.toApiResponse(): ApiResponse {
+    return ApiResponse(
         response = response,
         statusCode = statusCode,
-        imageResponse = imageResponse
+        imageResponse = imageResponse?.toImageBitmap()
     )
+}
 
 fun HistoryItem.Http.toHttpRequest(): ApiRequest {
     return ApiRequest(
@@ -42,18 +41,17 @@ fun HistoryItem.Http.toHttpResponse(): ApiResponse =
         imageResponse = request.imageResponse?.toImageBitmap()
     )
 
-fun httpRequestToRequest(
+fun buildHttpRequestFromApi(
     apiRequest: ApiRequest,
     apiResponse: ApiResponse,
-): Request =
-    Request(
-        id = apiRequest.id,
+): HttpRequest =
+    HttpRequest(
         requestUrl = apiRequest.requestUrl,
         httpMethod = apiRequest.httpMethod,
-        createdAt = apiRequest.createdAt,
+        createdAt = apiRequest.createdAt.toLong(),
         response = apiResponse.response,
         statusCode = apiResponse.statusCode,
-        imageResponse = apiResponse.imageResponse,
+        imageResponse = apiResponse.imageResponse?.toByteArray(),
         body = apiRequest.body,
         headers = apiRequest.headers
     )

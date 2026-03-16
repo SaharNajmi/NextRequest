@@ -1,77 +1,94 @@
 package com.example.nextrequest.collection.data.mapper
 
 import com.example.nextrequest.collection.data.entity.CollectionEntity
-import com.example.nextrequest.collection.data.entity.RequestEntity
-import com.example.nextrequest.collection.domain.model.Collection
-import com.example.nextrequest.collection.domain.model.Request
-import com.example.nextrequest.core.data.extensions.toByteArray
-import com.example.nextrequest.core.data.extensions.toImageBitmap
-import com.example.nextrequest.core.data.extensions.toLocalDate
-import com.example.nextrequest.core.data.extensions.toLong
+import com.example.nextrequest.collection.data.entity.CollectionItemEntity
+import com.example.nextrequest.collection.domain.model.RequestCollection
+import com.example.nextrequest.collection.domain.model.CollectionItem
+import com.example.nextrequest.core.domain.model.HttpRequest
+import com.example.nextrequest.core.domain.model.WebSocketRequest
+import com.example.nextrequest.history.domain.model.RequestType
+import com.google.gson.Gson
 
-fun CollectionEntity.toDomain(requests: List<Request>): Collection {
-    return Collection(
+fun CollectionEntity.toDomain(collectionItems: List<CollectionItem>): RequestCollection {
+    return RequestCollection(
         collectionId = collectionId,
         collectionName = collectionName,
-        requests = requests
+        items = collectionItems
     )
 }
 
-fun Collection.toEntity(): CollectionEntity {
+fun RequestCollection.toEntity(): CollectionEntity {
     return CollectionEntity(
         collectionId = collectionId,
         collectionName = collectionName
     )
 }
 
-fun Request.toEntity(collectionId: String): RequestEntity {
-    return RequestEntity(
-        id = id,
-        collectionId = collectionId,
-        requestName = requestName,
-        requestUrl = requestUrl,
-        httpMethod = httpMethod,
-        response = response,
-        createdAt = createdAt.toLong(),
-        statusCode = statusCode,
-        imageResponse = imageResponse?.toByteArray(),
-        body = body,
-        headers = headers
-    )
+fun CollectionItem.toEntity(
+    collectionId: String,
+): CollectionItemEntity {
+    val gson = Gson()
+    return when (this) {
+        is CollectionItem.Http -> CollectionItemEntity(
+            id = this.requestId,
+            collectionId = collectionId,
+            requestName = requestName,
+            type = RequestType.Http,
+            data = gson.toJson(this.request),
+            createdAt = this.request.createdAt
+        )
+
+        is CollectionItem.WebSocket -> CollectionItemEntity(
+            id = this.requestId,
+            collectionId = collectionId,
+            requestName = requestName,
+            type = RequestType.WebSocket,
+            data = gson.toJson(this.request),
+            createdAt = this.request.createdAt
+        )
+    }
 }
 
-fun Request.toEntity(
+fun CollectionItem.toEntity(
     collectionId: String,
     requestName: String,
-): RequestEntity {
-    return RequestEntity(
-        id = id,
-        collectionId = collectionId,
-        requestName = requestName,
-        requestUrl = requestUrl,
-        httpMethod = httpMethod,
-        response = response,
-        createdAt = createdAt.toLong(),
-        statusCode = statusCode,
-        imageResponse = imageResponse?.toByteArray(),
-        body = body,
-        headers = headers
-    )
+): CollectionItemEntity {
+    val gson = Gson()
+    return when (this) {
+        is CollectionItem.Http -> CollectionItemEntity(
+            id = this.requestId,
+            collectionId = collectionId,
+            requestName = requestName,
+            type = RequestType.Http,
+            data = gson.toJson(this.request),
+            createdAt = this.request.createdAt
+        )
+
+        is CollectionItem.WebSocket -> CollectionItemEntity(
+            id = this.requestId,
+            collectionId = collectionId,
+            requestName = requestName,
+            type = RequestType.WebSocket,
+            data = gson.toJson(this.request),
+            createdAt = this.request.createdAt
+        )
+    }
 }
 
+fun CollectionItemEntity.toDomain(): CollectionItem {
+    val gson = Gson()
+    return when (type) {
+        RequestType.Http -> CollectionItem.Http(
+            requestId = id,
+            requestName = requestName,
+            request = gson.fromJson(data, HttpRequest::class.java)
+        )
 
-fun RequestEntity.toDomain(): Request {
-    return Request(
-        id = id,
-        requestName = requestName,
-        requestUrl = requestUrl,
-        httpMethod = httpMethod,
-        response = response,
-        imageResponse = imageResponse?.toImageBitmap(),
-        createdAt = createdAt.toLocalDate(),
-        statusCode = statusCode,
-        body = body,
-        headers = headers
-    )
+        RequestType.WebSocket -> CollectionItem.WebSocket(
+            requestId = id,
+            requestName = requestName,
+            request = gson.fromJson(data, WebSocketRequest::class.java)
+        )
+    }
 }
 

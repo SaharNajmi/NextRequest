@@ -48,11 +48,6 @@ fun String.buildUrlWithParams(queryParams: String): String {
         "$baseUrl?$queryParams"
 }
 
-fun String.parseHttpMethodFromString(): HttpMethod {
-    val methodPart: String = this.substringBefore(" ")
-    return HttpMethod.valueOf(methodPart)
-}
-
 fun String.removeParameterFromUrl(key: String, value: String): String {
     val query = this.substringAfter("?", "")
     if (query.isEmpty()) return this

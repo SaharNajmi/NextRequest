@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.nextrequest.collection.domain.model.CollectionItem
 import com.example.nextrequest.collection.presentation.CollectionScreen
 import com.example.nextrequest.collection.presentation.CollectionViewModel
 import com.example.nextrequest.history.domain.model.HistoryItem
@@ -106,17 +107,33 @@ fun AppNavHost(
             CollectionScreen(
                 navController,
                 collectionViewModel,
-                onCollectionItemClick = { requestId, collectionId ->
-                    navController.navigate(
-                        Screens.HomeScreen.createRoute(
-                            requestId,
-                            Screens.ROUTE_COLLECTION_SCREEN,
-                            collectionId
-                        )
-                    ) {
-                        popUpTo(navController.graph.id) { inclusive = false }
-                        launchSingleTop = true
+                onCollectionItemClick = { collectionItem, collectionId ->
+                    when(collectionItem){
+                        is CollectionItem.Http -> {
+                            navController.navigate(
+                                Screens.HomeScreen.createRoute(
+                                    collectionItem.requestId,
+                                    Screens.ROUTE_COLLECTION_SCREEN,
+                                    collectionId
+                                )
+                            ) {
+                                popUpTo(navController.graph.id) { inclusive = false }
+                                launchSingleTop = true
+                            }
+                        }
+                        is CollectionItem.WebSocket ->  {
+                            navController.navigate(
+                                Screens.WebSocketScreen.createRoute(
+                                    collectionItem.requestId,
+                                    Screens.ROUTE_COLLECTION_SCREEN
+                                )
+                            ) {
+                                popUpTo(navController.graph.id) { inclusive = false }
+                                launchSingleTop = true
+                            }
+                        }
                     }
+
                 })
         }
         composable(

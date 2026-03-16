@@ -2,10 +2,11 @@ package com.example.nextrequest.collection.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.nextrequest.collection.domain.model.Collection
-import com.example.nextrequest.collection.domain.model.Request
+import com.example.nextrequest.collection.domain.model.RequestCollection
+import com.example.nextrequest.collection.domain.model.CollectionItem
 import com.example.nextrequest.collection.domain.repository.CollectionRepository
 import com.example.nextrequest.collection.presentation.model.CollectionUiState
+import com.example.nextrequest.core.domain.model.HttpRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +28,7 @@ class CollectionViewModel @Inject constructor(
         viewModelScope.launch(dispatcher) {
             _collections.value = collectionRepository.getAllCollections().map { item ->
                 val expanded =
-                    _collections.value.firstOrNull() { it.collection.collectionId == item.collectionId }?.isExpanded
+                    _collections.value.firstOrNull() { it.requestCollection.collectionId == item.collectionId }?.isExpanded
                         ?: false
                 CollectionUiState(item, expanded)
             }
@@ -36,7 +37,7 @@ class CollectionViewModel @Inject constructor(
 
     fun toggleExpanded(collectionId: String) {
         _collections.value = _collections.value.map {
-            if (it.collection.collectionId == collectionId) {
+            if (it.requestCollection.collectionId == collectionId) {
                 it.copy(isExpanded = !it.isExpanded)
             } else {
                 it
@@ -46,7 +47,7 @@ class CollectionViewModel @Inject constructor(
 
     fun deleteRequestItem(requestId: Int) {
         viewModelScope.launch(dispatcher) {
-            collectionRepository.deleteRequestFromCollection(requestId)
+            collectionRepository.deleteItemFromCollection(requestId)
             getCollections()
         }
     }
@@ -60,21 +61,28 @@ class CollectionViewModel @Inject constructor(
 
     fun createNewCollection() {
         viewModelScope.launch(dispatcher) {
-            collectionRepository.insertCollection(Collection())
+            collectionRepository.insertCollection(RequestCollection())
             getCollections()
         }
     }
 
     fun createAnEmptyRequest(collectionId: String) {
         viewModelScope.launch(dispatcher) {
-            collectionRepository.insertRequestToCollection(collectionId, Request())
+            val newItem = CollectionItem.Http(
+                requestId = 0,
+                requestName = "Http Request",
+                request = HttpRequest(
+                    requestUrl = ""
+                )
+            )
+            collectionRepository.insertItemToCollection(collectionId, newItem)
             getCollections()
         }
     }
 
-    fun updateCollection(collection: Collection) {
+    fun updateCollection(requestCollection: RequestCollection) {
         viewModelScope.launch(dispatcher) {
-            collectionRepository.updateCollection(collection)
+            collectionRepository.updateCollection(requestCollection)
             getCollections()
         }
     }

@@ -2,12 +2,13 @@ package com.example.nextrequest.history.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.nextrequest.collection.domain.model.Collection
+import com.example.nextrequest.collection.domain.model.RequestCollection
 import com.example.nextrequest.collection.domain.repository.CollectionRepository
 import com.example.nextrequest.collection.presentation.model.CollectionEntry
 import com.example.nextrequest.core.presentation.UiState
 import com.example.nextrequest.history.domain.formatDate
-import com.example.nextrequest.history.domain.mapper.toRequest
+import com.example.nextrequest.history.domain.mapper.getCreatedAt
+import com.example.nextrequest.history.domain.mapper.toCollectionItem
 import com.example.nextrequest.history.domain.model.HistoryItem
 import com.example.nextrequest.history.domain.repository.HistoryRepository
 import com.example.nextrequest.history.presentation.model.ExpandableHistoryItem
@@ -46,16 +47,19 @@ class HistoryViewModel @Inject constructor(
                 val collections = collectionsDeferred.await()
 
                 val grouped: Map<LocalDate, List<HistoryItem>> =
-                    histories.groupBy { it.toRequest().createdAt }
+                    histories.groupBy { it.getCreatedAt() }
 
                 val historyEntries = grouped
                     .toSortedMap(compareByDescending { it })
                     .map { (date, histories) ->
-                    HistoryEntry(dateCreated = formatDate(date), histories = histories)
-                }
+                        HistoryEntry(dateCreated = formatDate(date), histories = histories)
+                    }
 
                 val expandedStates = grouped.keys.map { date ->
-                    oldExpandedStates[formatDate(date)] ?: ExpandableHistoryItem(formatDate(date), false)
+                    oldExpandedStates[formatDate(date)] ?: ExpandableHistoryItem(
+                        formatDate(date),
+                        false
+                    )
                 }
                 val collectionEntries = collections.map {
                     CollectionEntry(it.collectionId, it.collectionName)
@@ -136,9 +140,9 @@ class HistoryViewModel @Inject constructor(
 
     fun addHistoryToCollection(historyItem: HistoryItem, collectionId: String) {
         viewModelScope.launch(dispatcher) {
-            collectionRepository.insertRequestToCollection(
+            collectionRepository.insertItemToCollection(
                 collectionId,
-                historyItem.toRequest()
+                historyItem.toCollectionItem()
             )
         }
     }
@@ -147,15 +151,15 @@ class HistoryViewModel @Inject constructor(
         histories: List<HistoryItem>,
         collectionId: String,
     ) {
-        val requests = histories.map { it.toRequest() }
+        val requests = histories.map { it.toCollectionItem() }
         viewModelScope.launch(dispatcher) {
-            requests.forEach { collectionRepository.insertRequestToCollection(collectionId, it) }
+            requests.forEach { collectionRepository.insertItemToCollection(collectionId, it) }
         }
     }
 
     fun createNewCollection() {
         viewModelScope.launch(dispatcher) {
-            collectionRepository.insertCollection(Collection())
+            collectionRepository.insertCollection(RequestCollection())
             getCollections()
         }
     }

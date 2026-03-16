@@ -2,10 +2,12 @@ package com.example.nextrequest.socket.presentation.component
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nextrequest.collection.domain.model.CollectionItem
 import com.example.nextrequest.collection.domain.repository.CollectionRepository
 import com.example.nextrequest.core.domain.model.ApiRequest
 import com.example.nextrequest.core.presentation.UiState
-import com.example.nextrequest.history.data.model.WebSocketRequest
+import com.example.nextrequest.core.domain.model.WebSocketRequest
+import com.example.nextrequest.core.presentation.navigation.Screens
 import com.example.nextrequest.history.domain.model.HistoryItem
 import com.example.nextrequest.history.domain.repository.HistoryRepository
 import com.example.nextrequest.history.presentation.HistoryViewModel
@@ -122,31 +124,35 @@ class WebSocketViewModel @Inject constructor(
         }
     }
 
-    fun loadRequestFromHistory(historyId: Int) {
+    fun loadRequest(requestId: Int, source: String) {
         viewModelScope.launch(dispatcher) {
-            when (val saved = historyRepository.getHistory(historyId)) {
-                is HistoryItem.Http -> {}
-
-                is HistoryItem.WebSocket -> {
-                    _uiState.value = UiState.Success(
-                        WebSocketUiModel(
-                            isConnected = false,
-                            url = saved.request.url,
-                            messages = saved.request.messages.map { it.toUi() }
-                        )
-                    )
+            val wsRequest = when (source) {
+                Screens.ROUTE_HISTORY_SCREEN -> {
+                    when (val saved = historyRepository.getHistory(requestId)) {
+                        is HistoryItem.WebSocket -> saved.request
+                        is HistoryItem.Http -> null
+                    }
                 }
+                Screens.ROUTE_COLLECTION_SCREEN -> {
+                    when (val saved = collectionRepository.getCollectionItem(requestId)) {
+                        is CollectionItem.WebSocket -> saved.request
+                        is CollectionItem.Http -> null
+                    }
+                }
+                else -> null
+            }
 
+            wsRequest?.let {
+                _uiState.value = UiState.Success(
+                    WebSocketUiModel(
+                        isConnected = false,
+                        url = it.url,
+                        messages = it.messages.map { msg -> msg.toUi() }
+                    )
+                )
             }
         }
     }
-
-    fun loadRequestFromCollection(requestId: Int) {
-        viewModelScope.launch(dispatcher) {
-            //todo
-        }
-    }
-
 
     override fun onCleared() {
         super.onCleared()

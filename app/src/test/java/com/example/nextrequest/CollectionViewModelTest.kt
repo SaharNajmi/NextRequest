@@ -1,6 +1,6 @@
 package com.example.nextrequest
 
-import com.example.nextrequest.collection.domain.model.Collection
+import com.example.nextrequest.collection.domain.model.RequestCollection
 import com.example.nextrequest.collection.domain.repository.CollectionRepository
 import com.example.nextrequest.collection.presentation.CollectionViewModel
 import io.kotest.inspectors.shouldForAll
@@ -38,13 +38,13 @@ class CollectionViewModelTest {
 
     @Test
     fun `toggleExpanded flips isExpanded by given collectionId`() = runTest {
-        val collections = listOf(
-            Collection(collectionId = "12", collectionName = "library"),
-            Collection(collectionId = "13", collectionName = "book"),
-            Collection(collectionId = "14", collectionName = "dictionary"),
+        val requestCollections = listOf(
+            RequestCollection(collectionId = "12", collectionName = "library"),
+            RequestCollection(collectionId = "13", collectionName = "book"),
+            RequestCollection(collectionId = "14", collectionName = "dictionary"),
         )
 
-        coEvery { collectionRepository.getAllCollections() } returns collections
+        coEvery { collectionRepository.getAllCollections() } returns requestCollections
         viewModel.getCollections()
         testDispatcher.scheduler.advanceUntilIdle()
 

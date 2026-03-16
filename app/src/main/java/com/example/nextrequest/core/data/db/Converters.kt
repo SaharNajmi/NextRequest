@@ -2,8 +2,8 @@ package com.example.nextrequest.core.data.db
 
 import androidx.room.TypeConverter
 import com.example.nextrequest.core.models.KeyValue
-import com.example.nextrequest.history.data.model.HttpRequest
-import com.example.nextrequest.history.data.model.WebSocketRequest
+import com.example.nextrequest.core.domain.model.HttpRequest
+import com.example.nextrequest.core.domain.model.WebSocketRequest
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 

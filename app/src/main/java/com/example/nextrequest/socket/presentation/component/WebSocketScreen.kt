@@ -65,10 +65,7 @@ fun WebSocketScreen(
 
     LaunchedEffect(requestId, source) {
         if (requestId != null && source != null) {
-            when (source) {
-                Screens.ROUTE_HISTORY_SCREEN -> viewModel.loadRequestFromHistory(requestId)
-                Screens.ROUTE_COLLECTION_SCREEN -> viewModel.loadRequestFromCollection(requestId)
-            }
+            viewModel.loadRequest(requestId, source)
         }
     }
 

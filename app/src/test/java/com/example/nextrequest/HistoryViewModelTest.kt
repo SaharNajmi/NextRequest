@@ -1,11 +1,11 @@
 package com.example.nextrequest
 
-import com.example.nextrequest.collection.domain.model.Collection
+import com.example.nextrequest.collection.domain.model.RequestCollection
 import com.example.nextrequest.collection.domain.repository.CollectionRepository
 import com.example.nextrequest.core.data.extensions.toLong
 import com.example.nextrequest.core.presentation.UiState
-import com.example.nextrequest.history.data.model.HttpRequest
-import com.example.nextrequest.history.data.model.WebSocketRequest
+import com.example.nextrequest.core.domain.model.HttpRequest
+import com.example.nextrequest.core.domain.model.WebSocketRequest
 import com.example.nextrequest.history.domain.formatDate
 import com.example.nextrequest.history.domain.model.HistoryItem
 import com.example.nextrequest.history.domain.repository.HistoryRepository
@@ -129,13 +129,13 @@ class HistoryViewModelTest {
 
     @Test
     fun `getCollections should get collectionNames without duplication`() = runTest {
-        val collections =
+        val requestCollections =
             listOf(
-                Collection(collectionId = "56", collectionName = "c1"),
-                Collection(collectionId = "23", collectionName = "c2"),
-                Collection(collectionId = "23", collectionName = "c2"),
+                RequestCollection(collectionId = "56", collectionName = "c1"),
+                RequestCollection(collectionId = "23", collectionName = "c2"),
+                RequestCollection(collectionId = "23", collectionName = "c2"),
             )
-        coEvery { collectionRepository.getAllCollections() } returns collections
+        coEvery { collectionRepository.getAllCollections() } returns requestCollections
         viewModel.getCollections()
         advanceUntilIdle()
         val uiState = viewModel.uiState.value as UiState.Success

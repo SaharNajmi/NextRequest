@@ -1,4 +1,4 @@
-package com.example.nextrequest.history.data.model
+package com.example.nextrequest.core.domain.model
 
 import com.example.nextrequest.socket.domain.repository.WebSocketMessage
 

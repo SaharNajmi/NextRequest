@@ -1,4 +1,4 @@
-package com.example.nextrequest.history.data.model
+package com.example.nextrequest.core.domain.model
 
 import com.example.nextrequest.core.models.HttpMethod
 import com.example.nextrequest.core.models.KeyValue

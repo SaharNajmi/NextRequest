@@ -5,8 +5,8 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.example.nextrequest.core.data.db.AppDatabase
 import com.example.nextrequest.history.data.dao.HistoryDao
-import com.example.nextrequest.history.data.model.HttpRequest
-import com.example.nextrequest.history.data.model.WebSocketRequest
+import com.example.nextrequest.core.domain.model.HttpRequest
+import com.example.nextrequest.core.domain.model.WebSocketRequest
 import com.example.nextrequest.history.data.repository.HistoryRepositoryImp
 import com.example.nextrequest.history.domain.model.HistoryItem
 import kotlinx.coroutines.Dispatchers
