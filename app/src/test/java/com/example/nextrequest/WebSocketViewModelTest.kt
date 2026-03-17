@@ -73,10 +73,10 @@ class WebSocketViewModelTest {
     @Test
     fun `connect calls repository and updates url when isConnected emits true`() = runTest {
         viewModel.connect("ws://example.com")
-        advanceUntilIdle() // connect coroutine runs → UiState.Loading
+        advanceUntilIdle()
 
         isConnectedFlow.value = true
-        advanceUntilIdle() // isConnected collector fires → UiState.Success
+        advanceUntilIdle()
 
         verify(exactly = 1) { wsRepository.connect("ws://example.com") }
         with(successData()) {
