@@ -1,2 +1,3 @@
-- Fixed bug with SaveToCollectionDialog
-- Improved HTTP request error handling
+- Added WebSocket support for real-time messaging; sessions are saved automatically to History on disconnect
+- Collections & History improvements
+- Bug fixes
