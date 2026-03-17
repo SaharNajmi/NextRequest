@@ -368,12 +368,6 @@ private fun CollectionItemView(
     val focusManager = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
     var isEditable by remember { mutableStateOf(false) }
-
-    LaunchedEffect(displayText) {
-        if (!isEditable) {
-            text = TextFieldValue(displayText, TextRange(displayText.length))
-        }
-    }
     val interactionSource = remember { MutableInteractionSource() }
 
     if (interactionSource.collectIsPressedAsState().value) {

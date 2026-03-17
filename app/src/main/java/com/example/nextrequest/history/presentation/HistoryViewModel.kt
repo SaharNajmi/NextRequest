@@ -36,7 +36,11 @@ class HistoryViewModel @Inject constructor(
             val oldExpandedStates =
                 (_uiState.value as? UiState.Success)?.data?.expandedStates?.associateBy { it.dateCreated }
                     ?: emptyMap()
-            _uiState.value = UiState.Loading
+
+            if (_uiState.value !is UiState.Success) {
+                _uiState.value = UiState.Loading
+            }
+
             try {
                 val historiesDeferred =
                     async(dispatcher) { historyRepository.getAllHistories() }
