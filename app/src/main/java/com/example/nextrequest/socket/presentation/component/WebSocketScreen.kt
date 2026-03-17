@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -47,7 +49,6 @@ import com.example.nextrequest.core.presentation.icons.ArrowDown
 import com.example.nextrequest.core.presentation.icons.ArrowDropDown
 import com.example.nextrequest.core.presentation.icons.ArrowDropUp
 import com.example.nextrequest.core.presentation.icons.ArrowUp
-import com.example.nextrequest.core.presentation.navigation.Screens
 import com.example.nextrequest.core.presentation.theme.Silver
 import com.example.nextrequest.socket.presentation.component.model.MessageUiModel
 import com.example.nextrequest.socket.presentation.component.model.WebSocketUiModel
@@ -157,13 +158,33 @@ fun WebSocketScreen(
                 }
 
                 is UiState.Success -> {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        TextButton(
+                            shape = RoundedCornerShape(4.dp),
+                            onClick = { viewModel.hideMessages() },
+                            enabled = state.data.visibleMessages.isNotEmpty()
+                        ) {
+                            Text("Hide Messages")
+                        }
+                    }
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)
                     ) {
-                        items(state.data.messages) {
+                        items(state.data.visibleMessages) {
                             MessageItem(it)
+                        }
+                        if (state.data.hiddenMessages.isNotEmpty()) {
+                            item {
+                                HiddenMessagesItem(
+                                    count = state.data.hiddenMessages.size,
+                                    onRestore = { viewModel.restoreHiddenMessages() }
+                                )
+                            }
                         }
                     }
                 }
@@ -225,6 +246,27 @@ fun MessageItem(message: MessageUiModel) {
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 0.5.dp)
     }
+}
+
+@Composable
+fun HiddenMessagesItem(count: Int, onRestore: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = "$count messages hidden",
+            fontSize = 12.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f)
+        )
+        TextButton(onClick = onRestore) {
+            Text("Restore", fontSize = 12.sp)
+        }
+    }
+    HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 0.5.dp)
 }
 
 @Composable

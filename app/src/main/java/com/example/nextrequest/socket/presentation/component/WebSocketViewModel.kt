@@ -4,18 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nextrequest.collection.domain.model.CollectionItem
 import com.example.nextrequest.collection.domain.repository.CollectionRepository
-import com.example.nextrequest.core.domain.model.ApiRequest
 import com.example.nextrequest.core.presentation.UiState
 import com.example.nextrequest.core.domain.model.WebSocketRequest
 import com.example.nextrequest.core.presentation.navigation.Screens
 import com.example.nextrequest.history.domain.model.HistoryItem
 import com.example.nextrequest.history.domain.repository.HistoryRepository
-import com.example.nextrequest.history.presentation.HistoryViewModel
-import com.example.nextrequest.home.data.mapper.toHttpRequest
-import com.example.nextrequest.home.data.mapper.toHttpResponse
-import com.example.nextrequest.home.presentation.HomeUiState
-import com.example.nextrequest.home.presentation.Loadable
-import com.example.nextrequest.socket.domain.repository.WebSocketMessage
 import com.example.nextrequest.socket.domain.repository.WebSocketRepository
 import com.example.nextrequest.socket.presentation.component.mapper.toUi
 import com.example.nextrequest.socket.presentation.component.mapper.toWebSocket
@@ -26,12 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.yield
-import java.text.SimpleDateFormat
-import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -43,7 +31,7 @@ class WebSocketViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState =
         MutableStateFlow<UiState<WebSocketUiModel>>(
-            UiState.Success(WebSocketUiModel(false, "", emptyList()))
+            UiState.Success(WebSocketUiModel(false, "", emptyList(), emptyList()))
         )
     val uiState: StateFlow<UiState<WebSocketUiModel>> = _uiState.asStateFlow()
     private var currentUrl: String? = null
@@ -56,23 +44,32 @@ class WebSocketViewModel @Inject constructor(
                 }
                 .collect { message ->
                     val current = (_uiState.value as? UiState.Success)?.data
-                        ?: WebSocketUiModel(isConnected = false, url = "", messages = emptyList())
+                        ?: WebSocketUiModel(
+                            isConnected = false,
+                            url = "",
+                            visibleMessages = emptyList(),
+                            hiddenMessages = emptyList()
+                        )
                     _uiState.value =
-                        UiState.Success(current.copy(messages = listOf(message.toUi()) + current.messages))
+                        UiState.Success(current.copy(visibleMessages = listOf(message.toUi()) + current.visibleMessages))
                 }
         }
         viewModelScope.launch {
             repository.isConnected
                 .collect { connected ->
                     val current = (_uiState.value as? UiState.Success)?.data
-                        ?: WebSocketUiModel(isConnected = false, url = "", messages = emptyList())
+                        ?: WebSocketUiModel()
 
                     if (current.isConnected && !connected) {
                         saveWebSocketHistory()
                     }
                     _uiState.value =
-                        UiState.Success(current.copy(isConnected = connected,
-                            url = currentUrl ?: current.url))
+                        UiState.Success(
+                            current.copy(
+                                isConnected = connected,
+                                url = currentUrl ?: current.url
+                            )
+                        )
                 }
         }
     }
@@ -93,6 +90,26 @@ class WebSocketViewModel @Inject constructor(
         repository.disconnect()
     }
 
+    fun hideMessages() {
+        val current = (_uiState.value as? UiState.Success)?.data ?: return
+        _uiState.value = UiState.Success(
+            current.copy(
+                visibleMessages = emptyList(),
+                hiddenMessages = current.visibleMessages + current.hiddenMessages
+            )
+        )
+    }
+
+    fun restoreHiddenMessages() {
+        val current = (_uiState.value as? UiState.Success)?.data ?: return
+        _uiState.value = UiState.Success(
+            current.copy(
+                visibleMessages = current.visibleMessages + current.hiddenMessages,
+                hiddenMessages = emptyList()
+            )
+        )
+    }
+
     fun sendMessage(message: String) {
         viewModelScope.launch {
             try {
@@ -109,7 +126,7 @@ class WebSocketViewModel @Inject constructor(
 
         val wsRequest = WebSocketRequest(
             url = url,
-            messages = currentState.messages.map { message ->
+            messages = (currentState.visibleMessages + currentState.hiddenMessages).map { message ->
                 message.toWebSocket()
             }
         )
@@ -133,12 +150,14 @@ class WebSocketViewModel @Inject constructor(
                         is HistoryItem.Http -> null
                     }
                 }
+
                 Screens.ROUTE_COLLECTION_SCREEN -> {
                     when (val saved = collectionRepository.getCollectionItem(requestId)) {
                         is CollectionItem.WebSocket -> saved.request
                         is CollectionItem.Http -> null
                     }
                 }
+
                 else -> null
             }
 
@@ -147,7 +166,7 @@ class WebSocketViewModel @Inject constructor(
                     WebSocketUiModel(
                         isConnected = false,
                         url = it.url,
-                        messages = it.messages.map { msg -> msg.toUi() }
+                        visibleMessages = it.messages.map { msg -> msg.toUi() }
                     )
                 )
             }
