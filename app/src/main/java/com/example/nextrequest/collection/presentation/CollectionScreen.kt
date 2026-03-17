@@ -87,6 +87,7 @@ fun CollectionScreen(
     val filteredItems = searchCollections(
         collections, searchQuery
     )
+
     val focusManager = LocalFocusManager.current
     val callbacks = CollectionCallbacks(
         onCollectionItemClick = onCollectionItemClick,
@@ -182,7 +183,7 @@ private fun ExpandedCollectionItems(
     LazyColumn {
         collections.forEachIndexed { index, collection ->
             val allRequests = collection.requestCollection.items
-            item {
+            item(key = collection.requestCollection.collectionId) {
                 CollectionHeader(
                     Modifier
                         .fillMaxWidth()
@@ -198,7 +199,7 @@ private fun ExpandedCollectionItems(
                 item {
                     AnimatedVisibility(
                         modifier = Modifier.fillMaxWidth(),
-                        visible = collection.isExpanded == true
+                        visible = collection.isExpanded
                     ) {
                         AddARequestButton(
                             Modifier.padding(12.dp),
@@ -211,9 +212,8 @@ private fun ExpandedCollectionItems(
                 items(allRequests.size, key = { i -> allRequests[i].requestId }) { index ->
                     AnimatedVisibility(
                         modifier = Modifier.fillMaxWidth(),
-                        visible = collection.isExpanded == true
+                        visible = collection.isExpanded
                     ) {
-                        //  key(allRequests[index].id) {
                         CollectionItemView(
                             Modifier
                                 .padding(top = 2.dp, bottom = 2.dp, start = 12.dp),
@@ -241,8 +241,8 @@ fun CollectionHeader(
     var text by remember {
         mutableStateOf(TextFieldValue(header, TextRange(header.length)))
     }
-
     var isEditable by remember { mutableStateOf(false) }
+
     val icon =
         if (isExpanded) Keyboard_arrow_down else Keyboard_arrow_right
 
@@ -368,6 +368,12 @@ private fun CollectionItemView(
     val focusManager = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
     var isEditable by remember { mutableStateOf(false) }
+
+    LaunchedEffect(displayText) {
+        if (!isEditable) {
+            text = TextFieldValue(displayText, TextRange(displayText.length))
+        }
+    }
     val interactionSource = remember { MutableInteractionSource() }
 
     if (interactionSource.collectIsPressedAsState().value) {
