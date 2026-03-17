@@ -13,7 +13,7 @@ interface CollectionDao {
     @Insert(onConflict = OnConflictStrategy.Companion.IGNORE)
     suspend fun insertCollection(collection: CollectionEntity)
 
-    @Query("SELECT * FROM collections")
+    @Query("SELECT * FROM collections ORDER BY collectionName COLLATE NOCASE ASC")
     suspend fun getAllCollections(): List<CollectionEntity>
 
     @Query("SELECT requestName FROM collection_items WHERE id = :requestId")
