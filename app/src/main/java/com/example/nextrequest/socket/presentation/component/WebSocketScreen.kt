@@ -70,7 +70,8 @@ fun WebSocketScreen(
     }
 
     LaunchedEffect(uiState) {
-        requestUrl = (uiState as? UiState.Success<WebSocketUiModel>)?.data?.url ?: ""
+        val url = (uiState as? UiState.Success<WebSocketUiModel>)?.data?.url
+        if (!url.isNullOrEmpty()) requestUrl = url
     }
 
     val callbacks = WebSocketCallbacks(
