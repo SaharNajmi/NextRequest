@@ -11,6 +11,7 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +24,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -57,6 +59,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.nextrequest.collection.domain.model.CollectionItem
 import com.example.nextrequest.collection.presentation.model.CollectionUiState
+import com.example.nextrequest.core.presentation.UiState
 import com.example.nextrequest.core.presentation.color
 import com.example.nextrequest.core.presentation.component.CustomSearchBar
 import com.example.nextrequest.core.presentation.component.CustomToolbar
@@ -82,11 +85,8 @@ fun CollectionScreen(
     LaunchedEffect(Unit) {
         viewModel.getCollections()
     }
+    val uiState by viewModel.uiState.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
-    val collections by viewModel.collections.collectAsState()
-    val filteredItems = searchCollections(
-        collections, searchQuery
-    )
 
     val focusManager = LocalFocusManager.current
     val callbacks = CollectionCallbacks(
@@ -94,9 +94,7 @@ fun CollectionScreen(
         onRenameRequestClick = { id, newName -> viewModel.changeRequestName(id, newName) },
         onRenameCollectionClick = { collection -> viewModel.updateCollection(collection) },
         onCreateEmptyRequestClick = { collectionId ->
-            viewModel.createAnEmptyRequest(
-                collectionId
-            )
+            viewModel.createAnEmptyRequest(collectionId)
         },
         onCreateNewCollectionClick = { viewModel.createNewCollection() },
         onHeaderClick = { collectionId -> viewModel.toggleExpanded(collectionId) },
@@ -110,34 +108,44 @@ fun CollectionScreen(
             .pointerInput(Unit) {
                 awaitEachGesture {
                     awaitFirstDown().consume()
-                    waitForUpOrCancellation()?.let { click ->
+                    waitForUpOrCancellation()?.let {
                         focusManager.clearFocus()
                     }
                 }
-            }) {
+            }
+    ) {
         Spacer(modifier = Modifier.height(24.dp))
         CustomToolbar("Collections", navController)
         Spacer(Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = {
-                viewModel.createNewCollection()
-            }, Modifier.size(24.dp)) {
-                Icon(
-                    imageVector = Add,
-                    contentDescription = "create new collection",
-                )
+            IconButton(onClick = { viewModel.createNewCollection() }, Modifier.size(24.dp)) {
+                Icon(imageVector = Add, contentDescription = "create new collection")
             }
             Spacer(Modifier.height(8.dp))
             CustomSearchBar("Search collections", searchQuery) { searchQuery = it }
         }
-        when {
-            collections.isEmpty() -> CreateNewCollection(callbacks)
-
-            filteredItems.isEmpty() -> NotFoundMessage(searchQuery)
-            else -> ExpandedCollectionItems(
-                filteredItems,
-                callbacks
-            )
+        when (uiState) {
+            is UiState.Loading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            }
+            is UiState.Error -> {
+                Text(
+                    text = "Error: ${(uiState as UiState.Error).message}",
+                    modifier = Modifier.padding(16.dp),
+                    color = Color.Red
+                )
+            }
+            is UiState.Success -> {
+                val collections = (uiState as UiState.Success<List<CollectionUiState>>).data
+                val filteredItems = searchCollections(collections, searchQuery)
+                when {
+                    collections.isEmpty() -> CreateNewCollection(callbacks)
+                    filteredItems.isEmpty() -> NotFoundMessage(searchQuery)
+                    else -> ExpandedCollectionItems(filteredItems, callbacks)
+                }
+            }
         }
     }
 }
