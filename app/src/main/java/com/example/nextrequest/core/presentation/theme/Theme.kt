@@ -67,7 +67,7 @@ val ColorScheme.iconOnBackground: Color
     get() = if (isDark) Color(0xFF585958) else Color(0xFFBEBBBB)
 
 val ColorScheme.focusedBorderColor: Color
-    get() = primary.copy(alpha = 0.5f)
+    get() = primary.copy(alpha = 0.3f)
 
 val ColorScheme.unfocusedBorderColor: Color
     get() = primary.copy(alpha = 0.4f)

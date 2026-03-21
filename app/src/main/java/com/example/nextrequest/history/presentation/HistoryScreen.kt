@@ -245,7 +245,7 @@ private fun ExpandedHistoryList(
     expandedState: List<ExpandableHistoryItem>,
     callbacks: HistoryCallbacks,
 ) {
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         historyEntries.forEach { historyEntry ->
             val isExpanded = expandedState
                 .firstOrNull { it.dateCreated == historyEntry.dateCreated }
@@ -452,7 +452,7 @@ private fun HistoryItemBadge(item: HistoryItem) {
         is HistoryItem.Http -> Text(
             text = item.request.httpMethod.name,
             color = item.request.httpMethod.color,
-            fontSize = 11.sp,
+            fontSize = 8.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
                 .padding(top = 1.dp)
