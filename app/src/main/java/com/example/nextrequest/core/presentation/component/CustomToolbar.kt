@@ -14,7 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.nextrequest.core.presentation.icons.Arrow_back_ios
+import com.example.nextrequest.core.presentation.icons.Arrow_back
 import com.example.nextrequest.core.presentation.navigation.Screens.Companion.ROUTE_HOME_SCREEN
 
 @Composable
@@ -29,7 +29,7 @@ fun CustomToolbar(title: String, navController: NavController) {
             }
         }) {
             Icon(
-                imageVector = Arrow_back_ios,
+                imageVector = Arrow_back,
                 contentDescription = "backToHome",
                 modifier = Modifier
                     .padding(start = 4.dp),

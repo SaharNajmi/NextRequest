@@ -1,16 +1,16 @@
 package com.example.nextrequest.core.presentation.icons
-
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
-val ChromeClose: ImageVector
+
+val Close: ImageVector
     get() {
-        if (_ChromeClose != null) return _ChromeClose!!
-        
-        _ChromeClose = ImageVector.Builder(
+        if (_MaterialIconsClose != null) return _MaterialIconsClose!!
+
+        _MaterialIconsClose = ImageVector.Builder(
             name = "ChromeClose",
             defaultWidth = 16.dp,
             defaultHeight = 16.dp,
@@ -36,9 +36,9 @@ val ChromeClose: ImageVector
                 close()
             }
         }.build()
-        
-        return _ChromeClose!!
+
+        return _MaterialIconsClose!!
     }
 
-private var _ChromeClose: ImageVector? = null
+private var _MaterialIconsClose: ImageVector? = null
 

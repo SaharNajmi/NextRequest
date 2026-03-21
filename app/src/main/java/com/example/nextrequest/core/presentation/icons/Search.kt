@@ -1,53 +1,50 @@
 package com.example.nextrequest.core.presentation.icons
-
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 val Search: ImageVector
     get() {
-        if (_Search != null) return _Search!!
-        
-        _Search = ImageVector.Builder(
-            name = "Search",
+        if (_LucideSearch != null) return _LucideSearch!!
+
+        _LucideSearch = ImageVector.Builder(
+            name = "search",
             defaultWidth = 24.dp,
             defaultHeight = 24.dp,
-            viewportWidth = 960f,
-            viewportHeight = 960f
+            viewportWidth = 24f,
+            viewportHeight = 24f
         ).apply {
             path(
-                fill = SolidColor(Color(0xFF000000))
+                fill = SolidColor(Color.Transparent),
+                stroke = SolidColor(Color.Black),
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round
             ) {
-                moveTo(784f, 840f)
-                lineTo(532f, 588f)
-                quadToRelative(-30f, 24f, -69f, 38f)
-                reflectiveQuadToRelative(-83f, 14f)
-                quadToRelative(-109f, 0f, -184.5f, -75.5f)
-                reflectiveQuadTo(120f, 380f)
-                reflectiveQuadToRelative(75.5f, -184.5f)
-                reflectiveQuadTo(380f, 120f)
-                reflectiveQuadToRelative(184.5f, 75.5f)
-                reflectiveQuadTo(640f, 380f)
-                quadToRelative(0f, 44f, -14f, 83f)
-                reflectiveQuadToRelative(-38f, 69f)
-                lineToRelative(252f, 252f)
+                moveTo(21f, 21f)
+                lineToRelative(-4.34f, -4.34f)
+            }
+            path(
+                fill = SolidColor(Color.Transparent),
+                stroke = SolidColor(Color.Black),
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round
+            ) {
+                moveTo(19f, 11f)
+                arcTo(8f, 8f, 0f, false, true, 11f, 19f)
+                arcTo(8f, 8f, 0f, false, true, 3f, 11f)
+                arcTo(8f, 8f, 0f, false, true, 19f, 11f)
                 close()
-                moveTo(380f, 560f)
-                quadToRelative(75f, 0f, 127.5f, -52.5f)
-                reflectiveQuadTo(560f, 380f)
-                reflectiveQuadToRelative(-52.5f, -127.5f)
-                reflectiveQuadTo(380f, 200f)
-                reflectiveQuadToRelative(-127.5f, 52.5f)
-                reflectiveQuadTo(200f, 380f)
-                reflectiveQuadToRelative(52.5f, 127.5f)
-                reflectiveQuadTo(380f, 560f)
             }
         }.build()
-        
-        return _Search!!
+
+        return _LucideSearch!!
     }
 
-private var _Search: ImageVector? = null
+private var _LucideSearch: ImageVector? = null
 

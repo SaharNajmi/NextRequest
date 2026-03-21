@@ -5,11 +5,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,10 +16,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -28,15 +26,12 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -49,12 +44,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -68,9 +60,17 @@ import com.example.nextrequest.core.presentation.icons.Collections_bookmark
 import com.example.nextrequest.core.presentation.icons.Content_copy
 import com.example.nextrequest.core.presentation.icons.History
 import com.example.nextrequest.core.presentation.icons.Search
+import com.example.nextrequest.core.presentation.icons.Send
 import com.example.nextrequest.core.presentation.icons.TriangleDown
 import com.example.nextrequest.core.presentation.theme.Silver
+import com.example.nextrequest.core.presentation.theme.cardBackground
+import com.example.nextrequest.core.presentation.theme.cardBorder
+import com.example.nextrequest.core.presentation.theme.chipTintAlpha
+import com.example.nextrequest.core.presentation.theme.dropdownBorder
 import com.example.nextrequest.core.presentation.theme.iconOnBackground
+import com.example.nextrequest.core.presentation.theme.inputFieldColors
+import com.example.nextrequest.core.presentation.theme.jsonChipBackground
+import com.example.nextrequest.core.presentation.theme.jsonChipBorder
 import com.example.nextrequest.core.presentation.theme.textMuted
 import com.example.nextrequest.home.domain.RadioHttpParameterOptions
 import com.example.nextrequest.home.presentation.components.KeyValueInput
@@ -81,7 +81,14 @@ import com.example.nextrequest.home.presentation.util.getHeaderValue
 import com.sahar.nextrequest.R
 import kotlinx.coroutines.launch
 
-@Composable()
+private val HTTP_METHODS = listOf(
+    HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH,
+    HttpMethod.DELETE, HttpMethod.HEAD, HttpMethod.OPTIONS
+)
+
+private val HTTP_PARAM_OPTIONS = RadioHttpParameterOptions.entries.toList()
+
+@Composable
 fun HomeScreen(
     homeViewModel: HomeViewModel,
     requestId: Int?,
@@ -125,8 +132,10 @@ fun HomeScreen(
                 }
             }
         })
+
     Box(
-        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.BottomCenter
     ) {
         SnackbarHost(hostState = snackbarHostState, snackbar = { data ->
             Snackbar(
@@ -138,61 +147,93 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 8.dp, vertical = 24.dp)
+                .background(MaterialTheme.colorScheme.background)
+                .statusBarsPadding()
         ) {
-
-            TextButton(
-                onClick = callbacks.onNavigateToWebSocket,
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        painter = painterResource(R.drawable.websocket),
-                        contentDescription = "Switch request type to websocket",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Text("Create WebSocket", color = MaterialTheme.colorScheme.primary)
-                }
-            }
-            Row {
-                BaseTextIconButton(
-                    onClick = { callbacks.onNavigateToHistory() },
-                    icon = History,
-                    label = "History",
-                )
-                BaseTextIconButton(
-                    onClick = { callbacks.onNavigateToCollection() },
-                    icon = Collections_bookmark,
-                    label = "Collection"
-                )
-                BaseTextIconButton(
-                    onClick = { callbacks.onClearDataClick() },
-                    icon = Add,
-                    label = "Create new request"
-                )
-            }
+            AppTopBar(callbacks = callbacks)
             RequestBuilder(
-                uiState, callbacks = callbacks
+                uiState = uiState,
+                callbacks = callbacks,
+                modifier = Modifier.weight(1f)
             )
         }
     }
 }
 
 @Composable
-fun BaseTextIconButton(
-    onClick: () -> Unit,
-    icon: ImageVector,
-    label: String,
-    tint: Color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
-) {
-    TextButton(
-        onClick = onClick,
+private fun AppTopBar(callbacks: HomeCallbacks) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = "NextRequest",
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Black,
+            fontSize = 20.sp,
+            modifier = Modifier.weight(1f)
+        )
+        IconButton(
+            onClick = callbacks.onNavigateToHistory,
+            modifier = Modifier.size(36.dp)
+        ) {
             Icon(
-                imageVector = icon, contentDescription = label, tint = tint
+                imageVector = History,
+                contentDescription = "History",
+                tint = MaterialTheme.colorScheme.textMuted,
+                modifier = Modifier.size(20.dp)
             )
-            Text(label, color = tint)
+        }
+        IconButton(
+            onClick = callbacks.onNavigateToCollection,
+            modifier = Modifier.size(36.dp)
+        ) {
+            Icon(
+                imageVector = Collections_bookmark,
+                contentDescription = "Collection",
+                tint = MaterialTheme.colorScheme.textMuted,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+        IconButton(
+            onClick = callbacks.onClearDataClick,
+            modifier = Modifier.size(36.dp)
+        ) {
+            Icon(
+                imageVector = Add,
+                contentDescription = "New request",
+                tint = MaterialTheme.colorScheme.textMuted,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+        Surface(
+            onClick = callbacks.onNavigateToWebSocket,
+            shape = RoundedCornerShape(10.dp),
+            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = MaterialTheme.colorScheme.chipTintAlpha),
+            modifier = Modifier.padding(start = 4.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.websocket),
+                    contentDescription = "WebSocket",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(12.dp)
+                )
+                Text(
+                    "WS",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 12.sp,
+                    letterSpacing = 0.3.sp
+                )
+            }
         }
     }
 }
@@ -201,75 +242,76 @@ fun BaseTextIconButton(
 fun RequestBuilder(
     uiState: HomeUiState,
     callbacks: HomeCallbacks,
+    modifier: Modifier = Modifier,
 ) {
-    val httpMethods = listOf(
-        HttpMethod.GET,
-        HttpMethod.POST,
-        HttpMethod.PUT,
-        HttpMethod.PATCH,
-        HttpMethod.DELETE,
-        HttpMethod.HEAD,
-        HttpMethod.OPTIONS
-    )
     val statusCode: Int? = (uiState.response as? Loadable.Success)?.data?.statusCode
     var isSearchVisible by remember { mutableStateOf(false) }
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(bottom = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        RequestLine(
-            httpMethods,
-            uiState.data.httpMethod,
-            uiState.data.requestUrl,
-            callbacks.onHttpMethodChanged,
-            callbacks.onRequestUrlChanged,
-            Modifier
-                .weight(1f)
-                .padding(start = 12.dp)
-        )
-        Button(
-            modifier = Modifier.padding(4.dp),
-            shape = RoundedCornerShape(4.dp),
-            onClick = { callbacks.onSendRequestClick() }) {
-            Text(text = "Send", fontWeight = FontWeight.Bold)
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            RequestLine(
+                httpMethods = HTTP_METHODS,
+                selectedHttpMethod = uiState.data.httpMethod,
+                requestUrl = uiState.data.requestUrl,
+                onHttpMethodChanged = callbacks.onHttpMethodChanged,
+                onRequestUrlChanged = callbacks.onRequestUrlChanged,
+                modifier = Modifier.weight(1f)
+            )
+
+            IconButton(
+                onClick = callbacks.onSendRequestClick,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(
+                    imageVector = Send,
+                    contentDescription = "Send Request",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
-    }
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(4.dp))
-            .background(if (isSystemInDarkTheme()) Color.Transparent else MaterialTheme.colorScheme.secondaryContainer)
-            .padding(8.dp)
-    ) {
+
         RequestParametersSection(
-            modifier = Modifier,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 4.dp)
+                .border(0.5.dp, MaterialTheme.colorScheme.cardBorder, RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.cardBackground),
             headers = uiState.data.headers,
             params = uiState.data.params,
             body = uiState.data.body,
             callbacks = callbacks
         )
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .padding(horizontal = 12.dp, vertical = 4.dp)
+                .border(0.5.dp, MaterialTheme.colorScheme.cardBorder, RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.cardBackground)
+        ) {
+            ResponseBodyTopBar(
+                statusCode = statusCode,
+                onSearchToggle = { isSearchVisible = !isSearchVisible },
+                callbacks = callbacks
+            )
+            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
+            ResponseBody(
+                response = uiState.response,
+                isSearchVisible = isSearchVisible,
+                onDismissSearch = { isSearchVisible = false }
+            )
+        }
     }
-
-
-    Spacer(modifier = Modifier.height(8.dp))
-
-    ResponseBodyTopBar(
-        statusCode, isSearchVisible, onSearchClick = {
-            isSearchVisible = it
-        }, callbacks = callbacks
-    )
-
-    HorizontalDivider(
-        thickness = 0.5.dp,
-        modifier = Modifier.padding(4.dp),
-        color = MaterialTheme.colorScheme.primary
-    )
-
-    ResponseBody(
-        response = uiState.response,
-        isSearchVisible = isSearchVisible,
-        onDismissSearch = { isSearchVisible = false })
 }
 
 @Composable
@@ -281,71 +323,92 @@ private fun RequestLine(
     onRequestUrlChanged: (String) -> Unit,
     modifier: Modifier,
 ) {
-    var isHttpMethodExpanded: Boolean by remember { mutableStateOf(false) }
+    var isHttpMethodExpanded by remember { mutableStateOf(false) }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.border(
-            shape = RoundedCornerShape(4.dp),
-            border = BorderStroke(0.5.dp, color = MaterialTheme.colorScheme.primary)
-        ),
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Text(
-            selectedHttpMethod.name,
-            color = selectedHttpMethod.color,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier
-                .padding(12.dp)
-                .clickable { isHttpMethodExpanded = true })
-        Icon(
-            imageVector = TriangleDown,
-            modifier = Modifier.clickable { isHttpMethodExpanded = true },
-            contentDescription = "drop down icon"
-        )
-        DropdownMenu(
-            expanded = isHttpMethodExpanded,
-            onDismissRequest = { isHttpMethodExpanded = false },
-            modifier = Modifier
-                .shadow(
-                    elevation = 12.dp, shape = RoundedCornerShape(8.dp), clip = false
-                )
-                .border(
-                    width = 2.dp,
-                    color = MaterialTheme.colorScheme.outline,
-                    shape = RoundedCornerShape(8.dp)
-                )
-                .background(
-                    color = MaterialTheme.colorScheme.background, shape = RoundedCornerShape(8.dp)
-                )
-        ) {
-            httpMethods.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text(option.name, color = option.color) },
-                    modifier = Modifier.background(
-                        color = if (option == selectedHttpMethod) MaterialTheme.colorScheme.primary.copy(
-                            alpha = 0.12f
-                        )
-                        else Color.Transparent
-                    ),
-                    onClick = {
-                        isHttpMethodExpanded = false
-                        onHttpMethodChanged(option)
-                    })
+        Box {
+            Surface(
+                onClick = { isHttpMethodExpanded = true },
+                shape = RoundedCornerShape(10.dp),
+                color = selectedHttpMethod.color.copy(alpha = MaterialTheme.colorScheme.chipTintAlpha),
+                modifier = Modifier.width(86.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = selectedHttpMethod.name,
+                        color = selectedHttpMethod.color,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp
+                    )
+                    Icon(
+                        imageVector = TriangleDown,
+                        contentDescription = null,
+                        tint = selectedHttpMethod.color.copy(alpha = 0.7f),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+
+            DropdownMenu(
+                expanded = isHttpMethodExpanded,
+                onDismissRequest = { isHttpMethodExpanded = false },
+                shape = RoundedCornerShape(12.dp),
+                containerColor = MaterialTheme.colorScheme.cardBackground,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.dropdownBorder),
+                shadowElevation = 0.dp,
+            ) {
+                httpMethods.forEach { option ->
+                    val isSelected = option == selectedHttpMethod
+                    DropdownMenuItem(
+                        text = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .background(option.color, RoundedCornerShape(4.dp))
+                                )
+                                Text(
+                                    text = option.name,
+                                    color = option.color,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    fontSize = 13.sp
+                                )
+                            }
+                        },
+                        modifier = Modifier.background(
+                            if (isSelected) option.color.copy(alpha = 0.1f) else Color.Transparent
+                        ),
+                        onClick = {
+                            isHttpMethodExpanded = false
+                            onHttpMethodChanged(option)
+                        }
+                    )
+                }
             }
         }
 
         TextField(
             value = requestUrl,
-            onValueChange = {
-                onRequestUrlChanged(it)
-            },
-            maxLines = 3,
-            placeholder = { Text("Enter URL", color = Silver) },
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-            )
+            onValueChange = onRequestUrlChanged,
+            maxLines = 1,
+            singleLine = true,
+            placeholder = { Text("Enter URL...", color = Silver, fontSize = 13.sp) },
+            modifier = Modifier
+                .weight(1f)
+                .border(0.5.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp)),
+            shape = RoundedCornerShape(10.dp),
+            colors = inputFieldColors()
         )
     }
 }
@@ -358,18 +421,16 @@ fun RequestParametersSection(
     body: String?,
     callbacks: HomeCallbacks,
 ) {
-    val radioHttpParameterOptions = RadioHttpParameterOptions.entries.toList()
-    var (selectedOption, onOptionSelected) = rememberSaveable() {
-        mutableStateOf(
-            radioHttpParameterOptions[0]
-        )
+    var (selectedOption, onOptionSelected) = rememberSaveable {
+        mutableStateOf(HTTP_PARAM_OPTIONS[0])
     }
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        HttpParameterSelection(radioHttpParameterOptions, selectedOption, onOptionSelected)
-        HttpParameterBody(
-            modifier, selectedOption, headers, params, body, callbacks
-        )
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+    ) {
+        HttpParameterSelection(HTTP_PARAM_OPTIONS, selectedOption, onOptionSelected)
+        HttpParameterBody(selectedOption, headers, params, body, callbacks)
     }
 }
 
@@ -379,32 +440,36 @@ private fun HttpParameterSelection(
     selectedOption: RadioHttpParameterOptions,
     onOptionSelected: (RadioHttpParameterOptions) -> Unit,
 ) {
-    FlowRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .selectableGroup(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    Row(
+        modifier = Modifier.fillMaxWidth()
     ) {
         radioHttpParameterOptions.forEach { option ->
-            Row(
+            val isSelected = option == selectedOption
+            val label = if (option == RadioHttpParameterOptions.Header) "Headers" else option.name
+            Column(
                 modifier = Modifier
-                    .selectable(
-                        selected = (option == selectedOption), onClick = {
-                            onOptionSelected(option)
-                        }, role = Role.RadioButton
-                    )
-                    .padding(bottom = 12.dp), verticalAlignment = Alignment.CenterVertically
+                    .clickable { onOptionSelected(option) }
+                    .width(IntrinsicSize.Max),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                RadioButton(
-                    selected = (option == selectedOption),
-                    onClick = null,
-                    colors = RadioButtonDefaults.colors(
-                        selectedColor = MaterialTheme.colorScheme.primary,
-                        unselectedColor = MaterialTheme.colorScheme.primary
-                    ),
-                    modifier = Modifier.padding(end = 2.dp)
+                Text(
+                    text = label,
+                    color = if (isSelected) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.textMuted,
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
                 )
-                Text(text = option.name)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(2.dp)
+                        .background(
+                            color = if (isSelected) MaterialTheme.colorScheme.primary
+                            else Color.Transparent,
+                            shape = RoundedCornerShape(1.dp)
+                        )
+                )
             }
         }
     }
@@ -412,7 +477,6 @@ private fun HttpParameterSelection(
 
 @Composable
 private fun HttpParameterBody(
-    modifier: Modifier,
     selectedOption: RadioHttpParameterOptions,
     headers: List<KeyValue>?,
     params: List<KeyValue>?,
@@ -420,7 +484,7 @@ private fun HttpParameterBody(
     callbacks: HomeCallbacks,
 ) {
     Box(
-        modifier
+        Modifier
             .height(120.dp)
             .fillMaxWidth()
             .padding(horizontal = 8.dp)
@@ -463,9 +527,7 @@ private fun StatusCode(statusCode: Int?) {
         Text(
             modifier = Modifier
                 .clip(RoundedCornerShape(4.dp))
-                .background(
-                    backgroundColor
-                )
+                .background(backgroundColor)
                 .padding(horizontal = 4.dp),
             color = textColor,
             text = statusCode.toString(),
@@ -474,20 +536,25 @@ private fun StatusCode(statusCode: Int?) {
 }
 
 @Composable
-fun ParamsSection(
-    params: List<KeyValue>?,
-    callbacks: HomeCallbacks,
+private fun KeyValueSection(
+    items: List<KeyValue>?,
+    onAdd: (String, String) -> Unit,
+    onRemove: (String, String) -> Unit,
 ) {
     Column {
-        KeyValueInput { key, value ->
-            callbacks.onAddParameter(key, value)
-        }
+        KeyValueInput { key, value -> onAdd(key, value) }
         Spacer(modifier = Modifier.height(4.dp))
-        RemovableTagList(
-            items = params, onRemoveItem = { key, value ->
-                callbacks.onRemoveParameter(key, value)
-            })
+        RemovableTagList(items = items, onRemoveItem = onRemove)
     }
+}
+
+@Composable
+fun ParamsSection(params: List<KeyValue>?, callbacks: HomeCallbacks) {
+    KeyValueSection(
+        items = params,
+        onAdd = callbacks.onAddParameter,
+        onRemove = callbacks.onRemoveParameter,
+    )
 }
 
 @Composable
@@ -496,14 +563,16 @@ fun AuthSection(
     headers: List<KeyValue>?,
     callbacks: HomeCallbacks,
 ) {
-    Column(modifier) {
+    Column(modifier = modifier) {
         Text(
             text = "Bearer Token",
             modifier = Modifier
-                .clip(RoundedCornerShape(4.dp))
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .padding(4.dp),
-            color = MaterialTheme.colorScheme.onBackground
+                .clip(RoundedCornerShape(20.dp))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                .padding(horizontal = 10.dp, vertical = 4.dp),
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold
         )
         Spacer(Modifier.height(8.dp))
         TextVisibilityTextField(
@@ -513,24 +582,14 @@ fun AuthSection(
     }
 }
 
-
 @Composable
-fun HeaderSection(
-    headers: List<KeyValue>?,
-    callbacks: HomeCallbacks,
-) {
-    Column {
-        KeyValueInput { key, value ->
-            callbacks.onAddHeader(key, value)
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-        RemovableTagList(
-            items = headers, onRemoveItem = { key, value ->
-                callbacks.onRemoveHeader(key, value)
-            })
-    }
+fun HeaderSection(headers: List<KeyValue>?, callbacks: HomeCallbacks) {
+    KeyValueSection(
+        items = headers,
+        onAdd = callbacks.onAddHeader,
+        onRemove = callbacks.onRemoveHeader,
+    )
 }
-
 
 @Composable
 fun HttpParameterBodySection(
@@ -540,68 +599,77 @@ fun HttpParameterBodySection(
 ) {
     TextField(
         value = body ?: "",
-        onValueChange = {
-            callbacks.onBodyChanged(it)
-        },
+        onValueChange = { callbacks.onBodyChanged(it) },
         maxLines = Int.MAX_VALUE,
-        modifier = modifier.border(
-            1.dp,
-            MaterialTheme.colorScheme.primary,
-            shape = RoundedCornerShape(8.dp)
-        ),
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-        )
+        placeholder = { Text("Enter request body...", color = Silver, fontSize = 12.sp) },
+        modifier = modifier.padding(8.dp),
+        shape = RoundedCornerShape(10.dp),
+        colors = inputFieldColors()
     )
 }
 
 @Composable
 private fun ResponseBodyTopBar(
     statusCode: Int?,
-    searchVisible: Boolean,
-    onSearchClick: (Boolean) -> Unit,
+    onSearchToggle: () -> Unit,
     callbacks: HomeCallbacks,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(12.dp, 0.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "{ } JSON",
-            fontSize = 14.sp,
+            text = "Response",
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.textMuted,
+            modifier = Modifier.padding(end = 4.dp)
+        )
+        Text(
+            text = "{ } JSON",
+            fontSize = 10.sp,
+            color = MaterialTheme.colorScheme.textMuted,
+            fontWeight = FontWeight.Medium,
             modifier = Modifier
                 .background(
-                    MaterialTheme.colorScheme.onPrimary, shape = RoundedCornerShape(8.dp)
+                    MaterialTheme.colorScheme.jsonChipBackground,
+                    shape = RoundedCornerShape(8.dp)
                 )
-                .padding(6.dp, 2.dp)
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.jsonChipBorder,
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .padding(horizontal = 8.dp)
         )
+
 
         StatusCode(statusCode)
 
         Spacer(Modifier.weight(1f))
         IconButton(
-            onClick = { onSearchClick(!searchVisible) },
+            onClick = onSearchToggle,
             modifier = Modifier
                 .padding(end = 8.dp)
-                .size(24.dp)
+                .size(18.dp)
         ) {
             Icon(
-                imageVector = Search, contentDescription = "search"
+                imageVector = Search,
+                contentDescription = "search",
+                tint = MaterialTheme.colorScheme.textMuted
             )
         }
         IconButton(
-            onClick = {
-                callbacks.onCopyClick()
-            }, modifier = Modifier.size(24.dp)
+            onClick = { callbacks.onCopyClick() },
+            modifier = Modifier.size(18.dp)
         ) {
             Icon(
-                imageVector = Content_copy, contentDescription = "copy response"
+                imageVector = Content_copy,
+                contentDescription = "copy response",
+                tint = MaterialTheme.colorScheme.textMuted
             )
         }
     }
@@ -622,43 +690,46 @@ fun ResponseBody(
                 Image(
                     bitmap = response.data.imageResponse,
                     contentDescription = "Decoded Image",
-                    modifier = Modifier.fillMaxWidth(), alignment = Alignment.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                    alignment = Alignment.Center,
                 )
             }
         }
 
-        is Loadable.Error -> Text(
-            text = "Error: ${response.message}",
-            modifier = Modifier.padding(16.dp),
-            color = Color.Red
-        )
+        is Loadable.Error -> ResponseErrorText(response.message)
+        is Loadable.NetworkError -> ResponseErrorText(response.message)
 
-        Loadable.Loading -> CircularProgressIndicator()
-        is Loadable.NetworkError -> Text(
-            text = "Error: ${response.message}",
-            modifier = Modifier.padding(16.dp),
-            color = Color.Red
-        )
+        Loadable.Loading -> Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) { CircularProgressIndicator() }
 
-        is Loadable.Empty -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.action_block),
-                    contentDescription = "no responses yet",
-                    tint = MaterialTheme.colorScheme.iconOnBackground
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Enter the URL and click send to get a response",
-                    color = MaterialTheme.colorScheme.textMuted,
-                    fontSize = 14.sp
-                )
-            }
+        is Loadable.Empty -> Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.action_block),
+                contentDescription = "no responses yet",
+                tint = MaterialTheme.colorScheme.iconOnBackground
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Enter the URL and click send to get a response",
+                color = MaterialTheme.colorScheme.textMuted,
+                fontSize = 14.sp
+            )
         }
     }
+}
+
+@Composable
+private fun ResponseErrorText(message: String) {
+    Text(
+        text = "Error: $message",
+        modifier = Modifier.padding(16.dp),
+        color = Color.Red
+    )
 }
