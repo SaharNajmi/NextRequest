@@ -161,9 +161,9 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
-    fun createNewCollection() {
+    fun createNewCollection(name: String) {
         viewModelScope.launch(dispatcher) {
-            collectionRepository.insertCollection(RequestCollection())
+            collectionRepository.insertCollection(RequestCollection(collectionName = name))
             getCollections()
         }
     }

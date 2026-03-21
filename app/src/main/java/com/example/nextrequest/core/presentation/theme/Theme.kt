@@ -57,6 +57,9 @@ val ColorScheme.isDark: Boolean
 val ColorScheme.textMuted: Color
     get() = if (isDark) Color(0xFF585958) else Color(0xFF888888)
 
+val ColorScheme.iconMuted: Color
+    get() = if (isDark) Color(0xFF9E9E9E) else Color(0xFF555555)
+
 val ColorScheme.iconTint: Color
     get() = if (isDark) Color(0xFFFFFFFF) else Color(0xFF2F409D)
 

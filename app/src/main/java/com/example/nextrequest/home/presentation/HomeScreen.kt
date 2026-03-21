@@ -45,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
@@ -127,11 +128,10 @@ fun HomeScreen(
                 ?: (uiState.response as? Loadable.Error)?.message
             textToCopy?.let {
                 clipboard.setText(AnnotatedString(it))
-                scope.launch {
-                    snackbarHostState.showSnackbar("Copied to clipboard")
-                }
+                scope.launch { snackbarHostState.showSnackbar("Copied to clipboard") }
             }
-        })
+        }
+    )
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -175,65 +175,52 @@ private fun AppTopBar(callbacks: HomeCallbacks) {
             fontSize = 20.sp,
             modifier = Modifier.weight(1f)
         )
-        IconButton(
-            onClick = callbacks.onNavigateToHistory,
-            modifier = Modifier.size(36.dp)
+        TopBarIcon(History, "History", callbacks.onNavigateToHistory)
+        TopBarIcon(Collections_bookmark, "Collection", callbacks.onNavigateToCollection)
+        TopBarIcon(Add, "New request", callbacks.onClearDataClick)
+        WebSocketChip(onClick = callbacks.onNavigateToWebSocket)
+    }
+}
+
+@Composable
+private fun TopBarIcon(icon: ImageVector, contentDescription: String, onClick: () -> Unit) {
+    IconButton(onClick = onClick, modifier = Modifier.size(36.dp)) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = MaterialTheme.colorScheme.textMuted,
+            modifier = Modifier.size(20.dp)
+        )
+    }
+}
+
+@Composable
+private fun WebSocketChip(onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(10.dp),
+        border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)),
+        color = MaterialTheme.colorScheme.primary.copy(alpha = MaterialTheme.colorScheme.chipTintAlpha),
+        modifier = Modifier.padding(start = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Icon(
-                imageVector = History,
-                contentDescription = "History",
-                tint = MaterialTheme.colorScheme.textMuted,
-                modifier = Modifier.size(20.dp)
+                painter = painterResource(R.drawable.websocket),
+                contentDescription = "WebSocket",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(12.dp)
             )
-        }
-        IconButton(
-            onClick = callbacks.onNavigateToCollection,
-            modifier = Modifier.size(36.dp)
-        ) {
-            Icon(
-                imageVector = Collections_bookmark,
-                contentDescription = "Collection",
-                tint = MaterialTheme.colorScheme.textMuted,
-                modifier = Modifier.size(20.dp)
+            Text(
+                "WS",
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 12.sp,
+                letterSpacing = 0.3.sp
             )
-        }
-        IconButton(
-            onClick = callbacks.onClearDataClick,
-            modifier = Modifier.size(36.dp)
-        ) {
-            Icon(
-                imageVector = Add,
-                contentDescription = "New request",
-                tint = MaterialTheme.colorScheme.textMuted,
-                modifier = Modifier.size(20.dp)
-            )
-        }
-        Surface(
-            onClick = callbacks.onNavigateToWebSocket,
-            shape = RoundedCornerShape(10.dp),
-            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)),
-            color = MaterialTheme.colorScheme.primary.copy(alpha = MaterialTheme.colorScheme.chipTintAlpha),
-            modifier = Modifier.padding(start = 4.dp)
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.websocket),
-                    contentDescription = "WebSocket",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(12.dp)
-                )
-                Text(
-                    "WS",
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 12.sp,
-                    letterSpacing = 0.3.sp
-                )
-            }
         }
     }
 }
@@ -246,6 +233,13 @@ fun RequestBuilder(
 ) {
     val statusCode: Int? = (uiState.response as? Loadable.Success)?.data?.statusCode
     var isSearchVisible by remember { mutableStateOf(false) }
+
+    val cardModifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 12.dp, vertical = 4.dp)
+        .border(0.5.dp, MaterialTheme.colorScheme.cardBorder, RoundedCornerShape(12.dp))
+        .clip(RoundedCornerShape(12.dp))
+        .background(MaterialTheme.colorScheme.cardBackground)
 
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
@@ -263,11 +257,7 @@ fun RequestBuilder(
                 onRequestUrlChanged = callbacks.onRequestUrlChanged,
                 modifier = Modifier.weight(1f)
             )
-
-            IconButton(
-                onClick = callbacks.onSendRequestClick,
-                modifier = Modifier.size(36.dp)
-            ) {
+            IconButton(onClick = callbacks.onSendRequestClick, modifier = Modifier.size(36.dp)) {
                 Icon(
                     imageVector = Send,
                     contentDescription = "Send Request",
@@ -278,27 +268,14 @@ fun RequestBuilder(
         }
 
         RequestParametersSection(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 4.dp)
-                .border(0.5.dp, MaterialTheme.colorScheme.cardBorder, RoundedCornerShape(12.dp))
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.cardBackground),
+            modifier = cardModifier,
             headers = uiState.data.headers,
             params = uiState.data.params,
             body = uiState.data.body,
             callbacks = callbacks
         )
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .padding(horizontal = 12.dp, vertical = 4.dp)
-                .border(0.5.dp, MaterialTheme.colorScheme.cardBorder, RoundedCornerShape(12.dp))
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.cardBackground)
-        ) {
+        Column(modifier = cardModifier.weight(1f)) {
             ResponseBodyTopBar(
                 statusCode = statusCode,
                 onSearchToggle = { isSearchVisible = !isSearchVisible },
@@ -326,8 +303,8 @@ private fun RequestLine(
     var isHttpMethodExpanded by remember { mutableStateOf(false) }
 
     Row(
-        verticalAlignment = Alignment.CenterVertically,
         modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Box {
@@ -401,7 +378,6 @@ private fun RequestLine(
         TextField(
             value = requestUrl,
             onValueChange = onRequestUrlChanged,
-            maxLines = 1,
             singleLine = true,
             placeholder = { Text("Enter URL...", color = Silver, fontSize = 13.sp) },
             modifier = Modifier
@@ -421,29 +397,22 @@ fun RequestParametersSection(
     body: String?,
     callbacks: HomeCallbacks,
 ) {
-    var (selectedOption, onOptionSelected) = rememberSaveable {
-        mutableStateOf(HTTP_PARAM_OPTIONS[0])
-    }
+    var selectedOption by rememberSaveable { mutableStateOf(HTTP_PARAM_OPTIONS[0]) }
 
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-    ) {
-        HttpParameterSelection(HTTP_PARAM_OPTIONS, selectedOption, onOptionSelected)
+    Column(modifier = modifier.fillMaxWidth()) {
+        HttpParameterSelection(HTTP_PARAM_OPTIONS, selectedOption) { selectedOption = it }
         HttpParameterBody(selectedOption, headers, params, body, callbacks)
     }
 }
 
 @Composable
 private fun HttpParameterSelection(
-    radioHttpParameterOptions: List<RadioHttpParameterOptions>,
+    options: List<RadioHttpParameterOptions>,
     selectedOption: RadioHttpParameterOptions,
     onOptionSelected: (RadioHttpParameterOptions) -> Unit,
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        radioHttpParameterOptions.forEach { option ->
+    Row(modifier = Modifier.fillMaxWidth()) {
+        options.forEach { option ->
             val isSelected = option == selectedOption
             val label = if (option == RadioHttpParameterOptions.Header) "Headers" else option.name
             Column(
@@ -454,8 +423,7 @@ private fun HttpParameterSelection(
             ) {
                 Text(
                     text = label,
-                    color = if (isSelected) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.textMuted,
+                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.textMuted,
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                     fontSize = 12.sp,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
@@ -465,8 +433,7 @@ private fun HttpParameterSelection(
                         .fillMaxWidth()
                         .height(2.dp)
                         .background(
-                            color = if (isSelected) MaterialTheme.colorScheme.primary
-                            else Color.Transparent,
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
                             shape = RoundedCornerShape(1.dp)
                         )
                 )
@@ -484,7 +451,7 @@ private fun HttpParameterBody(
     callbacks: HomeCallbacks,
 ) {
     Box(
-        Modifier
+        modifier = Modifier
             .height(120.dp)
             .fillMaxWidth()
             .padding(horizontal = 8.dp)
@@ -494,16 +461,12 @@ private fun HttpParameterBody(
                 Modifier.padding(start = 12.dp, end = 12.dp, top = 6.dp), headers, callbacks
             )
 
-            RadioHttpParameterOptions.Params -> ParamsSection(
-                params, callbacks
-            )
-
-            RadioHttpParameterOptions.Header -> HeaderSection(
-                headers, callbacks
-            )
-
+            RadioHttpParameterOptions.Params -> ParamsSection(params, callbacks)
+            RadioHttpParameterOptions.Header -> HeaderSection(headers, callbacks)
             RadioHttpParameterOptions.Body -> HttpParameterBodySection(
-                Modifier.fillMaxSize(), body, callbacks
+                Modifier.fillMaxSize(),
+                body,
+                callbacks
             )
         }
     }
@@ -512,10 +475,11 @@ private fun HttpParameterBody(
 @Composable
 private fun StatusCode(statusCode: Int?) {
     if (statusCode == null) return
+    val isSuccess = statusCode in 200..208
     val textColor =
-        if (statusCode in 200..208) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.error
-    val backgroundColor =
-        if (statusCode in 200..208) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.errorContainer
+        if (isSuccess) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.error
+    val bgColor =
+        if (isSuccess) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.errorContainer
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
@@ -525,12 +489,12 @@ private fun StatusCode(statusCode: Int?) {
             fontSize = 12.sp
         )
         Text(
+            text = statusCode.toString(),
+            color = textColor,
             modifier = Modifier
                 .clip(RoundedCornerShape(4.dp))
-                .background(backgroundColor)
-                .padding(horizontal = 4.dp),
-            color = textColor,
-            text = statusCode.toString(),
+                .background(bgColor)
+                .padding(horizontal = 4.dp)
         )
     }
 }
@@ -576,9 +540,9 @@ fun AuthSection(
         )
         Spacer(Modifier.height(8.dp))
         TextVisibilityTextField(
-            headers?.getHeaderValue("Authorization") ?: "", onTextChange = {
-                callbacks.onAddHeader("Authorization", it)
-            })
+            value = headers?.getHeaderValue("Authorization") ?: "",
+            onTextChange = { callbacks.onAddHeader("Authorization", it) }
+        )
     }
 }
 
@@ -599,7 +563,7 @@ fun HttpParameterBodySection(
 ) {
     TextField(
         value = body ?: "",
-        onValueChange = { callbacks.onBodyChanged(it) },
+        onValueChange = callbacks.onBodyChanged,
         maxLines = Int.MAX_VALUE,
         placeholder = { Text("Enter request body...", color = Silver, fontSize = 12.sp) },
         modifier = modifier.padding(8.dp),
@@ -618,7 +582,6 @@ private fun ResponseBodyTopBar(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -634,21 +597,11 @@ private fun ResponseBodyTopBar(
             color = MaterialTheme.colorScheme.textMuted,
             fontWeight = FontWeight.Medium,
             modifier = Modifier
-                .background(
-                    MaterialTheme.colorScheme.jsonChipBackground,
-                    shape = RoundedCornerShape(8.dp)
-                )
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.jsonChipBorder,
-                    shape = RoundedCornerShape(8.dp)
-                )
+                .background(MaterialTheme.colorScheme.jsonChipBackground, RoundedCornerShape(8.dp))
+                .border(1.dp, MaterialTheme.colorScheme.jsonChipBorder, RoundedCornerShape(8.dp))
                 .padding(horizontal = 8.dp)
         )
-
-
         StatusCode(statusCode)
-
         Spacer(Modifier.weight(1f))
         IconButton(
             onClick = onSearchToggle,
@@ -662,10 +615,7 @@ private fun ResponseBodyTopBar(
                 tint = MaterialTheme.colorScheme.textMuted
             )
         }
-        IconButton(
-            onClick = { callbacks.onCopyClick() },
-            modifier = Modifier.size(18.dp)
-        ) {
+        IconButton(onClick = callbacks.onCopyClick, modifier = Modifier.size(18.dp)) {
             Icon(
                 imageVector = Content_copy,
                 contentDescription = "copy response",
@@ -684,7 +634,9 @@ fun ResponseBody(
     when (response) {
         is Loadable.Success -> {
             SearchFromContentText(
-                response.data.response, isSearchVisible, onDismissSearch = onDismissSearch
+                response.data.response,
+                isSearchVisible,
+                onDismissSearch = onDismissSearch
             )
             if (response.data.imageResponse != null) {
                 Image(
@@ -698,7 +650,6 @@ fun ResponseBody(
 
         is Loadable.Error -> ResponseErrorText(response.message)
         is Loadable.NetworkError -> ResponseErrorText(response.message)
-
         Loadable.Loading -> Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
