@@ -69,20 +69,17 @@ val ColorScheme.iconOnBackground: Color
 val ColorScheme.focusedBorderColor: Color
     get() = primary.copy(alpha = 0.3f)
 
-val ColorScheme.unfocusedBorderColor: Color
-    get() = primary.copy(alpha = 0.4f)
-
 val ColorScheme.inputBackground: Color
-    get() = if (isDark) Color(0xFF2A2A2A) else Color(0xFFF0F0F0)
+    get() = if (isDark) Color(0xFF1F1F1F) else Color(0xFFF0F0F0)
 
 val ColorScheme.cardBackground: Color
-    get() = if (isDark) Color(0xFF1C1C1E) else Color(0xFFFAFAFA)
+    get() = if (isDark) Color(0xFF1A1919) else Color(0xFFFAFAFA)
 
 val ColorScheme.cardBorder: Color
-    get() = if (isDark) Color(0xFF2E2E2E) else Color(0xFFE8E8E8)
+    get() = if (isDark) Color(0xFF282828) else Color(0xFFE8E8E8)
 
 val ColorScheme.dropdownBorder: Color
-    get() = if (isDark) Color(0xFF3A3A3A) else Color(0xFFE0E0E0)
+    get() = if (isDark) Color(0xFF333333) else Color(0xFFE0E0E0)
 
 val ColorScheme.chipTintAlpha: Float
     get() = if (isDark) 0.12f else 0.1f
