@@ -256,8 +256,8 @@ private fun WebSocketTopBar(navController: NavController) {
         Text(
             text = stringResource(R.string.title_websocket),
             color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Black,
-            fontSize = 20.sp,
+            fontWeight = FontWeight.Medium,
+            fontSize = 18.sp,
             modifier = Modifier
                 .weight(1f)
                 .padding(start = 4.dp)
