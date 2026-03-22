@@ -33,9 +33,15 @@ Download the app on Google Play:
 
 
 ## 📷 Screenshots
-
+<p float="left">
+  <img src="screenshots/home-dark.png" width="220">
+  <img src="screenshots/history-dark.png" width="220">
+  <img src="screenshots/collection-dark.png" width="220">
+  <img src="screenshots/websocket-dark.png" width="220">
+</p>
 <p float="left">
   <img src="screenshots/home.png" width="220">
   <img src="screenshots/history.png" width="220">
   <img src="screenshots/collection.png" width="220">
+  <img src="screenshots/websocket.png" width="220">
 </p>
