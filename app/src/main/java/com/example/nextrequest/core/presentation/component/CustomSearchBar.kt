@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.nextrequest.core.presentation.icons.Search
-import com.example.nextrequest.core.presentation.theme.Silver
 import com.example.nextrequest.core.presentation.theme.inputFieldColors
 import com.example.nextrequest.core.presentation.theme.textMuted
 
@@ -27,7 +26,13 @@ fun CustomSearchBar(
     TextField(
         value = searchQuery,
         onValueChange = { onSearchQueryChanged(it) },
-        placeholder = { Text(queryHint, color = Silver, fontSize = 12.sp) },
+        placeholder = {
+            Text(
+                queryHint,
+                color = MaterialTheme.colorScheme.textMuted,
+                fontSize = 12.sp
+            )
+        },
         singleLine = true,
         leadingIcon = {
             Icon(

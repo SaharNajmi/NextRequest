@@ -2,8 +2,6 @@ package com.example.nextrequest.core.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Silver = Color(0xFFBEBBBB)
-
 val primaryLight = Color(0xFFE65100)
 val onPrimaryLight = Color(0xFFFFFFFF)
 val primaryContainerLight = Color(0xFFF6B763)

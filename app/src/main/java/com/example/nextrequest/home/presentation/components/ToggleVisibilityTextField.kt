@@ -22,11 +22,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.material3.Text
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.nextrequest.core.presentation.theme.inputBackground
+import com.example.nextrequest.core.presentation.theme.textMuted
 import com.sahar.nextrequest.R
 
 @Composable
@@ -56,6 +59,13 @@ fun TextVisibilityTextField(value: String, onTextChange: (String) -> Unit) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(modifier = Modifier.weight(1f)) {
+                    if (state.text.isEmpty()) {
+                        Text(
+                            text = "Token",
+                            color = MaterialTheme.colorScheme.textMuted,
+                            fontSize = 14.sp
+                        )
+                    }
                     innerTextField()
                 }
                 Icon(

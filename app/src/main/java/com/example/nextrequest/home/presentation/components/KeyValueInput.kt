@@ -20,8 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.nextrequest.core.presentation.icons.Add
-import com.example.nextrequest.core.presentation.theme.Silver
 import com.example.nextrequest.core.presentation.theme.inputFieldColors
+import com.example.nextrequest.core.presentation.theme.textMuted
 
 @Composable
 fun KeyValueInput(
@@ -40,7 +40,7 @@ fun KeyValueInput(
             modifier = Modifier.weight(1f),
             value = key,
             singleLine = true,
-            placeholder = { Text("Key", color = Silver, fontSize = 12.sp) },
+            placeholder = { Text("Key", color = MaterialTheme.colorScheme.textMuted, fontSize = 12.sp) },
             shape = RoundedCornerShape(10.dp),
             colors = fieldColors,
             onValueChange = { key = it }
@@ -49,7 +49,7 @@ fun KeyValueInput(
             modifier = Modifier.weight(1f),
             value = value,
             singleLine = true,
-            placeholder = { Text("Value", color = Silver, fontSize = 12.sp) },
+            placeholder = { Text("Value", color = MaterialTheme.colorScheme.textMuted, fontSize = 12.sp) },
             shape = RoundedCornerShape(10.dp),
             colors = fieldColors,
             onValueChange = { value = it }

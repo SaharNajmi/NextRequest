@@ -26,7 +26,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -56,6 +55,7 @@ import com.example.nextrequest.core.domain.model.ApiResponse
 import com.example.nextrequest.core.models.HttpMethod
 import com.example.nextrequest.core.models.KeyValue
 import com.example.nextrequest.core.presentation.color
+import com.example.nextrequest.core.presentation.component.AppSnackbar
 import com.example.nextrequest.core.presentation.icons.Add
 import com.example.nextrequest.core.presentation.icons.Collections_bookmark
 import com.example.nextrequest.core.presentation.icons.Content_copy
@@ -63,7 +63,6 @@ import com.example.nextrequest.core.presentation.icons.History
 import com.example.nextrequest.core.presentation.icons.Search
 import com.example.nextrequest.core.presentation.icons.Send
 import com.example.nextrequest.core.presentation.icons.TriangleDown
-import com.example.nextrequest.core.presentation.theme.Silver
 import com.example.nextrequest.core.presentation.theme.cardBackground
 import com.example.nextrequest.core.presentation.theme.cardBorder
 import com.example.nextrequest.core.presentation.theme.chipTintAlpha
@@ -137,13 +136,6 @@ fun HomeScreen(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
     ) {
-        SnackbarHost(hostState = snackbarHostState, snackbar = { data ->
-            Snackbar(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = Color.Black,
-                snackbarData = data
-            )
-        })
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -156,6 +148,9 @@ fun HomeScreen(
                 callbacks = callbacks,
                 modifier = Modifier.weight(1f)
             )
+        }
+        SnackbarHost(hostState = snackbarHostState) { data ->
+            AppSnackbar(message = data.visuals.message)
         }
     }
 }
@@ -379,7 +374,7 @@ private fun RequestLine(
             value = requestUrl,
             onValueChange = onRequestUrlChanged,
             singleLine = true,
-            placeholder = { Text("Enter URL...", color = Silver, fontSize = 13.sp) },
+            placeholder = { Text("Enter URL...", color = MaterialTheme.colorScheme.textMuted, fontSize = 13.sp) },
             modifier = Modifier
                 .weight(1f)
                 .border(0.5.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp)),
@@ -565,7 +560,13 @@ fun HttpParameterBodySection(
         value = body ?: "",
         onValueChange = callbacks.onBodyChanged,
         maxLines = Int.MAX_VALUE,
-        placeholder = { Text("Enter request body...", color = Silver, fontSize = 12.sp) },
+        placeholder = {
+            Text(
+                "Enter request body...",
+                color = MaterialTheme.colorScheme.textMuted,
+                fontSize = 12.sp
+            )
+        },
         modifier = modifier.padding(8.dp),
         shape = RoundedCornerShape(10.dp),
         colors = inputFieldColors()

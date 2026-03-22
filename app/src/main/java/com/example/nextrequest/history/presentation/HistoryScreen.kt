@@ -47,6 +47,7 @@ import androidx.navigation.NavController
 import com.example.nextrequest.collection.presentation.model.CollectionEntry
 import com.example.nextrequest.core.presentation.UiState
 import com.example.nextrequest.core.presentation.color
+import com.example.nextrequest.core.presentation.component.AppSnackbar
 import com.example.nextrequest.core.presentation.component.CustomSearchBar
 import com.example.nextrequest.core.presentation.component.NotFoundMessage
 import com.example.nextrequest.core.presentation.icons.Add
@@ -107,7 +108,7 @@ fun HistoryScreen(
         contentAlignment = Alignment.BottomCenter
     ) {
         SnackbarHost(hostState = snackbarHostState) { data ->
-            HistorySnackbar(message = data.visuals.message)
+            AppSnackbar(message = data.visuals.message)
         }
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -136,32 +137,6 @@ fun HistoryScreen(
     }
 }
 
-@Composable
-private fun HistorySnackbar(message: String) {
-    Row(
-        modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(MaterialTheme.colorScheme.cardBackground)
-            .border(0.5.dp, MaterialTheme.colorScheme.cardBorder, RoundedCornerShape(10.dp)),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .width(3.dp)
-                .height(40.dp)
-                .background(MaterialTheme.colorScheme.primary)
-        )
-        Text(
-            text = message,
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-    }
-}
 
 @Composable
 private fun HistoryTopBar(navController: NavController) {

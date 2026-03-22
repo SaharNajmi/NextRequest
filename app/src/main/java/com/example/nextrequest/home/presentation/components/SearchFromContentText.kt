@@ -42,7 +42,6 @@ import com.example.nextrequest.core.presentation.icons.Close
 import com.example.nextrequest.core.presentation.icons.Keyboard_arrow_down
 import com.example.nextrequest.core.presentation.icons.Keyboard_arrow_up
 import com.example.nextrequest.core.presentation.icons.Search
-import com.example.nextrequest.core.presentation.theme.Silver
 import com.example.nextrequest.core.presentation.theme.cardBorder
 import com.example.nextrequest.core.presentation.theme.inputBackground
 import com.example.nextrequest.core.presentation.theme.textMuted
@@ -135,7 +134,13 @@ private fun SearchBarCard(
         TextField(
             value = searchQuery,
             onValueChange = onQueryChange,
-            placeholder = { Text("Find...", color = Silver, fontSize = 13.sp) },
+            placeholder = {
+                Text(
+                    "Find...",
+                    color = MaterialTheme.colorScheme.textMuted,
+                    fontSize = 13.sp
+                )
+            },
             leadingIcon = {
                 Icon(
                     imageVector = Search,
