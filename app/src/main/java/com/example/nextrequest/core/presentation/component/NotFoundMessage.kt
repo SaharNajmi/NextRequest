@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,7 +30,7 @@ fun NotFoundMessage(notFoundedSearchQuery: String) {
         )
         Spacer(modifier = Modifier.height(24.dp))
         Text(
-            "No result found for \"$notFoundedSearchQuery\"",
+            stringResource(R.string.msg_no_result_found, notFoundedSearchQuery),
             fontSize = 12.sp,
             modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center
         )

@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -128,7 +129,7 @@ fun CollectionScreen(
             CollectionTopBar(navController, callbacks)
 
             Column(modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp)) {
-                CustomSearchBar("Search collections", searchQuery) { searchQuery = it }
+                CustomSearchBar(stringResource(R.string.hint_search_collections), searchQuery) { searchQuery = it }
 
                 when (uiState) {
                     is UiState.Loading -> Box(
@@ -139,7 +140,7 @@ fun CollectionScreen(
                     }
 
                     is UiState.Error -> Text(
-                        text = "Error: ${(uiState as UiState.Error).message}",
+                        text = stringResource(R.string.msg_error, (uiState as UiState.Error).message),
                         modifier = Modifier.padding(16.dp),
                         color = Color.Red
                     )
@@ -178,13 +179,13 @@ private fun CollectionTopBar(navController: NavController, callbacks: Collection
         ) {
             Icon(
                 imageVector = Arrow_back,
-                contentDescription = "Back",
+                contentDescription = stringResource(R.string.cd_back),
                 tint = MaterialTheme.colorScheme.textMuted,
                 modifier = Modifier.size(20.dp)
             )
         }
         Text(
-            text = "Collections",
+            text = stringResource(R.string.title_collections),
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Medium,
             fontSize = 18.sp,
@@ -198,7 +199,7 @@ private fun CollectionTopBar(navController: NavController, callbacks: Collection
         ) {
             Icon(
                 imageVector = Add,
-                contentDescription = "create new collection",
+                contentDescription = stringResource(R.string.cd_create_new_collection),
                 tint = MaterialTheme.colorScheme.iconTint,
                 modifier = Modifier.size(20.dp)
             )
@@ -215,13 +216,13 @@ private fun EmptyCollectionMessage(callbacks: CollectionCallbacks) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "Create a collection for your requests",
+            text = stringResource(R.string.msg_create_collection_title),
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onBackground
         )
         Text(
-            text = "A collection lets you group related requests",
+            text = stringResource(R.string.msg_create_collection_subtitle),
             fontSize = 12.sp,
             fontWeight = FontWeight.Light,
             color = MaterialTheme.colorScheme.textMuted,
@@ -234,7 +235,7 @@ private fun EmptyCollectionMessage(callbacks: CollectionCallbacks) {
             onClick = { callbacks.onCreateNewCollectionClick() }
         ) {
             Text(
-                "Create Collection",
+                stringResource(R.string.action_create_collection),
                 color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Normal,
                 fontSize = 12.sp
@@ -339,7 +340,7 @@ fun CollectionHeader(
     ) {
         Icon(
             imageVector = if (isExpanded) Keyboard_arrow_down else Keyboard_arrow_right,
-            contentDescription = "expand/collapse",
+            contentDescription = stringResource(R.string.cd_expand_collapse),
             tint = MaterialTheme.colorScheme.textMuted,
             modifier = Modifier
                 .size(18.dp)
@@ -390,7 +391,7 @@ fun CollectionHeader(
 
         Icon(
             imageVector = Add,
-            contentDescription = "add new request",
+            contentDescription = stringResource(R.string.cd_add_new_request),
             modifier = Modifier
                 .padding(start = 8.dp)
                 .size(18.dp)
@@ -403,7 +404,7 @@ fun CollectionHeader(
 
         Icon(
             imageVector = Edit,
-            contentDescription = "rename collection",
+            contentDescription = stringResource(R.string.cd_rename_collection),
             modifier = Modifier
                 .padding(start = 8.dp)
                 .size(18.dp)
@@ -421,7 +422,7 @@ fun CollectionHeader(
 
         Icon(
             imageVector = Delete_sweep,
-            contentDescription = "delete collection",
+            contentDescription = stringResource(R.string.cd_delete_collection),
             modifier = Modifier
                 .padding(start = 8.dp)
                 .size(18.dp)
@@ -438,13 +439,13 @@ fun CollectionHeader(
 fun AddARequestButton(modifier: Modifier, collectionId: String, callbacks: CollectionCallbacks) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Text(
-            "This collection is empty",
+            stringResource(R.string.msg_collection_empty),
             fontSize = 13.sp,
             color = MaterialTheme.colorScheme.textMuted
         )
         TextButton(onClick = { callbacks.onCreateEmptyRequestClick(collectionId) }) {
             Text(
-                "Add a request",
+                stringResource(R.string.action_add_request),
                 fontSize = 13.sp,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -536,7 +537,7 @@ private fun CollectionItemView(
 
         Icon(
             imageVector = Edit,
-            contentDescription = "rename",
+            contentDescription = stringResource(R.string.cd_rename),
             modifier = Modifier
                 .size(18.dp)
                 .clickable {
@@ -553,7 +554,7 @@ private fun CollectionItemView(
 
         Icon(
             imageVector = Delete,
-            contentDescription = "delete",
+            contentDescription = stringResource(R.string.cd_delete),
             modifier = Modifier
                 .size(18.dp)
                 .clickable {

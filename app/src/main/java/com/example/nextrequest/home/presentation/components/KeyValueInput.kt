@@ -19,9 +19,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import com.example.nextrequest.core.presentation.icons.Add
 import com.example.nextrequest.core.presentation.theme.inputFieldColors
 import com.example.nextrequest.core.presentation.theme.textMuted
+import com.sahar.nextrequest.R
 
 @Composable
 fun KeyValueInput(
@@ -40,7 +42,7 @@ fun KeyValueInput(
             modifier = Modifier.weight(1f),
             value = key,
             singleLine = true,
-            placeholder = { Text("Key", color = MaterialTheme.colorScheme.textMuted, fontSize = 12.sp) },
+            placeholder = { Text(stringResource(R.string.hint_key), color = MaterialTheme.colorScheme.textMuted, fontSize = 12.sp) },
             shape = RoundedCornerShape(10.dp),
             colors = fieldColors,
             onValueChange = { key = it }
@@ -49,7 +51,7 @@ fun KeyValueInput(
             modifier = Modifier.weight(1f),
             value = value,
             singleLine = true,
-            placeholder = { Text("Value", color = MaterialTheme.colorScheme.textMuted, fontSize = 12.sp) },
+            placeholder = { Text(stringResource(R.string.hint_value), color = MaterialTheme.colorScheme.textMuted, fontSize = 12.sp) },
             shape = RoundedCornerShape(10.dp),
             colors = fieldColors,
             onValueChange = { value = it }
@@ -64,7 +66,7 @@ fun KeyValueInput(
         ) {
             Icon(
                 imageVector = Add,
-                contentDescription = "Add",
+                contentDescription = stringResource(R.string.cd_add),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(20.dp)
             )

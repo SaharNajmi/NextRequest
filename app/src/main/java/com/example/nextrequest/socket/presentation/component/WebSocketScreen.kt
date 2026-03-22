@@ -36,7 +36,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import com.sahar.nextrequest.R
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -133,7 +135,7 @@ fun WebSocketScreen(
                     onValueChange = { messageText = it },
                     colors = inputFieldColors(),
                     placeholder = {
-                        Text("Type a message", color = MaterialTheme.colorScheme.textMuted, fontSize = 13.sp)
+                        Text(stringResource(R.string.hint_type_message), color = MaterialTheme.colorScheme.textMuted, fontSize = 13.sp)
                     },
                     maxLines = 5,
                     shape = RoundedCornerShape(12.dp)
@@ -145,7 +147,7 @@ fun WebSocketScreen(
                 ) {
                     Icon(
                         imageVector = Send,
-                        contentDescription = "Send Message",
+                        contentDescription = stringResource(R.string.cd_send_message),
                         tint = if (isConnected && messageText.isNotBlank())
                             MaterialTheme.colorScheme.primary
                         else
@@ -158,7 +160,7 @@ fun WebSocketScreen(
             when (val state = uiState) {
                 is UiState.Error -> {
                     Text(
-                        text = "Error: ${state.message}",
+                        text = stringResource(R.string.msg_error, state.message),
                         modifier = Modifier.padding(16.dp),
                         color = MaterialTheme.colorScheme.error
                     )
@@ -189,7 +191,7 @@ fun WebSocketScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Messages",
+                                text = stringResource(R.string.label_messages),
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.textMuted,
@@ -199,7 +201,7 @@ fun WebSocketScreen(
                                 onClick = callbacks.onHideMessages,
                                 enabled = state.data.visibleMessages.isNotEmpty()
                             ) {
-                                Text("Hide", fontSize = 12.sp)
+                                Text(stringResource(R.string.action_hide), fontSize = 12.sp)
                             }
                         }
                         HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
@@ -246,13 +248,13 @@ private fun WebSocketTopBar(navController: NavController) {
         ) {
             Icon(
                 imageVector = Arrow_back,
-                contentDescription = "Back",
+                contentDescription = stringResource(R.string.cd_back),
                 tint = MaterialTheme.colorScheme.textMuted,
                 modifier = Modifier.size(20.dp)
             )
         }
         Text(
-            text = "WebSocket",
+            text = stringResource(R.string.title_websocket),
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Black,
             fontSize = 20.sp,
@@ -343,13 +345,13 @@ fun HiddenMessagesItem(count: Int, onShowClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "$count messages hidden",
+            text = stringResource(R.string.msg_messages_hidden, count),
             fontSize = 12.sp,
             color = MaterialTheme.colorScheme.textMuted,
             modifier = Modifier.weight(1f)
         )
         TextButton(onClick = onShowClick) {
-            Text("Show", fontSize = 12.sp)
+            Text(stringResource(R.string.action_show), fontSize = 12.sp)
         }
     }
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 0.5.dp)
@@ -373,7 +375,7 @@ fun RequestLine(
             value = requestUrl,
             onValueChange = onRequestUrlChanged,
             maxLines = 4,
-            placeholder = { Text("Enter URL", color = MaterialTheme.colorScheme.textMuted, fontSize = 13.sp) },
+            placeholder = { Text(stringResource(R.string.hint_enter_url_ws), color = MaterialTheme.colorScheme.textMuted, fontSize = 13.sp) },
             colors = inputFieldColors(),
             modifier = Modifier
                 .weight(1f)
@@ -396,7 +398,7 @@ fun RequestLine(
                 MaterialTheme.colorScheme.primary.copy(alpha = MaterialTheme.colorScheme.chipTintAlpha)
         ) {
             Text(
-                text = if (isConnected) "Disconnect" else "Connect",
+                text = if (isConnected) stringResource(R.string.action_disconnect) else stringResource(R.string.action_connect),
                 color = if (isConnected) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
                 fontSize = 12.sp,

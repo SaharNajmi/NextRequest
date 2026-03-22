@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -81,6 +82,7 @@ fun HistoryScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val addedToCollection = stringResource(R.string.snackbar_added_to_collection)
 
     LaunchedEffect(Unit) { viewModel.getHistories() }
 
@@ -88,11 +90,11 @@ fun HistoryScreen(
         onHistoryItemClick = onHistoryItemClick,
         onAddHistoryToCollection = { history, collectionId ->
             viewModel.addHistoryToCollection(history, collectionId)
-            scope.launch { snackbarHostState.showSnackbar("Added to collection") }
+            scope.launch { snackbarHostState.showSnackbar(addedToCollection) }
         },
         onAddHistoriesToCollection = { histories, collectionId ->
             viewModel.addHistoriesToCollection(histories, collectionId)
-            scope.launch { snackbarHostState.showSnackbar("Added to collection") }
+            scope.launch { snackbarHostState.showSnackbar(addedToCollection) }
         },
         onHeaderClick = viewModel::toggleExpanded,
         onDeleteHistoriesClick = viewModel::deleteHistories,
@@ -123,7 +125,7 @@ fun HistoryScreen(
                 }
 
                 is UiState.Error -> Text(
-                    text = "Error: ${(uiState as UiState.Error).message}",
+                    text = stringResource(R.string.msg_error, (uiState as UiState.Error).message),
                     modifier = Modifier.padding(16.dp),
                     color = Color.Red
                 )
@@ -157,13 +159,13 @@ private fun HistoryTopBar(navController: NavController) {
         ) {
             Icon(
                 imageVector = Arrow_back,
-                contentDescription = "Back",
+                contentDescription = stringResource(R.string.cd_back),
                 tint = MaterialTheme.colorScheme.textMuted,
                 modifier = Modifier.size(20.dp)
             )
         }
         Text(
-            text = "History",
+            text = stringResource(R.string.title_history),
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Medium,
             fontSize = 18.sp,
@@ -184,7 +186,7 @@ fun HistoryScreenContent(
     val filteredHistories = searchHistories(histories, searchQuery)
 
     Column(modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp)) {
-        CustomSearchBar("Search requests...", searchQuery) { searchQuery = it }
+        CustomSearchBar(stringResource(R.string.hint_search_requests), searchQuery) { searchQuery = it }
 
         when {
             filteredHistories.isEmpty() && searchQuery.isEmpty() -> EmptyHistoryMessage()
@@ -205,11 +207,11 @@ private fun EmptyHistoryMessage() {
     ) {
         Icon(
             Hourglass_empty,
-            contentDescription = "empty list",
+            contentDescription = stringResource(R.string.cd_empty_list),
             tint = MaterialTheme.colorScheme.textMuted,
             modifier = Modifier.padding(end = 4.dp)
         )
-        Text(text = "History is empty", color = MaterialTheme.colorScheme.textMuted)
+        Text(text = stringResource(R.string.msg_history_empty), color = MaterialTheme.colorScheme.textMuted)
     }
 }
 
@@ -290,7 +292,7 @@ fun HistoryHeader(
     ) {
         Icon(
             imageVector = if (isExpanded) Keyboard_arrow_down else Keyboard_arrow_right,
-            contentDescription = "expand/collapse",
+            contentDescription = stringResource(R.string.cd_expand_collapse),
             tint = MaterialTheme.colorScheme.textMuted,
             modifier = Modifier.size(18.dp)
         )
@@ -320,7 +322,7 @@ private fun HeaderActions(
 
     Icon(
         imageVector = Add,
-        contentDescription = "add requests to collections",
+        contentDescription = stringResource(R.string.cd_add_to_collection),
         modifier = Modifier
             .size(18.dp)
             .clickable { showCollectionDialog = true },
@@ -328,7 +330,7 @@ private fun HeaderActions(
     )
     Icon(
         imageVector = Delete_sweep,
-        contentDescription = "delete list by date",
+        contentDescription = stringResource(R.string.cd_delete_by_date),
         modifier = Modifier
             .padding(start = 8.dp)
             .size(18.dp)
@@ -395,7 +397,7 @@ private fun HistoryItemActions(
     ) {
         Icon(
             imageVector = Add,
-            contentDescription = "add to collection",
+            contentDescription = stringResource(R.string.cd_add_to_collection),
             modifier = Modifier
                 .size(18.dp)
                 .clickable { showCollectionDialog = true },
@@ -403,7 +405,7 @@ private fun HistoryItemActions(
         )
         Icon(
             imageVector = Delete,
-            contentDescription = "delete",
+            contentDescription = stringResource(R.string.cd_delete),
             modifier = Modifier
                 .size(18.dp)
                 .clickable { callbacks.onDeleteHistoryClick(item) },

@@ -44,7 +44,9 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import com.sahar.nextrequest.R
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -144,13 +146,13 @@ fun SaveToCollectionDialog(
 private fun DialogHeader(selectedItem: CollectionEntry?) {
     Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 12.dp)) {
         Text(
-            text = selectedItem?.let { "Save to ${it.name}" } ?: "No collections yet",
+            text = selectedItem?.let { stringResource(R.string.msg_save_to_collection, it.name) } ?: stringResource(R.string.msg_no_collections_yet),
             fontSize = 15.sp,
             fontWeight = FontWeight.ExtraBold,
             color = MaterialTheme.colorScheme.primary
         )
         Text(
-            text = "Select a collection",
+            text = stringResource(R.string.msg_select_collection),
             fontSize = 11.sp,
             color = MaterialTheme.colorScheme.textMuted,
             modifier = Modifier.padding(top = 2.dp)
@@ -300,7 +302,7 @@ private fun NewCollectionInput(
                 Box(modifier = Modifier.fillMaxWidth()) {
                     if (value.isEmpty()) {
                         Text(
-                            text = "Collection name…",
+                            text = stringResource(R.string.hint_collection_name),
                             fontSize = 13.sp,
                             color = MaterialTheme.colorScheme.textMuted
                         )
@@ -322,7 +324,7 @@ private fun NewCollectionInput(
         ) {
             Icon(
                 imageVector = Close,
-                contentDescription = "Cancel",
+                contentDescription = stringResource(R.string.cd_cancel),
                 tint = MaterialTheme.colorScheme.iconMuted,
                 modifier = Modifier.size(16.dp)
             )
@@ -340,7 +342,7 @@ private fun NewCollectionInput(
         ) {
             Icon(
                 imageVector = Check,
-                contentDescription = "Create",
+                contentDescription = stringResource(R.string.cd_create),
                 tint = if (value.isNotBlank()) MaterialTheme.colorScheme.onPrimary
                 else MaterialTheme.colorScheme.textMuted,
                 modifier = Modifier.size(16.dp)
@@ -370,13 +372,13 @@ private fun AddNewCollectionRow(onClick: () -> Unit) {
     ) {
         Icon(
             imageVector = Add,
-            contentDescription = "Add new collection",
+            contentDescription = stringResource(R.string.action_add_new_collection),
             tint = MaterialTheme.colorScheme.iconTint,
             modifier = Modifier.size(16.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = "Add new collection",
+            text = stringResource(R.string.action_add_new_collection),
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.iconTint
@@ -399,7 +401,7 @@ private fun DialogActions(
     ) {
         TextButton(onClick = onDismiss) {
             Text(
-                text = "Cancel",
+                text = stringResource(R.string.action_cancel),
                 fontSize = 13.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.textMuted
@@ -415,7 +417,7 @@ private fun DialogActions(
             ),
             shape = RoundedCornerShape(8.dp)
         ) {
-            Text(text = "Save", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Text(text = stringResource(R.string.action_save), fontSize = 13.sp, fontWeight = FontWeight.Bold)
         }
     }
 }

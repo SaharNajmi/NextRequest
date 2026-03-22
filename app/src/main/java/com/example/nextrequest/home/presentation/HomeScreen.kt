@@ -47,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -108,6 +109,7 @@ fun HomeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val clipboard = LocalClipboardManager.current
+    val copiedToClipboard = stringResource(R.string.snackbar_copied_to_clipboard)
 
     val callbacks = HomeCallbacks(
         onSendRequestClick = { homeViewModel.sendRequest(collectionId) },
@@ -127,7 +129,7 @@ fun HomeScreen(
                 ?: (uiState.response as? Loadable.Error)?.message
             textToCopy?.let {
                 clipboard.setText(AnnotatedString(it))
-                scope.launch { snackbarHostState.showSnackbar("Copied to clipboard") }
+                scope.launch { snackbarHostState.showSnackbar(copiedToClipboard) }
             }
         }
     )
@@ -164,15 +166,15 @@ private fun AppTopBar(callbacks: HomeCallbacks) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "NextRequest",
+            text = stringResource(R.string.app_name),
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Black,
             fontSize = 20.sp,
             modifier = Modifier.weight(1f)
         )
-        TopBarIcon(History, "History", callbacks.onNavigateToHistory)
-        TopBarIcon(Collections_bookmark, "Collection", callbacks.onNavigateToCollection)
-        TopBarIcon(Add, "New request", callbacks.onClearDataClick)
+        TopBarIcon(History, stringResource(R.string.cd_history), callbacks.onNavigateToHistory)
+        TopBarIcon(Collections_bookmark, stringResource(R.string.cd_collection), callbacks.onNavigateToCollection)
+        TopBarIcon(Add, stringResource(R.string.cd_new_request), callbacks.onClearDataClick)
         WebSocketChip(onClick = callbacks.onNavigateToWebSocket)
     }
 }
@@ -205,12 +207,12 @@ private fun WebSocketChip(onClick: () -> Unit) {
         ) {
             Icon(
                 painter = painterResource(R.drawable.websocket),
-                contentDescription = "WebSocket",
+                contentDescription = stringResource(R.string.cd_websocket),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(12.dp)
             )
             Text(
-                "WS",
+                stringResource(R.string.label_ws),
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 12.sp,
@@ -255,7 +257,7 @@ fun RequestBuilder(
             IconButton(onClick = callbacks.onSendRequestClick, modifier = Modifier.size(36.dp)) {
                 Icon(
                     imageVector = Send,
-                    contentDescription = "Send Request",
+                    contentDescription = stringResource(R.string.cd_send_request),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
                 )
@@ -374,7 +376,7 @@ private fun RequestLine(
             value = requestUrl,
             onValueChange = onRequestUrlChanged,
             singleLine = true,
-            placeholder = { Text("Enter URL...", color = MaterialTheme.colorScheme.textMuted, fontSize = 13.sp) },
+            placeholder = { Text(stringResource(R.string.hint_enter_url), color = MaterialTheme.colorScheme.textMuted, fontSize = 13.sp) },
             modifier = Modifier
                 .weight(1f)
                 .border(0.5.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp)),
@@ -478,7 +480,7 @@ private fun StatusCode(statusCode: Int?) {
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = "Status ",
+            text = stringResource(R.string.label_status),
             modifier = Modifier.padding(start = 24.dp),
             color = MaterialTheme.colorScheme.textMuted,
             fontSize = 12.sp
@@ -524,7 +526,7 @@ fun AuthSection(
 ) {
     Column(modifier = modifier) {
         Text(
-            text = "Bearer Token",
+            text = stringResource(R.string.label_bearer_token),
             modifier = Modifier
                 .clip(RoundedCornerShape(20.dp))
                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
@@ -562,7 +564,7 @@ fun HttpParameterBodySection(
         maxLines = Int.MAX_VALUE,
         placeholder = {
             Text(
-                "Enter request body...",
+                stringResource(R.string.hint_enter_request_body),
                 color = MaterialTheme.colorScheme.textMuted,
                 fontSize = 12.sp
             )
@@ -586,14 +588,14 @@ private fun ResponseBodyTopBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "Response",
+            text = stringResource(R.string.label_response),
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.textMuted,
             modifier = Modifier.padding(end = 4.dp)
         )
         Text(
-            text = "{ } JSON",
+            text = stringResource(R.string.label_json),
             fontSize = 10.sp,
             color = MaterialTheme.colorScheme.textMuted,
             fontWeight = FontWeight.Medium,
@@ -612,14 +614,14 @@ private fun ResponseBodyTopBar(
         ) {
             Icon(
                 imageVector = Search,
-                contentDescription = "search",
+                contentDescription = stringResource(R.string.cd_search),
                 tint = MaterialTheme.colorScheme.textMuted
             )
         }
         IconButton(onClick = callbacks.onCopyClick, modifier = Modifier.size(18.dp)) {
             Icon(
                 imageVector = Content_copy,
-                contentDescription = "copy response",
+                contentDescription = stringResource(R.string.cd_copy_response),
                 tint = MaterialTheme.colorScheme.textMuted
             )
         }
@@ -642,7 +644,7 @@ fun ResponseBody(
             if (response.data.imageResponse != null) {
                 Image(
                     bitmap = response.data.imageResponse,
-                    contentDescription = "Decoded Image",
+                    contentDescription = stringResource(R.string.cd_decoded_image),
                     modifier = Modifier.fillMaxWidth(),
                     alignment = Alignment.Center,
                 )
@@ -664,12 +666,12 @@ fun ResponseBody(
         ) {
             Icon(
                 painter = painterResource(R.drawable.action_block),
-                contentDescription = "no responses yet",
+                contentDescription = stringResource(R.string.cd_no_responses_yet),
                 tint = MaterialTheme.colorScheme.iconOnBackground
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Enter the URL and click send to get a response",
+                text = stringResource(R.string.msg_empty_response),
                 color = MaterialTheme.colorScheme.textMuted,
                 fontSize = 14.sp
             )
@@ -680,7 +682,7 @@ fun ResponseBody(
 @Composable
 private fun ResponseErrorText(message: String) {
     Text(
-        text = "Error: $message",
+        text = stringResource(R.string.msg_error, message),
         modifier = Modifier.padding(16.dp),
         color = Color.Red
     )

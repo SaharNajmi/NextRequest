@@ -1,3 +1,74 @@
 <resources>
     <string name="app_name">NextRequest</string>
+
+    <string name="title_collections">Collections</string>
+    <string name="title_history">History</string>
+    <string name="title_websocket">WebSocket</string>
+
+    <string name="label_ws">WS</string>
+    <string name="label_status">"Status "</string>
+    <string name="label_bearer_token">Bearer Token</string>
+    <string name="label_response">Response</string>
+    <string name="label_json">{ } JSON</string>
+    <string name="label_messages">Messages</string>
+
+    <string name="hint_enter_url">Enter URL…</string>
+    <string name="hint_enter_url_ws">Enter URL</string>
+    <string name="hint_enter_request_body">Enter request body…</string>
+    <string name="hint_search_collections">Search collections</string>
+    <string name="hint_search_requests">Search requests…</string>
+    <string name="hint_type_message">Type a message</string>
+    <string name="hint_key">Key</string>
+    <string name="hint_value">Value</string>
+    <string name="hint_collection_name">Collection name…</string>
+
+    <string name="action_create_collection">Create Collection</string>
+    <string name="action_add_request">Add a request</string>
+    <string name="action_hide">Hide</string>
+    <string name="action_show">Show</string>
+    <string name="action_connect">Connect</string>
+    <string name="action_disconnect">Disconnect</string>
+    <string name="action_add_new_collection">Add new collection</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_save">Save</string>
+
+    <string name="msg_empty_response">Enter the URL and click send to get a response</string>
+    <string name="msg_create_collection_title">Create a collection for your requests</string>
+    <string name="msg_create_collection_subtitle">A collection lets you group related requests</string>
+    <string name="msg_collection_empty">This collection is empty</string>
+    <string name="msg_history_empty">History is empty</string>
+    <string name="msg_no_collections_yet">No collections yet</string>
+    <string name="msg_select_collection">Select a collection</string>
+    <string name="msg_save_to_collection">Save to %s</string>
+    <string name="msg_messages_hidden">%d messages hidden</string>
+    <string name="msg_no_result_found">No result found for \"%s\"</string>
+    <string name="msg_error">Error: %s</string>
+
+    <string name="snackbar_copied_to_clipboard">Copied to clipboard</string>
+    <string name="snackbar_added_to_collection">Added to collection</string>
+
+    <string name="cd_back">Back</string>
+    <string name="cd_history">History</string>
+    <string name="cd_collection">Collection</string>
+    <string name="cd_new_request">New request</string>
+    <string name="cd_websocket">WebSocket</string>
+    <string name="cd_send_request">Send Request</string>
+    <string name="cd_send_message">Send Message</string>
+    <string name="cd_search">Search</string>
+    <string name="cd_copy_response">Copy response</string>
+    <string name="cd_decoded_image">Decoded Image</string>
+    <string name="cd_no_responses_yet">No responses yet</string>
+    <string name="cd_expand_collapse">Expand/Collapse</string>
+    <string name="cd_create_new_collection">Create new collection</string>
+    <string name="cd_add_new_request">Add new request</string>
+    <string name="cd_rename_collection">Rename collection</string>
+    <string name="cd_delete_collection">Delete collection</string>
+    <string name="cd_add_to_collection">Add to collection</string>
+    <string name="cd_delete_by_date">Delete list by date</string>
+    <string name="cd_empty_list">Empty list</string>
+    <string name="cd_rename">Rename</string>
+    <string name="cd_delete">Delete</string>
+    <string name="cd_add">Add</string>
+    <string name="cd_cancel">Cancel</string>
+    <string name="cd_create">Create</string>
 </resources>
