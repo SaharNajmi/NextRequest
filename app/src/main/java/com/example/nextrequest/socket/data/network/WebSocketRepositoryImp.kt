@@ -51,7 +51,7 @@ class WebSocketRepositoryImp @Inject constructor(
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                 scope.launch {
-                    _messages.emit(WebSocketMessage(t.message.toString(), false))
+                    _messages.emit(WebSocketMessage(t.message ?: "Connection failed: ${t.javaClass.simpleName}", false))
                     _isConnected.value = false
                 }
             }

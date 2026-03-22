@@ -191,12 +191,12 @@ class WebSocketViewModelTest {
     }
 
     @Test
-    fun `restoreHiddenMessages moves hiddenMessages back to visibleMessages`() = runTest {
+    fun `showHiddenMessages moves hiddenMessages back to visibleMessages`() = runTest {
         messagesFlow.emit(WebSocketMessage("msg1", false, 0L))
         advanceUntilIdle()
         viewModel.hideMessages()
 
-        viewModel.restoreHiddenMessages()
+        viewModel.showHiddenMessages()
 
         with(successData()) {
             hiddenMessages shouldBe emptyList()
@@ -206,7 +206,7 @@ class WebSocketViewModelTest {
     }
 
     @Test
-    fun `restoreHiddenMessages appends hidden messages after existing visible messages`() = runTest {
+    fun `showHiddenMessages appends hidden messages after existing visible messages`() = runTest {
         messagesFlow.emit(WebSocketMessage("old", false, 0L))
         advanceUntilIdle()
         viewModel.hideMessages()
@@ -214,7 +214,7 @@ class WebSocketViewModelTest {
         messagesFlow.emit(WebSocketMessage("new", true, 0L))
         advanceUntilIdle()
 
-        viewModel.restoreHiddenMessages()
+        viewModel.showHiddenMessages()
 
         with(successData()) {
             hiddenMessages shouldBe emptyList()
@@ -331,7 +331,7 @@ class WebSocketViewModelTest {
     }
 
     @Test
-    fun `loadRequest clears hiddenMessages to prevent duplicates on restore`() = runTest {
+    fun `loadRequest clears hiddenMessages to prevent duplicates on show messages`() = runTest {
         val wsRequest = WebSocketRequest(
             url = "ws://example.com",
             messages = listOf(WebSocketMessage("msg", false, 0L))
@@ -345,7 +345,7 @@ class WebSocketViewModelTest {
         viewModel.loadRequest(1, Screens.ROUTE_HISTORY_SCREEN)
         advanceUntilIdle()
 
-        viewModel.restoreHiddenMessages()
+        viewModel.showHiddenMessages()
 
         successData().visibleMessages.size shouldBe 1
     }

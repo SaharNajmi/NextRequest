@@ -8,25 +8,23 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,19 +35,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.nextrequest.core.presentation.UiState
-import com.example.nextrequest.core.presentation.component.CustomToolbar
 import com.example.nextrequest.core.presentation.icons.ArrowDown
 import com.example.nextrequest.core.presentation.icons.ArrowDropDown
 import com.example.nextrequest.core.presentation.icons.ArrowDropUp
 import com.example.nextrequest.core.presentation.icons.ArrowUp
-import com.example.nextrequest.core.presentation.theme.Silver
+import com.example.nextrequest.core.presentation.icons.Arrow_back
+import com.example.nextrequest.core.presentation.icons.Send
+import com.example.nextrequest.core.presentation.navigation.Screens.Companion.ROUTE_HOME_SCREEN
+import com.example.nextrequest.core.presentation.theme.cardBackground
+import com.example.nextrequest.core.presentation.theme.cardBorder
+import com.example.nextrequest.core.presentation.theme.chipTintAlpha
+import com.example.nextrequest.core.presentation.theme.inputFieldColors
+import com.example.nextrequest.core.presentation.theme.textMuted
 import com.example.nextrequest.socket.presentation.component.model.MessageUiModel
 import com.example.nextrequest.socket.presentation.component.model.WebSocketUiModel
 
@@ -75,76 +79,88 @@ fun WebSocketScreen(
         if (!url.isNullOrEmpty()) requestUrl = url
     }
 
-    val callbacks = WebSocketCallbacks(
-        onConnectClick = {
-            viewModel.connect(requestUrl)
-        },
-        onDisconnectClick = {
-            viewModel.disconnect()
-        },
-        onSendMessageClick = {
-            viewModel.sendMessage(messageText)
-        })
+    val isConnected = (uiState as? UiState.Success<WebSocketUiModel>)?.data?.isConnected ?: false
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            Column(modifier = Modifier.padding(horizontal = 12.dp)) {
-                Spacer(modifier = Modifier.height(36.dp))
-                CustomToolbar("WebSocket", navController)
-            }
-        }
-    ) { padding ->
-        val isConnected =
-            (uiState as? UiState.Success<WebSocketUiModel>)?.data?.isConnected ?: false
+    val callbacks = WebSocketCallbacks(
+        onConnectClick = { viewModel.connect(requestUrl) },
+        onDisconnectClick = { viewModel.disconnect() },
+        onSendMessageClick = { viewModel.sendMessage(messageText) },
+        onHideMessages = { viewModel.hideMessages() },
+        onShowHiddenMessages = { viewModel.showHiddenMessages() }
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
+    ) {
+        WebSocketTopBar(navController = navController)
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .padding(vertical = 8.dp, horizontal = 12.dp)
+                .padding(horizontal = 12.dp)
         ) {
-            RequestLine(
-                callbacks = callbacks,
-                isConnected = isConnected,
-                requestUrl = requestUrl,
-                onRequestUrlChanged = {
-                    requestUrl = it
-                }
-            )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                RequestLine(
+                    callbacks = callbacks,
+                    isConnected = isConnected,
+                    requestUrl = requestUrl,
+                    onRequestUrlChanged = { requestUrl = it },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 TextField(
                     modifier = Modifier
-                        .padding(end = 4.dp)
-                        .weight(1f),
+                        .weight(1f)
+                        .border(0.5.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp)),
                     value = messageText,
                     onValueChange = { messageText = it },
-                    colors = TextFieldDefaults.colors(
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                    ),
-                    placeholder = { Text("Type a message", color = Silver) },
-                    maxLines = 5
-                )
-                Button(
-                    shape = RoundedCornerShape(4.dp),
-                    onClick = {
-                        viewModel.sendMessage(messageText)
+                    colors = inputFieldColors(),
+                    placeholder = {
+                        Text("Type a message", color = MaterialTheme.colorScheme.textMuted, fontSize = 13.sp)
                     },
-                    enabled = isConnected && messageText.isNotBlank()
+                    maxLines = 5,
+                    shape = RoundedCornerShape(12.dp)
+                )
+                IconButton(
+                    onClick = callbacks.onSendMessageClick,
+                    enabled = isConnected && messageText.isNotBlank(),
+                    modifier = Modifier.size(36.dp)
                 ) {
-                    Text("Send")
+                    Icon(
+                        imageVector = Send,
+                        contentDescription = "Send Message",
+                        tint = if (isConnected && messageText.isNotBlank())
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.textMuted,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
+
             when (val state = uiState) {
                 is UiState.Error -> {
                     Text(
                         text = "Error: ${state.message}",
-                        modifier = Modifier.padding(16.dp), color = Color.Red
+                        modifier = Modifier.padding(16.dp),
+                        color = MaterialTheme.colorScheme.error
                     )
                 }
 
@@ -158,32 +174,50 @@ fun WebSocketScreen(
                 }
 
                 is UiState.Success -> {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        TextButton(
-                            shape = RoundedCornerShape(4.dp),
-                            onClick = { viewModel.hideMessages() },
-                            enabled = state.data.visibleMessages.isNotEmpty()
-                        ) {
-                            Text("Hide Messages")
-                        }
-                    }
-                    LazyColumn(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp)
+                            .weight(1f)
+                            .border(0.5.dp, MaterialTheme.colorScheme.cardBorder, RoundedCornerShape(12.dp))
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.cardBackground)
                     ) {
-                        items(state.data.visibleMessages) {
-                            MessageItem(it)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Messages",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.textMuted,
+                                modifier = Modifier.weight(1f)
+                            )
+                            TextButton(
+                                onClick = callbacks.onHideMessages,
+                                enabled = state.data.visibleMessages.isNotEmpty()
+                            ) {
+                                Text("Hide", fontSize = 12.sp)
+                            }
                         }
-                        if (state.data.hiddenMessages.isNotEmpty()) {
-                            item {
-                                HiddenMessagesItem(
-                                    count = state.data.hiddenMessages.size,
-                                    onRestore = { viewModel.restoreHiddenMessages() }
-                                )
+                        HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 4.dp)
+                        ) {
+                            items(state.data.visibleMessages) {
+                                MessageItem(it)
+                            }
+                            if (state.data.hiddenMessages.isNotEmpty()) {
+                                item {
+                                    HiddenMessagesItem(
+                                        count = state.data.hiddenMessages.size,
+                                        onShowClick = callbacks.onShowHiddenMessages
+                                    )
+                                }
                             }
                         }
                     }
@@ -194,46 +228,97 @@ fun WebSocketScreen(
 }
 
 @Composable
+private fun WebSocketTopBar(navController: NavController) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(
+            onClick = {
+                navController.navigate(ROUTE_HOME_SCREEN) {
+                    popUpTo(ROUTE_HOME_SCREEN) { inclusive = false }
+                    launchSingleTop = true
+                }
+            },
+            modifier = Modifier.size(36.dp)
+        ) {
+            Icon(
+                imageVector = Arrow_back,
+                contentDescription = "Back",
+                tint = MaterialTheme.colorScheme.textMuted,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+        Text(
+            text = "WebSocket",
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Black,
+            fontSize = 20.sp,
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 4.dp)
+        )
+    }
+}
+
+@Composable
 fun MessageItem(message: MessageUiModel) {
     var expandedText by remember { mutableStateOf(false) }
     val maxLines = if (expandedText) Int.MAX_VALUE else 1
     var isOverflowing by remember { mutableStateOf(false) }
-    Column() {
+    Column {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp),
+                .padding(vertical = 6.dp),
         ) {
             if (message.isSentByUser) {
                 Icon(
-                    imageVector = ArrowUp, contentDescription = "sender",
-                    Modifier.background(
-                        MaterialTheme.colorScheme.primaryContainer
-                    ), tint = MaterialTheme.colorScheme.primary
+                    imageVector = ArrowUp,
+                    contentDescription = "sender",
+                    modifier = Modifier
+                        .size(16.dp)
+                        .background(
+                            MaterialTheme.colorScheme.primaryContainer,
+                            RoundedCornerShape(4.dp)
+                        ),
+                    tint = MaterialTheme.colorScheme.primary
                 )
             } else {
                 Icon(
-                    imageVector = ArrowDown, contentDescription = "receiver",
-                    Modifier
+                    imageVector = ArrowDown,
+                    contentDescription = "receiver",
+                    modifier = Modifier
+                        .size(16.dp)
                         .background(
-                            MaterialTheme.colorScheme.secondaryContainer
-                        ), tint = MaterialTheme.colorScheme.secondary
+                            MaterialTheme.colorScheme.secondaryContainer,
+                            RoundedCornerShape(4.dp)
+                        ),
+                    tint = MaterialTheme.colorScheme.secondary
                 )
             }
             Text(
                 message.text,
                 modifier = Modifier
                     .weight(1f)
-                    .padding(start = 4.dp, end = 4.dp),
+                    .padding(start = 6.dp, end = 4.dp),
                 maxLines = maxLines,
                 overflow = TextOverflow.Ellipsis,
-                fontSize = 12.sp, onTextLayout = { textLayoutResult ->
+                fontSize = 12.sp,
+                onTextLayout = { textLayoutResult ->
                     if (!expandedText) {
                         isOverflowing = textLayoutResult.hasVisualOverflow
                     }
                 }
             )
-            Text(message.timestamp, fontSize = 12.sp, fontWeight = FontWeight.Light)
+            Text(
+                message.timestamp,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Light,
+                color = MaterialTheme.colorScheme.textMuted
+            )
             Icon(
                 imageVector = if (expandedText) ArrowDropUp else ArrowDropDown,
                 contentDescription = "expanded",
@@ -242,14 +327,15 @@ fun MessageItem(message: MessageUiModel) {
                     .clickable(enabled = isOverflowing || expandedText) {
                         expandedText = !expandedText
                     }
-                    .alpha(if (isOverflowing || expandedText) 1f else 0f))
+                    .alpha(if (isOverflowing || expandedText) 1f else 0f)
+            )
         }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 0.5.dp)
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 0.5.dp)
     }
 }
 
 @Composable
-fun HiddenMessagesItem(count: Int, onRestore: () -> Unit) {
+fun HiddenMessagesItem(count: Int, onShowClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -259,14 +345,14 @@ fun HiddenMessagesItem(count: Int, onRestore: () -> Unit) {
         Text(
             text = "$count messages hidden",
             fontSize = 12.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.textMuted,
             modifier = Modifier.weight(1f)
         )
-        TextButton(onClick = onRestore) {
-            Text("Restore", fontSize = 12.sp)
+        TextButton(onClick = onShowClick) {
+            Text("Show", fontSize = 12.sp)
         }
     }
-    HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 0.5.dp)
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 0.5.dp)
 }
 
 @Composable
@@ -275,55 +361,47 @@ fun RequestLine(
     isConnected: Boolean,
     requestUrl: String,
     onRequestUrlChanged: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 8.dp)
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+
         TextField(
             value = requestUrl,
-            onValueChange = {
-                onRequestUrlChanged(it)
-            },
+            onValueChange = onRequestUrlChanged,
             maxLines = 4,
-            placeholder = { Text("Enter URL", color = Silver) },
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-            ),
+            placeholder = { Text("Enter URL", color = MaterialTheme.colorScheme.textMuted, fontSize = 13.sp) },
+            colors = inputFieldColors(),
             modifier = Modifier
-                .padding(end = 4.dp)
                 .weight(1f)
-                .border(
-                    shape = RoundedCornerShape(4.dp),
-                    border = BorderStroke(0.5.dp, color = MaterialTheme.colorScheme.primary)
-                ),
+                .border(0.5.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp)),
+            shape = RoundedCornerShape(10.dp),
             enabled = !isConnected
         )
-        Button(
-            shape = RoundedCornerShape(4.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (isConnected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
+
+        Surface(
+            onClick = if (isConnected) callbacks.onDisconnectClick else callbacks.onConnectClick,
+            shape = RoundedCornerShape(10.dp),
+            border = BorderStroke(
+                1.5.dp,
+                if (isConnected) MaterialTheme.colorScheme.error.copy(alpha = 0.4f)
+                else MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
             ),
-            onClick = {
-                if (isConnected) callbacks.onDisconnectClick() else callbacks.onConnectClick()
-            }) {
-            if (isConnected) {
-                Text(
-                    text = "Disconnect",
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            } else {
-                Text(
-                    text = "connect",
-                    fontWeight = FontWeight.Medium,
-                )
-            }
+            color = if (isConnected)
+                MaterialTheme.colorScheme.error.copy(alpha = MaterialTheme.colorScheme.chipTintAlpha)
+            else
+                MaterialTheme.colorScheme.primary.copy(alpha = MaterialTheme.colorScheme.chipTintAlpha)
+        ) {
+            Text(
+                text = if (isConnected) "Disconnect" else "Connect",
+                color = if (isConnected) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
+            )
         }
     }
 }

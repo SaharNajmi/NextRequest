@@ -100,7 +100,7 @@ class WebSocketViewModel @Inject constructor(
         )
     }
 
-    fun restoreHiddenMessages() {
+    fun showHiddenMessages() {
         val current = (_uiState.value as? UiState.Success)?.data ?: return
         _uiState.value = UiState.Success(
             current.copy(
