@@ -44,6 +44,8 @@ import com.example.nextrequest.core.presentation.icons.Keyboard_arrow_up
 import com.example.nextrequest.core.presentation.icons.Search
 import com.example.nextrequest.core.presentation.theme.cardBorder
 import com.example.nextrequest.core.presentation.theme.inputBackground
+import com.example.nextrequest.core.presentation.theme.searchHighlightLine
+import com.example.nextrequest.core.presentation.theme.searchHighlightText
 import com.example.nextrequest.core.presentation.theme.textMuted
 import com.example.nextrequest.home.domain.HighlightedTextLine
 import com.example.nextrequest.home.domain.buildHighlightedTextLines
@@ -209,7 +211,7 @@ fun HighlightedTextList(
                 item.annotatedString.spanStyles.forEach { span ->
                     addStyle(
                         style = SpanStyle(
-                            background = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                            background = MaterialTheme.colorScheme.searchHighlightText
                         ),
                         start = span.start,
                         end = span.end
@@ -224,7 +226,7 @@ fun HighlightedTextList(
                     .fillMaxWidth()
                     .background(
                         if (index == foundIndex)
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                            MaterialTheme.colorScheme.searchHighlightLine
                         else Color.Transparent
                     )
                     .padding(horizontal = 4.dp, vertical = 2.dp)

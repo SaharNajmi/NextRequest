@@ -102,6 +102,12 @@ val ColorScheme.jsonChipBackground: Color
 val ColorScheme.jsonChipBorder: Color
     get() = if (isDark) Color(0xFF2A2A2A) else Color(0xFFE7E4E4)
 
+val ColorScheme.searchHighlightText: Color
+    get() = if (isDark) Color(0xFFFFA000).copy(alpha = 0.45f) else Color(0xFFFFA000).copy(alpha = 0.55f)
+
+val ColorScheme.searchHighlightLine: Color
+    get() = if (isDark) Color(0xFFF8E296).copy(alpha = 0.12f) else Color(0xFFFFC107).copy(alpha = 0.15f)
+
 @Composable
 fun inputFieldColors() = TextFieldDefaults.colors(
     focusedContainerColor = MaterialTheme.colorScheme.inputBackground,

@@ -483,6 +483,7 @@ private fun StatusCode(statusCode: Int?) {
         Text(
             text = statusCode.toString(),
             color = textColor,
+            fontSize = 12.sp,
             modifier = Modifier
                 .clip(RoundedCornerShape(4.dp))
                 .background(bgColor)
