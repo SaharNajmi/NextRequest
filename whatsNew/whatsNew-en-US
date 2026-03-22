@@ -1,3 +1,2 @@
-- Added WebSocket support for real-time messaging; sessions are saved automatically to History on disconnect
-- Collections & History improvements
+- Redesigned UI across all screens
 - Bug fixes
