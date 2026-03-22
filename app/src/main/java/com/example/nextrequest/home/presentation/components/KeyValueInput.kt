@@ -4,12 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,12 +14,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.example.nextrequest.core.presentation.icons.Add
-import com.example.nextrequest.core.presentation.theme.inputFieldColors
-import com.example.nextrequest.core.presentation.theme.textMuted
 import com.sahar.nextrequest.R
 
 @Composable
@@ -31,30 +25,23 @@ fun KeyValueInput(
 ) {
     var key by remember { mutableStateOf("") }
     var value by remember { mutableStateOf("") }
-    val fieldColors = inputFieldColors()
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.padding(8.dp)
     ) {
-        TextField(
-            modifier = Modifier.weight(1f),
+        AppTextField(
             value = key,
-            singleLine = true,
-            placeholder = { Text(stringResource(R.string.hint_key), color = MaterialTheme.colorScheme.textMuted, fontSize = 12.sp) },
-            shape = RoundedCornerShape(10.dp),
-            colors = fieldColors,
-            onValueChange = { key = it }
+            onValueChange = { key = it },
+            placeholder = stringResource(R.string.hint_key),
+            modifier = Modifier.weight(1f)
         )
-        TextField(
-            modifier = Modifier.weight(1f),
+        AppTextField(
             value = value,
-            singleLine = true,
-            placeholder = { Text(stringResource(R.string.hint_value), color = MaterialTheme.colorScheme.textMuted, fontSize = 12.sp) },
-            shape = RoundedCornerShape(10.dp),
-            colors = fieldColors,
-            onValueChange = { value = it }
+            onValueChange = { value = it },
+            placeholder = stringResource(R.string.hint_value),
+            modifier = Modifier.weight(1f)
         )
         IconButton(
             onClick = {
