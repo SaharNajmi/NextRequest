@@ -74,6 +74,7 @@ import com.example.nextrequest.core.presentation.theme.jsonChipBackground
 import com.example.nextrequest.core.presentation.theme.jsonChipBorder
 import com.example.nextrequest.core.presentation.theme.textMuted
 import com.example.nextrequest.home.domain.RadioHttpParameterOptions
+import com.example.nextrequest.home.presentation.components.EllipsisTextField
 import com.example.nextrequest.home.presentation.components.KeyValueInput
 import com.example.nextrequest.home.presentation.components.RemovableTagList
 import com.example.nextrequest.home.presentation.components.SearchFromContentText
@@ -371,17 +372,11 @@ private fun RequestLine(
                 }
             }
         }
-
-        TextField(
+        EllipsisTextField(
             value = requestUrl,
             onValueChange = onRequestUrlChanged,
-            singleLine = true,
-            placeholder = { Text(stringResource(R.string.hint_enter_url), color = MaterialTheme.colorScheme.textMuted, fontSize = 13.sp) },
-            modifier = Modifier
-                .weight(1f)
-                .border(0.5.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp)),
-            shape = RoundedCornerShape(10.dp),
-            colors = inputFieldColors()
+            placeholder = stringResource(R.string.hint_enter_url),
+            modifier = Modifier.weight(1f)
         )
     }
 }
@@ -449,7 +444,7 @@ private fun HttpParameterBody(
 ) {
     Box(
         modifier = Modifier
-            .height(120.dp)
+            .height(110.dp)
             .fillMaxWidth()
             .padding(horizontal = 8.dp)
     ) {
